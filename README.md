@@ -117,5 +117,9 @@ resources()->where(['parent'=>10])->remove();
 ```
 $count = users()->profile()->where(['Profile.blocked'=>1])->count();
 ```
+**Load script with the async attribute**
+```
+script('/path/to/script.js', 'async'); // <script async type="text/javascript" src="/path/to/script.js"></script>
+```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).
