@@ -115,7 +115,7 @@ resources()->where(['parent'=>10])->remove();
 
 **Count blocked users**
 ```
-users()->profile()->where(['Profile.blocked'=>1])->count();
+$count = users()->profile()->where(['Profile.blocked'=>1])->count();
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).
