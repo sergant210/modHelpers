@@ -73,11 +73,11 @@ email_user('admin', $subject, $content);
 **Redirect**
 ```
 redirect($url);
-To the resource with the id = 5
+//To the resource with the id = 5
 redirect(5);
 ```
 
-**The latests resource**
+**The latest resource**
 ```
 $resourceObject = resource()->last(); // Resource object
 $resourceArray = resource()->last()->toArray(); // Resource data as array
@@ -107,6 +107,15 @@ $value = session('key1.key2');  // $value = $_SESSION['key1']['key2']
 if (is_email($email)) {
    // Valid
 }
+```
+**Remove child resources of the one with the id = 10**
+```
+resources()->where(['parent'=>10])->remove();
+```
+
+**Count blocked users**
+```
+users()->profile()->where(['Profile.blocked'=>1])->count();
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).

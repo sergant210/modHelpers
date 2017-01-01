@@ -31,7 +31,7 @@ if (!function_exists('url')) {
 }
 if (!function_exists('redirect')) {
     /**
-     * Редиретит на указанный ресурс
+     * Переадресация на указанный ресурс
      * @param string|int $url Алиас или id ресурса
      * @param array|boolean $options Опции
      * @param string $type
@@ -505,14 +505,15 @@ if (!function_exists('resource')) {
      * Получает ресурс по ID или условию.
      * @param int|array $criteria ID ресурса или массив для поиска.
      * @param bool $asObject Если TRUE, функция вернёт объект. Иначе массив.
-     * @return array|modResource|bool
+     * @return array|modResource|bool|ObjectManager
      */
     function resource($criteria = null, $asObject = true)
     {
         /** @var ObjectManager $resourceManager */
         $resourceManager = object('modResource', $criteria);
+        if (!isset($criteria)) return $resourceManager;
 
-        return (isset($criteria) && $asObject) ? $resourceManager->get() : $resourceManager->toArray();
+        return $asObject ? $resourceManager->get() : $resourceManager->toArray();
     }
 }
 if (!function_exists('resources')) {
@@ -552,8 +553,9 @@ if (!function_exists('resources')) {
             }
             if ($where) $collection->where($where);
         }
+        if (!isset($criteria)) return $collection;
 
-        return (isset($criteria) && $asObject) ? $collection->get() : $collection->toArray();
+        return $asObject ? $collection->get() : $collection->toArray();
     }
 }
 
@@ -751,8 +753,6 @@ if (!function_exists('user_exists')) {
         if ($query->prepare() && $query->stmt->execute()) {
             $rowCount = $query->stmt->rowCount();
         }
-//TODO
-//Logger::error($query->toSql());
         return isset($rowCount) ? $rowCount > 0 : $rowCount;
     }
 }
@@ -880,5 +880,53 @@ if (!function_exists('is_url')) {
     function is_url($string)
     {
         return preg_match('/^((https|http):\/\/)?([a-z0-9]{1})([\w\.]+)\.([a-z]{2,6}\.?)(\/[\w\.]*)*\/?$/',$string);
+    }
+}
+if (!function_exists('error')) {
+    /**
+     * $modx->log(modX::LOG_LEVEL_ERROR,$message)
+     *
+     * @param string $message
+     * @param bool $changeLevel Change log level
+     */
+    function error($message, $changeLevel = false)
+    {
+        LogManager::error($message, $changeLevel);
+    }
+}
+if (!function_exists('warn')) {
+    /**
+     * $modx->log(modX::LOG_LEVEL_WARN, $message)
+     *
+     * @param string $message
+     * @param bool $changeLevel Change log level
+     */
+    function warn($message, $changeLevel = false)
+    {
+        LogManager::warn($message, $changeLevel);
+    }
+}
+if (!function_exists('info')) {
+    /**
+     * $modx->log(modX::LOG_LEVEL_INFO, $message)
+     *
+     * @param string $message
+     * @param bool $changeLevel Change log level
+     */
+    function info($message, $changeLevel = false)
+    {
+        LogManager::info($message, $changeLevel);
+    }
+}
+if (!function_exists('debug')) {
+    /**
+     * $modx->log(modX::LOG_LEVEL_DEBUG, $message)
+     *
+     * @param string $message
+     * @param bool $changeLevel Change log level
+     */
+    function debug($message, $changeLevel = false)
+    {
+        LogManager::debug($message, $changeLevel);
     }
 }
