@@ -613,7 +613,7 @@ if (!function_exists('users')) {
             }
             if ($where) $collection->where($where);
         }
-        return (isset($criteria) && $asObject) ? $collection->get() : $collection->toArray();
+        return $asObject ? $collection->get() : $collection->toArray();
     }
 }
 if (!function_exists('is_auth')) {
@@ -885,63 +885,64 @@ if (!function_exists('is_url')) {
         return preg_match('/^((https|http):\/\/)?([a-z0-9]{1})([\w\.]+)\.([a-z]{2,6}\.?)(\/[\w\.]*)*\/?$/',$string);
     }
 }
-if (!function_exists('error')) {
+if (!function_exists('log_error')) {
     /**
      * $modx->log(modX::LOG_LEVEL_ERROR,$message)
      *
      * @param string $message
      * @param bool $changeLevel Change log level
      */
-    function error($message, $changeLevel = false)
+    function log_error($message, $changeLevel = false)
     {
         LogManager::error($message, $changeLevel);
     }
 }
-if (!function_exists('warn')) {
+if (!function_exists('log_warn')) {
     /**
      * $modx->log(modX::LOG_LEVEL_WARN, $message)
      *
      * @param string $message
      * @param bool $changeLevel Change log level
      */
-    function warn($message, $changeLevel = false)
+    function log_warn($message, $changeLevel = false)
     {
         LogManager::warn($message, $changeLevel);
     }
 }
-if (!function_exists('info')) {
+if (!function_exists('log_info')) {
     /**
      * $modx->log(modX::LOG_LEVEL_INFO, $message)
      *
      * @param string $message
      * @param bool $changeLevel Change log level
      */
-    function info($message, $changeLevel = false)
+    function log_info($message, $changeLevel = false)
     {
         LogManager::info($message, $changeLevel);
     }
 }
-if (!function_exists('debug')) {
+if (!function_exists('log_debug')) {
     /**
      * $modx->log(modX::LOG_LEVEL_DEBUG, $message)
      *
      * @param string $message
      * @param bool $changeLevel Change log level
      */
-    function debug($message, $changeLevel = false)
+    function log_debug($message, $changeLevel = false)
     {
         LogManager::debug($message, $changeLevel);
     }
 }
 if (!function_exists('context')) {
     /**
-     * Gets the name of the current context
+     * Gets the specified property of the current context
+     * @param string $key
      * @return string
      */
-    function context()
+    function context($key = 'key')
     {
         global $modx;
-        return $modx->context->get('key');
+        return $modx->context->get($key);
     }
 }
 if (!function_exists('query')) {

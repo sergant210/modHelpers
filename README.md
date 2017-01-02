@@ -47,10 +47,10 @@ Available functions:
 * resource_exists() - checks if the specified resource exists.
 * is_email() - validates the email.
 * is_url() - validates the url.
-* error() — logs to the error log for the ERROR log level.
-* warn() — logs to the error log for the WARN log level.
-* info() — logs to the error log for the INFO log level.
-* debug() — logs to the error log for the DEBUG log level.
+* log_error() — logs to the error log for the ERROR log level.
+* log_warn() — logs to the error log for the WARN log level.
+* log_info() — logs to the error log for the INFO log level.
+* log_debug() — logs to the error log for the DEBUG log level.
 * context() - gets the name of the current context.
 * query() - runs the query.
 

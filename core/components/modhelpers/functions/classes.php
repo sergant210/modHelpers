@@ -114,7 +114,10 @@ class ObjectManager {
     {
         $data = array();
         if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class));
+        $tstart = microtime(true);
         if ($this->query->prepare() && $this->query->stmt->execute()) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
             $data = $this->query->stmt->fetch(PDO::FETCH_ASSOC);
         }
         return $data;
@@ -199,22 +202,25 @@ class CollectionManager {
     protected $query;
     /** @var string class */
     protected $class;
+    protected $alias;
 
     protected $where = array();
+    protected $tvSelects = array();
+    protected $tvJoins = array();
 
     public function __construct(&$modx, $class)
     {
         /** @var modX $modx */
         $this->modx =& $modx;
         $this->class = $class;
+        $this->alias = $class;
 
         $this->query = $this->modx->newQuery($class);
-        $this->query->setClassAlias($class);
+        //$this->query->setClassAlias($class);
         if ($class == 'modUser') {
-            $this->query->setClassAlias('User');
-        } else {
-            $this->query->setClassAlias($class);
+            $this->alias = 'modUser';
         }
+        $this->query->setClassAlias($this->alias);
 
         $this->query->limit(20);
     }
@@ -222,9 +228,13 @@ class CollectionManager {
     public function toArray()
     {
         $data = array();
+        $this->addSelect();
+        $this->addJoins();
         $this->addWhere($this->query);
-        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class));
+        $tstart = microtime(true);
         if ($this->query->prepare() && $this->query->stmt->execute()) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
             $data = $this->query->stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         return $data;
@@ -238,15 +248,22 @@ class CollectionManager {
     public function get($name = null)
     {
         if (!empty($name)) {
+            $this->addSelect();
+            $this->addJoins();
             $this->addWhere($this->query);
-            $this->query->select($name);
+//            $this->query->query['columns'] = array();
+            //$this->query->select($name);
             $array = array();
+            $tstart = microtime(true);
             $stmt = $this->query->prepare();
             if ($stmt && $stmt->execute()) {
+                $this->modx->queryTime += microtime(true) - $tstart;
+                $this->modx->executedQueries++;
                 while($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $array[] = $row[$name];
                 }
             }
+
             return $array;
         }
         return $this->process();
@@ -257,7 +274,10 @@ class CollectionManager {
         $this->addWhere($query);
         $query->set($data);
         $query->limit(0);
+        $tstart = microtime(true);
         if (!($query->prepare() && $query->stmt->execute())) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
             return false;
         }
         return $query->stmt->rowCount();
@@ -270,7 +290,10 @@ class CollectionManager {
         $query->command('DELETE');
         $this->addWhere($query);
         $query->limit(0);
+        $tstart = microtime(true);
         if (!($query->prepare() && $query->stmt->execute())) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
             return false;
         }
         return $query->stmt->rowCount();
@@ -292,6 +315,14 @@ class CollectionManager {
         return $this;
     }
 
+    protected function addSelect() {
+        if (!empty($this->tvSelects)) {
+            foreach ($this->tvSelects as $select) {
+                $this->query->select($select);
+            }
+        }
+        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+    }
     protected function addWhere(&$query) {
         if (!empty($this->where)) {
             foreach ($this->where as $where) {
@@ -299,25 +330,68 @@ class CollectionManager {
             }
         }
     }
+
+    public function addJoins()
+    {
+        if (!empty($this->tvJoins)) {
+            foreach ($this->tvJoins as $k => $v) {
+                $class = !empty($v['class']) ? $v['class'] : $k;
+                $alias = !empty($v['alias']) ? $v['alias'] : $k;
+                if (!is_numeric($alias) && !is_numeric($class)) {
+                    $this->query->leftJoin($class, $alias, $v['on']);
+                }
+            }
+        }
+    }
+    public function withTV($TV, $prefix = 'TV.')
+    {
+        $tvs = array_map('trim', explode(',', $TV));
+        $tvs = array_unique($tvs);
+        if (!empty($tvs)) {
+            $q = $this->modx->newQuery('modTemplateVar', array('name:IN' => $tvs));
+            $q->select('id,name,type,default_text');
+            $tstart = microtime(true);
+            if ($q->prepare() && $q->stmt->execute()) {
+                $this->modx->queryTime += microtime(true) - $tstart;
+                $this->modx->executedQueries++;
+                $tvs = array();
+                while ($tv = $q->stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $name = strtolower($tv['name']);
+                    $alias = 'TV' . $name;
+                    $this->tvJoins[$name] = array(
+                        'class' => 'modTemplateVarResource',
+                        'alias' => $alias,
+                        'on' => '`TV' . $name . '`.`contentid` = `' . $this->alias . '`.`id` AND `TV' . $name . '`.`tmplvarid` = ' . $tv['id'],
+                        'tv' => $tv,
+                    );
+                    $this->tvSelects[$alias] = array('`' . $prefix . $tv['name'] . '`' => 'IFNULL(`' . $alias . '`.`value`, ' . $this->modx->quote($tv['default_text']) . ')');
+                    $tvs[] = $tv['name'];
+                }
+            }
+        }
+        return $this;
+    }
     /**
      * @return array|bool
      */
     protected function process()
     {
-        $this->query->setClassAlias($this->class);
+        $this->query->setClassAlias($this->alias);
+        $this->addSelect();
+        $this->addJoins();
         $this->addWhere($this->query);
-        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->class));
+        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
         if (!$collection = $this->modx->getCollection($this->class, $this->query)) {
             return false;
         }
         return $collection;
     }
 
-    public function profile()
+    public function profile($alias = 'Profile')
     {
         if ($this->class == 'modUser') {
-            $this->query->innerJoin('modUserProfile', 'Profile');
-            if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns('modUser','User').','.$this->modx->getSelectColumns('modUserProfile','Profile','',array('id'),true));
+            $this->query->innerJoin('modUserProfile', $alias);
+            if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns('modUser',$this->alias).','.$this->modx->getSelectColumns('modUserProfile',$alias,'',array('id'),true));
         }
         return $this;
     }
@@ -405,8 +479,11 @@ class QueryManager
             }
             $this->bind($bindings);
         }
+        $tstart = microtime(true);
         $stmt = $this->modx->prepare($this->query);
         if ($stmt->execute($this->bindings)){
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
             return $stmt->fetchAll();
         }
         return false;
@@ -422,8 +499,11 @@ class QueryManager
             }
             $this->bind($bindings);
         }
+        $tstart = microtime(true);
         $stmt = $this->modx->prepare($this->query);
         if ($stmt->execute($this->bindings)){
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
             return $stmt->rowCount();
         }
         return false;

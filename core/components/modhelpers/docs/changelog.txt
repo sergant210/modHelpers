@@ -1,3 +1,8 @@
+1.0.1-beta
+==============
+- Rename the log functions.
+- Add withTV method to the collection class.
+
 1.0.0-beta
 ==============
 - Initial release.
