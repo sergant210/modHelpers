@@ -128,7 +128,7 @@ class ObjectManager {
         /** @var xPDOObject $object */
         $object->fromArray($data,'', true);
         $object->save();
-        return $object;
+        return $object->save();
     }
 
     public function remove() {
@@ -137,7 +137,7 @@ class ObjectManager {
         }
         /** @var xPDOObject $object */
         $object->remove();
-        return $this;
+        return $object->remove();
     }
 
     public function get($name = null)
@@ -258,9 +258,10 @@ class CollectionManager {
         $query->set($data);
         $query->limit(0);
         if (!($query->prepare() && $query->stmt->execute())) {
-            return $this;
+            return false;
         }
-        return $this->process();
+        return $query->stmt->rowCount();
+//        return $this->process();
     }
 
     public function remove()
@@ -270,9 +271,9 @@ class CollectionManager {
         $this->addWhere($query);
         $query->limit(0);
         if (!($query->prepare() && $query->stmt->execute())) {
-            return $this;
+            return false;
         }
-        return $this;
+        return $query->stmt->rowCount();
     }
     public function first($num = 0) {
         $this->query->sortby('id', 'ASC');
@@ -324,7 +325,26 @@ class CollectionManager {
     public function count() {
         return count($this->toArray());
     }
-
+    public function max($name) {
+        $this->query->query['columns'] = array("max($name) as max");
+        $value = $this->toArray();
+        return $value[0]['max'];
+    }
+    public function min($name) {
+        $this->query->query['columns'] = array("min($name) as min");
+        $value = $this->toArray();
+        return $value[0]['min'];
+    }
+    public function avg($name) {
+        $this->query->query['columns'] = array("avg($name) as avg");
+        $value = $this->toArray();
+        return $value[0]['avg'];
+    }
+    public function sum($name) {
+        $this->query->query['columns'] = array("sum($name) as sum");
+        $value = $this->toArray();
+        return $value[0]['sum'];
+    }
     /**
      * @return string
      */
@@ -345,4 +365,68 @@ class CollectionManager {
         $this->query = call_user_func_array(array($this->query, $method), $parameters);
         return $this;
     }
+}
+
+
+class QueryManager
+{
+    /** @var  modX $modx */
+    protected $modx;
+    protected $query;
+    protected $bindings;
+
+    public function __construct(&$modx, $query)
+    {
+        /** @var modX $modx */
+        $this->modx =& $modx;
+        $this->query = $query;
+
+    }
+
+    public function bind($bindings)
+    {
+        if (!empty($bindings)) {
+            if (!is_array($bindings)) {
+                $this->bindings = func_get_args();
+            } else {
+                $this->bindings = $bindings;
+            }
+        }
+        return $this;
+    }
+
+    public function execute($bindings = '')
+    {
+        if (!empty($bindings)) {
+            if (!is_array($bindings)) {
+                $this->bindings = func_get_args();
+            } else {
+                $this->bindings = $bindings;
+            }
+            $this->bind($bindings);
+        }
+        $stmt = $this->modx->prepare($this->query);
+        if ($stmt->execute($this->bindings)){
+            return $stmt->fetchAll();
+        }
+        return false;
+    }
+
+    public function count($bindings = '')
+    {
+        if (!empty($bindings)) {
+            if (!is_array($bindings)) {
+                $this->bindings = func_get_args();
+            } else {
+                $this->bindings = $bindings;
+            }
+            $this->bind($bindings);
+        }
+        $stmt = $this->modx->prepare($this->query);
+        if ($stmt->execute($this->bindings)){
+            return $stmt->rowCount();
+        }
+        return false;
+    }
+
 }

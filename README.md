@@ -14,7 +14,7 @@ Available functions:
 * pls() - to work with placeholders.
 * pls_delete() - removes the specified placeholders.
 * lang() - to work with lexicon records.
-* table() - gets the table name of the specified class.
+* table_name() - gets the table name of the specified class.
 * columns() - gets select columns from a specific class for building a query.
 * email() - send email.
 * email_user() - send email to the specified user.
@@ -47,6 +47,13 @@ Available functions:
 * resource_exists() - checks if the specified resource exists.
 * is_email() - validates the email.
 * is_url() - validates the url.
+* error() — logs to the error log for the ERROR log level.
+* warn() — logs to the error log for the WARN log level.
+* info() — logs to the error log for the INFO log level.
+* debug() — logs to the error log for the DEBUG log level.
+* context() - gets the name of the current context.
+* query() - runs the query.
+
 
 ### Examples
 **Check the user exists**
@@ -120,6 +127,10 @@ $count = users()->profile()->where(['Profile.blocked'=>1])->count();
 **Load script with the async attribute**
 ```
 script('/path/to/script.js', 'async'); // <script async type="text/javascript" src="/path/to/script.js"></script>
+```
+**Get an array of users**
+```
+$userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->execute(10);
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).

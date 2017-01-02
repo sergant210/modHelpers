@@ -7,10 +7,10 @@ require_once __DIR__ . '/classes.php';
 if (!function_exists('url')) {
     /**
      * Формирует Url
-     * @param int $id ID страницы
-     * @param string $context Контекст
-     * @param array $arg Аргументы ссылки
-     * @param int $scheme Схема
+     * @param int $id Page id
+     * @param string $context Context
+     * @param array $arg Ling arguments
+     * @param int $scheme Scheme
      * <pre>
      *      -1 : (default value) URL is relative to site_url
      *       0 : see http
@@ -20,7 +20,7 @@ if (!function_exists('url')) {
      *    http : URL is absolute, forced to http scheme
      *   https : URL is absolute, forced to https scheme
      * </pre>
-     * @param array $options Массив настроек
+     * @param array $options Option
      * @return string
      */
     function url($id, $context = '', $arg = array(), $scheme = -1, array $options = array())
@@ -31,9 +31,9 @@ if (!function_exists('url')) {
 }
 if (!function_exists('redirect')) {
     /**
-     * Переадресация на указанный ресурс
-     * @param string|int $url Алиас или id ресурса
-     * @param array|boolean $options Опции
+     * Redirect to the specified url or page
+     * @param string|int $url Url or page id
+     * @param array|boolean $options Options
      * @param string $type
      * @param string $responseCode
      */
@@ -41,7 +41,11 @@ if (!function_exists('redirect')) {
     {
         global $modx;
         if (is_numeric($url)) {
-            $ctx = isset($options['ctx']) ? $options['ctx'] : '';
+            if (is_string($options)) {
+                $ctx = $options;
+            } else {
+                $ctx = isset($options['context']) ? $options['context'] : '';
+            }
             $url = url($url, $ctx);
         }
         if (!empty($url)) $modx->sendRedirect($url, $options, $type, $responseCode);
@@ -49,8 +53,8 @@ if (!function_exists('redirect')) {
 }
 if (!function_exists('abort')) {
     /**
-     * Выводит страницу ошибки
-     * @param array|int $options Массив настроек или код
+     * Send to the error page or to the unauthorized page
+     * @param array|int $options Options or response code - 401,403,404
      */
     function abort($options = null)
     {
@@ -75,9 +79,9 @@ if (!function_exists('abort')) {
 }
 if (!function_exists('config')) {
     /**
-     * Получает или изменяет системные настройки
+     * Gets and sets the system settings
      * @param string $key
-     * @param null $value
+     * @param null|mixed $value
      * @return array|null|string
      */
     function config($key = '', $value = NULL)
@@ -96,9 +100,9 @@ if (!function_exists('config')) {
 }
 if (!function_exists('session')) {
     /**
-     * Управляет сессией
-     * @param string $key Ключ. Можно указывать ключи через точку.
-     * @param string|null $value Значение или NULL для обнуления.
+     * Manages the session
+     * @param string $key Use the dot notation.
+     * @param string|null $value Value or NULL.
      * @return mixed
      */
     function session($key = '', $value = '')
@@ -145,10 +149,10 @@ if (!function_exists('session')) {
 }
 if (!function_exists('cache')) {
     /**
-     * Управляет кэшем
+     * Manages the cache
      * @see https://docs.modx.com/revolution/2.x/developing-in-modx/advanced-development/caching
      * @param string|array $key
-     * @param null|string|array $options Опции
+     * @param null|string|array $options
      * @return mixed|modCacheManager
      */
     function cache($key = '', $options = NULL)
@@ -176,8 +180,8 @@ if (!function_exists('cache')) {
 }
 if (!function_exists('pls')) {
     /**
-     * Получает/устанавливает плейсхолдеры
-     * @param string|array $key Строка для получения плейсхолдера, массив ('ключ'=>'значение') - для установки.
+     * Gets/sets placeholders
+     * @param string|array $key String to get a placeholder, array ('key'=>'value') - to set one/ones.
      * @param string $default
      * @return array|bool|string
      */
@@ -200,8 +204,8 @@ if (!function_exists('pls')) {
 }
 if (!function_exists('pls_delete')) {
     /**
-     * Удаляет указанные плейсхолдеры
-     * @param string|array $keys Ключ/массив ключей плейсхолдеров
+     * Removes the specified placeholders
+     * @param string|array $keys Key/array of keys
      */
     function pls_delete($keys)
     {
@@ -217,7 +221,7 @@ if (!function_exists('email')) {
     /**
      * Отправляет Email.
      * @param string $email Email.
-     * @param string|array $subject Заголовок или массив параметров почты. Обязательные - subject, content.
+     * @param string|array $subject Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
      * @return bool
      */
@@ -254,12 +258,11 @@ if (!function_exists('email')) {
 }
 if (!function_exists('email_user')) {
     /**
-     * Отправляет Email указанному пользователю.
-     * @param int|string|modUser $user Пользователь.
-     * @param string|array $subject Заголовок или массив параметров. Обязательные - user, subject, content.
+     * Sends email to the specified user.
+     * @param int|string|modUser $user User id or username or user object.
+     * @param string|array $subject Magic. Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
      * @return bool
-     * @internal param array $options Параметры почты. Обязательные - email, subject, content.
      */
     function email_user($user, $subject, $content = '')
     {
@@ -275,7 +278,7 @@ if (!function_exists('email_user')) {
 }
 if (!function_exists('pdotools')) {
     /**
-     * Возвращает объект класса pdoTools
+     * Gets instance of the pdoTools class
      * @param array $options
      * @return pdoTools|boolean
      */
@@ -294,7 +297,7 @@ if (!function_exists('pdotools')) {
 }
 if (!function_exists('pdofetch')) {
     /**
-     * * Возвращает объект класса pdoFetch
+     * * Gets instance of the pdoFetch class
      * @param array $options
      * @return pdoFetch|boolean
      */
@@ -313,7 +316,7 @@ if (!function_exists('pdofetch')) {
 }
 if (!function_exists('css')) {
     /**
-     * Добавляет стили на страницу.
+     * Register CSS to be injected inside the HEAD tag of a resource.
      * @param string $src
      * @param null $media
      */
@@ -325,9 +328,9 @@ if (!function_exists('css')) {
 }
 if (!function_exists('script')) {
     /**
-     * Добавляет скрипты на страницу.
+     * Register JavaScript.
      * @param string $src
-     * @param bool|string $start Добавлять в head.
+     * @param bool|string $start Inject inside the HEAD tag of a resource.
      * @param bool|string $plaintext
      * @param bool|string $attr async defer
      */
@@ -360,9 +363,9 @@ if (!function_exists('script')) {
 }
 if (!function_exists('html')) {
     /**
-     * Добавляет HTML на страницу.
+     * Register HTML
      * @param string $src
-     * @param bool $start Добавлять в head.
+     * @param bool $start Inject inside the HEAD tag of a resource.
      */
     function html($src, $start = false)
     {
@@ -372,7 +375,7 @@ if (!function_exists('html')) {
 }
 if (!function_exists('lang')) {
     /**
-     * Выводит строку из лексикона
+     * Grabs a processed lexicon string.
      * @param $key
      * @param array $params
      * @param string $language
@@ -386,7 +389,7 @@ if (!function_exists('lang')) {
 }
 if (!function_exists('chunk')) {
     /**
-     * Получает и парсит чанк.
+     * Process and return the output from a Chunk by name.
      * @param $chunkName
      * @param array $properties
      * @return string
@@ -402,7 +405,7 @@ if (!function_exists('chunk')) {
 }
 if (!function_exists('snippet')) {
     /**
-     * Запускает сниппет.
+     * Runs the specified snippet.
      * @param $snippetName
      * @param array $params
      * @return string
@@ -418,7 +421,7 @@ if (!function_exists('snippet')) {
 }
 if (!function_exists('processor')) {
     /**
-     * Запускает процессор.
+     * Runs the specified processor.
      * @param string $action
      * @param array $scriptProperties
      * @param array $options
@@ -432,7 +435,7 @@ if (!function_exists('processor')) {
 }
 if (!function_exists('parents')) {
     /**
-     * Получает родителей указанного ресурса.
+     * Gets all of the parent resource ids for a given resource.
      * @param int $id
      * @param int $height
      * @param array $options
@@ -446,7 +449,7 @@ if (!function_exists('parents')) {
 }
 if (!function_exists('children')) {
     /**
-     * Получает дочерние элементы указанного ресурса.
+     * Gets all of the child resource ids for a given resource.
      * @param int $id
      * @param int $depth
      * @param array $options
@@ -460,7 +463,7 @@ if (!function_exists('children')) {
 }
 if (!function_exists('object')) {
     /**
-     * Получает менеджера объекта указанного класса.
+     * Gets an object of the specified class.
      * @param string $class
      * @param integer|array $criteria
      * @return ObjectManager
@@ -485,7 +488,7 @@ if (!function_exists('object')) {
 }
 if (!function_exists('collection')) {
     /**
-     * Получает коллекцию объектов.
+     * Gets a collection of the specified class.
      * @param string $class
      * @param array $criteria
      * @return CollectionManager
@@ -502,9 +505,9 @@ if (!function_exists('collection')) {
 }
 if (!function_exists('resource')) {
     /**
-     * Получает ресурс по ID или условию.
-     * @param int|array $criteria ID ресурса или массив для поиска.
-     * @param bool $asObject Если TRUE, функция вернёт объект. Иначе массив.
+     * Gets a resource object/array.
+     * @param int|array $criteria Resource id or array with criteria.
+     * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modResource|bool|ObjectManager
      */
     function resource($criteria = null, $asObject = true)
@@ -518,9 +521,9 @@ if (!function_exists('resource')) {
 }
 if (!function_exists('resources')) {
     /**
-     * Получает коллекцию ресурсов с указанными условиями.
-     * @param array $criteria Массив для поиска
-     * @param bool $asObject Если TRUE, функция вернёт массив объектов. Иначе коллекцию массивов с данными ресурсов.
+     * Gets a collection of the resources.
+     * @param array $criteria Criteria
+     * @param bool $asObject True to return an array of the objects. Otherwise - an array of resources data arrays.
      * @return array|bool|CollectionManager
      */
     function resources($criteria = null, $asObject = false)
@@ -561,9 +564,9 @@ if (!function_exists('resources')) {
 
 if (!function_exists('user')) {
     /**
-     * Получает объект пользователя.
-     * @param int|array $criteria
-     * @param bool $asObject Если TRUE, функция вернёт объект. Иначе массив с данными пользователя.
+     * Gets a user object.
+     * @param int|array $criteria User id or array with criteria.
+     * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modUser
      */
     function user($criteria = null, $asObject = true)
@@ -576,8 +579,8 @@ if (!function_exists('user')) {
 }
 if (!function_exists('users')) {
     /**
-     * @param array $criteria Массив с данными для поиска
-     * @param bool $asObject Если TRUE, функция вернёт массив объектов. Иначе коллекцию массивов с данными пользователей.
+     * @param array $criteria
+     * @param bool $asObject True to return an array of the user objects. Otherwise - an array of users data arrays.
      * @return array|CollectionManager
      */
     function users($criteria = null, $asObject = false)
@@ -615,9 +618,9 @@ if (!function_exists('users')) {
 }
 if (!function_exists('is_auth')) {
     /**
-     * Проверяет, авторизован пользователь или нет.
+     * Determines if this user is authenticated in a specific context or current context.
      * @param string $ctx
-     * @return bool True если не авторизован.
+     * @return bool
      */
     function is_auth($ctx = '')
     {
@@ -629,8 +632,8 @@ if (!function_exists('is_auth')) {
 }
 if (!function_exists('is_guest')) {
     /**
-     * Проверяет, является ли пользователь гостем.
-     * @return bool True если не авторизован.
+     * Checks the user is guest.
+     * @return bool
      */
     function is_guest()
     {
@@ -640,8 +643,8 @@ if (!function_exists('is_guest')) {
 }
 if (!function_exists('can')) {
     /**
-     * Проверяет права на указанную операцию.
-     * @param string $pm Права
+     * Returns true if user has the specified policy permission.
+     * @param string $pm Permission
      * @return bool
      */
     function can($pm)
@@ -653,7 +656,7 @@ if (!function_exists('can')) {
 }
 if (!function_exists('quote')) {
     /**
-     * Заключает строку в кавычки и экранирует спец. символы.
+     * Quote the string.
      * @see http://php.net/manual/ru/function.pdo-quote.php
      * @param string $string
      * @param int $parameter_type
@@ -668,7 +671,7 @@ if (!function_exists('quote')) {
 }
 if (!function_exists('esc')) {
     /**
-     * Экранирует строку.
+     * Escapes the provided string using the platform-specific escape character.
      * @param string $string
      * @return string
      */
@@ -681,7 +684,7 @@ if (!function_exists('esc')) {
 }
 if (!function_exists('object_exists')) {
     /**
-     * Проверяет существование объекта.
+     * Checks the object existence
      * @param $className
      * @param array $criteria
      * @return bool
@@ -699,7 +702,7 @@ if (!function_exists('object_exists')) {
 }
 if (!function_exists('resource_exists')) {
     /**
-     * Проверяет существование ресурса.
+     * Checks the resource existence
      * @param array $criteria
      * @return bool
      */
@@ -710,7 +713,7 @@ if (!function_exists('resource_exists')) {
 }
 if (!function_exists('user_exists')) {
     /**
-     * Проверяет существование пользователя.
+     * Checks the user existence.
      * @param array $criteria
      * @return bool
      */
@@ -758,7 +761,7 @@ if (!function_exists('user_exists')) {
 }
 if (!function_exists('user_id')) {
     /**
-     * Выводит id текущего пользователя.
+     * Gets id of the current user.
      * @return int
      */
     function user_id()
@@ -769,7 +772,7 @@ if (!function_exists('user_id')) {
 }
 if (!function_exists('resource_id')) {
     /**
-     * Выводит id текущего ресурса.
+     * Gets id of the current resource.
      * @return int
      */
     function resource_id()
@@ -780,7 +783,7 @@ if (!function_exists('resource_id')) {
 }
 if (!function_exists('template_id')) {
     /**
-     * Выводит id текущего шаблона.
+     * Gets the template id of the current resource.
      * @return int
      */
     function template_id()
@@ -792,7 +795,7 @@ if (!function_exists('template_id')) {
 
 if (!function_exists('tv')) {
     /**
-     * Выводит TV текущего ресурса.
+     * Gets TV of the current resource.
      * @param mixed $id
      * @return null|mixed
      */
@@ -806,12 +809,12 @@ if (!function_exists('tv')) {
 
 if (!function_exists('str_clean')) {
     /**
-     * Очищает строку от указанных символов
+     * Sanitize the specified string
      *
-     * @param string $str Строка
-     * @param string|array $chars Набор символов для удаления или разрешенные теги.
-     * @param array $allowedTags Разрешенные теги.
-     * @return string Очищенная строка.
+     * @param string $str
+     * @param string|array $chars Magic. Chars or allowed tags.
+     * @param array $allowedTags Allowed tags.
+     * @return string .
      */
     function str_clean($str, $chars = '/\'"();><', $allowedTags = array())
     {
@@ -826,15 +829,15 @@ if (!function_exists('str_clean')) {
         return str_replace($chars, '', strip_tags($str, $allowedTags));
     }
 }
-if (!function_exists('table')) {
+if (!function_exists('table_name')) {
     /**
-     * Выводит название таблицы для указанного класса
+     * Gets the actual run-time table name from a specified class name.
      *
-     * @param string $className Имя класса
-     * @param bool $includeDb Включать в имя таблицы имя базы данных
+     * @param string $className
+     * @param bool $includeDb
      * @return string Название таблицы.
      */
-    function table($className, $includeDb = false)
+    function table_name($className, $includeDb = false)
     {
         global $modx;
         return $modx->getTableName($className, $includeDb);
@@ -843,7 +846,7 @@ if (!function_exists('table')) {
 
 if (!function_exists('columns')) {
     /**
-     * Колонки таблицы указанного класса
+     * Gets select columns from a specific class for building a query
      *
      * @param string $className Имя класса
      * @param string $tableAlias
@@ -860,7 +863,7 @@ if (!function_exists('columns')) {
 }
 if (!function_exists('is_email')) {
     /**
-     * Валидация адреса электронной почты
+     * Validates the email
      *
      * @param string
      * @return bool
@@ -872,7 +875,7 @@ if (!function_exists('is_email')) {
 }
 if (!function_exists('is_url')) {
     /**
-     * Валидация URL
+     * Validates the URL
      *
      * @param string
      * @return bool
@@ -928,5 +931,26 @@ if (!function_exists('debug')) {
     function debug($message, $changeLevel = false)
     {
         LogManager::debug($message, $changeLevel);
+    }
+}
+if (!function_exists('context')) {
+    /**
+     * Gets the name of the current context
+     * @return string
+     */
+    function context()
+    {
+        global $modx;
+        return $modx->context->get('key');
+    }
+}
+if (!function_exists('query')) {
+    /**
+     * Manages a SQL query
+     */
+    function query($query)
+    {
+        global $modx;
+        return new QueryManager($modx, $query);
     }
 }
