@@ -72,9 +72,9 @@ class LogManager
             self::$modx = new modX();
         }
         if (is_array($message) || is_object($message)) $message = print_r($message,1);
-        self::$modx->setLogTarget('HTML');
+//self::$modx->setLogTarget('HTML');
         if (self::$modx->getLogTarget() == 'HTML') {
-            $message = '<style>.modx-debug-block{background-color:#002357;color:#fcffc4;margin:0;padding:5px} .modx-debug-block h5,.modx-debug-block pre {margin:0}</style>' . $message;
+            $message = '<style>.modx-debug-block{background-color:#002357;color:#fcffc4;margin:0;padding:5px} .modx-debug-block h5,.modx-debug-block pre {margin:0}</style><div class="modx-debug-block">' . $message . '</div>';
         }
         if ($changeLevel) {
             $oldLevel = self::$modx->setLogLevel($level);

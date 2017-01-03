@@ -65,6 +65,7 @@ if (user_exists(['email'=>'admin@mail.com']) {
 
 **Get the data from the cache**
 ```
+//Gets the data from the file *core/cahce/key.cache.php*. 
 $value = cache('key', 'my_data');
 // Or 
 $value = cache()->get('key', 'my_data');
@@ -74,7 +75,9 @@ $value = cache()->get('key', 'my_data');
 ```
 email('pussycat@mail.ru', 'Subject','Email content');
 // To the user
-email_user('admin', $subject, $content);
+email_user('admin', $subject, $content); 
+// or use the user id
+email_user(5, $subject, $content);
 ```
 
 **Redirect**
@@ -115,7 +118,7 @@ if (is_email($email)) {
    // Valid
 }
 ```
-**Remove child resources of the one with the id = 10**
+**Remove child resources of the resource with the id = 10**
 ```
 resources()->where(['parent'=>10])->remove();
 ```
@@ -130,7 +133,12 @@ script('/path/to/script.js', 'async'); // <script async type="text/javascript" s
 ```
 **Get an array of users**
 ```
-$userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->execute(10);
+// Can use the prepared query
+$userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->execute(( (int) $_POST['user_id']);
+```
+**Load a script with the async attribute**
+```
+script('/path/to/script.js','async');
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).
