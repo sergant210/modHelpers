@@ -65,7 +65,7 @@ if (user_exists(['email'=>'admin@mail.com']) {
 
 **Get the data from the cache**
 ```
-//Gets the data from the file *core/cahce/key.cache.php*. 
+//Gets the data from the file *core/cahce/my_data/key.cache.php*. 
 $value = cache('key', 'my_data');
 // Or 
 $value = cache()->get('key', 'my_data');
@@ -138,7 +138,7 @@ $userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->e
 ```
 **Log error to the error log**
 ```
-log_error($array); // Log the array using print_r().
+log_error($array); // Convert the array to string using print_r().
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).
