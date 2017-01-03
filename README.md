@@ -136,9 +136,9 @@ script('/path/to/script.js', 'async'); // <script async type="text/javascript" s
 // Can use the prepared query
 $userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->execute(( (int) $_POST['user_id']);
 ```
-**Load a script with the async attribute**
+**Log error to the error log**
 ```
-script('/path/to/script.js','async');
+log_error($array); // Log the array using print_r().
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).
