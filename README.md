@@ -5,6 +5,7 @@ Available functions:
 
 * url() - make an url.
 * redirect() - redirect to the url or site page if the id is passed.
+* forward() - forwards the request to another resource without changing the URL.
 * abort() - redirect to the error page.
 * config() - manage the config settings.
 * session() - manage the session using dot notation.
@@ -53,6 +54,7 @@ Available functions:
 * log_debug() — logs to the error log for the DEBUG log level.
 * context() - gets the name of the current context.
 * query() - runs the query.
+* memory() - returns the formatted string of the amount of memory allocated to PHP.
 
 
 ### Examples
@@ -65,13 +67,13 @@ if (user_exists(['email'=>'admin@mail.com']) {
 
 **Get the data from the cache**
 ```
-//Gets the data from the file *core/cahce/my_data/key.cache.php*. 
+//Gets the data from the file *core/cache/my_data/key.cache.php*. 
 $value = cache('key', 'my_data');
 // Or 
 $value = cache()->get('key', 'my_data');
 ```
 
-**Send email**
+**Send an email**
 ```
 email('pussycat@mail.ru', 'Subject','Email content');
 // To the user
@@ -98,11 +100,14 @@ $resourceArray = resource()->last()->toArray(); // Resource data as array
 $resObjects = resources()->last(10); 
 ```
 
-**Array of the resource pagetitles of the parent with id = 20.**
+**Array of the resource pagetitles of the parent with the id = 20.**
 ```
-$titles= resources()->where(['parent'=>20])->get('pagetitle'); // array('pagetitle 1', 'pagetitle 2', 'pagetitle 3')
+$titles = resources()->where(['parent'=>20])->get('pagetitle'); // array('pagetitle 1', 'pagetitle 2', 'pagetitle 3')
 ```
-
+**Use a Closure for child resources of the category with the id = 20.**
+```
+return resources()->where(['id:IN'=>children(20)])->each(function($resource, $idx) {return "<div>{$idx}. " . $resource['pagetitle'] . "</div>";}); 
+```
 **Set a value to the session**
 ```
 session('key1.key2', 'value'); // => $_SESSION['key1']['key2'] = $value;
@@ -114,7 +119,7 @@ $value = session('key1.key2');  // $value = $_SESSION['key1']['key2']
 
 **Validates the email**
 ```
-if (is_email($email)) {
+if (is_email($_POST['email'])) {
    // Valid
 }
 ```
@@ -122,7 +127,6 @@ if (is_email($email)) {
 ```
 resources()->where(['parent'=>10])->remove();
 ```
-
 **Count blocked users**
 ```
 $count = users()->profile()->where(['Profile.blocked'=>1])->count();
@@ -139,6 +143,20 @@ $userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->e
 **Log error to the error log**
 ```
 log_error($array); // Convert the array to string using print_r().
+log_error($message, 'HTML'); // Show message on the page.
+```
+**Get the list of the pagetitles**
+```
+return resources()->where(['id:IN'=>children(5)])->each(function($resource, $idx){ return "<li>{$idx}. ".$resource['pagetitle']."</li>";});
+```
+**Get users which are members of the "Manager" group**
+```
+$usersArray = users()->members('Managers')->toArray();
+// Get all users from "ContentManagers" and "SaleManagers" groups 
+$users = users()->members('%Managers')->get();
+foreach($users as $user) {
+  echo $user->username;
+}
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).

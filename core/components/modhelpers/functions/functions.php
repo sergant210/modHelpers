@@ -10,7 +10,7 @@ if (!function_exists('url')) {
      * @param int $id Page id
      * @param string $context Context
      * @param array $arg Ling arguments
-     * @param int $scheme Scheme
+     * @param mixed $scheme Scheme
      * <pre>
      *      -1 : (default value) URL is relative to site_url
      *       0 : see http
@@ -33,7 +33,7 @@ if (!function_exists('redirect')) {
     /**
      * Redirect to the specified url or page
      * @param string|int $url Url or page id
-     * @param array|boolean $options Options
+     * @param array|string|bool $options Options
      * @param string $type
      * @param string $responseCode
      */
@@ -49,6 +49,20 @@ if (!function_exists('redirect')) {
             $url = url($url, $ctx);
         }
         if (!empty($url)) $modx->sendRedirect($url, $options, $type, $responseCode);
+    }
+}
+if (!function_exists('forward')) {
+    /**
+     * Forwards the request to another resource without changing the URL.
+     *
+     * @param integer $id The resource identifier.
+     * @param string $options An array of options for the process.
+     */
+    function forward($id, $options = null)
+    {
+        global $modx;
+
+        if (!empty($id)) $modx->sendForward($id, $options);
     }
 }
 if (!function_exists('abort')) {
@@ -152,7 +166,7 @@ if (!function_exists('cache')) {
      * Manages the cache
      * @see https://docs.modx.com/revolution/2.x/developing-in-modx/advanced-development/caching
      * @param string|array $key
-     * @param null|string|array $options
+     * @param null|int|string|array $options
      * @return mixed|modCacheManager
      */
     function cache($key = '', $options = NULL)
@@ -163,8 +177,7 @@ if (!function_exists('cache')) {
         }
         if (is_string($options)) {
             $options = array(xPDO::OPT_CACHE_KEY => $options);
-        }
-        if (is_numeric($options)) {
+        } elseif (is_numeric($options)) {
             $options = array(xPDO::OPT_CACHE_EXPIRES => (int) $options);
         }
         if (is_array($key)) {
@@ -178,6 +191,35 @@ if (!function_exists('cache')) {
         }
     }
 }
+if (!function_exists('parents')) {
+    /**
+     * Gets all of the parent resource ids for a given resource.
+     * @param int $id
+     * @param int $height
+     * @param array $options
+     * @return array
+     */
+    function parents($id = null, $height = 10,array $options = array())
+    {
+        global $modx;
+        return $modx->getParentIds($id, $height, $options);
+    }
+}
+if (!function_exists('children')) {
+    /**
+     * Gets all of the child resource ids for a given resource.
+     * @param int $id
+     * @param int $depth
+     * @param array $options
+     * @return array
+     */
+    function children($id = null, $depth = 10,array $options = array())
+    {
+        global $modx;
+        return $modx->getChildIds($id, $depth, $options);
+    }
+}
+
 if (!function_exists('pls')) {
     /**
      * Gets/sets placeholders
@@ -219,7 +261,7 @@ if (!function_exists('pls_delete')) {
 }
 if (!function_exists('email')) {
     /**
-     * Отправляет Email.
+     * Send Email.
      * @param string $email Email.
      * @param string|array $subject Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
@@ -318,7 +360,7 @@ if (!function_exists('css')) {
     /**
      * Register CSS to be injected inside the HEAD tag of a resource.
      * @param string $src
-     * @param null $media
+     * @param string $media
      */
     function css($src, $media = null)
     {
@@ -406,17 +448,28 @@ if (!function_exists('chunk')) {
 if (!function_exists('snippet')) {
     /**
      * Runs the specified snippet.
-     * @param $snippetName
+     * @param string $snippetName
      * @param array $params
+     * @param int|string|array $cacheOptions
      * @return string
      */
-    function snippet($snippetName, array $params= array ())
+    function snippet($snippetName, array $params= array (), $cacheOptions = array())
     {
-        global $modx;
-        if ($pdo = pdotools()) {
-            return $pdo->runSnippet($snippetName, $params);
+        $result = cache($snippetName);
+        if (isset($result)) {
+            return $result;
         }
-        return $modx->runSnippet($snippetName, $params);
+
+        if ($pdo = pdotools()) {
+            $result =  $pdo->runSnippet($snippetName, $params);
+        } else {
+            global $modx;
+            $result = $modx->runSnippet($snippetName, $params);
+        }
+        if (!empty($cacheOptions)) {
+            cache(array($snippetName => $result), $cacheOptions);
+        }
+        return $result;
     }
 }
 if (!function_exists('processor')) {
@@ -431,34 +484,6 @@ if (!function_exists('processor')) {
     {
         global $modx;
         return $modx->runProcessor($action, $scriptProperties, $options);
-    }
-}
-if (!function_exists('parents')) {
-    /**
-     * Gets all of the parent resource ids for a given resource.
-     * @param int $id
-     * @param int $height
-     * @param array $options
-     * @return array
-     */
-    function parents($id = null, $height = 10,array $options = array())
-    {
-        global $modx;
-        return $modx->getParentIds($id, $height, $options);
-    }
-}
-if (!function_exists('children')) {
-    /**
-     * Gets all of the child resource ids for a given resource.
-     * @param int $id
-     * @param int $depth
-     * @param array $options
-     * @return array
-     */
-    function children($id = null, $depth = 10,array $options = array())
-    {
-        global $modx;
-        return $modx->getChildIds($id, $depth, $options);
     }
 }
 if (!function_exists('object')) {
@@ -669,13 +694,13 @@ if (!function_exists('quote')) {
         return $modx->quote($string, $parameter_type);
     }
 }
-if (!function_exists('esc')) {
+if (!function_exists('escape')) {
     /**
      * Escapes the provided string using the platform-specific escape character.
      * @param string $string
      * @return string
      */
-    function esc($string)
+    function escape($string)
     {
         global $modx;
 
@@ -685,7 +710,7 @@ if (!function_exists('esc')) {
 if (!function_exists('object_exists')) {
     /**
      * Checks the object existence
-     * @param $className
+     * @param string $className
      * @param array $criteria
      * @return bool
      */
@@ -948,10 +973,35 @@ if (!function_exists('context')) {
 if (!function_exists('query')) {
     /**
      * Manages a SQL query
+     * @param string $query
+     * @return QueryManager
      */
     function query($query)
     {
         global $modx;
         return new QueryManager($modx, $query);
+    }
+}
+if (!function_exists('memory')) {
+    /**
+     * Return the formatted amount of memory allocated to PHP
+     * @param string $unit
+     * @return string
+     */
+    function memory($unit = 'KB')
+    {
+        switch ($unit) {
+            case 'byte':
+                $value = number_format(memory_get_usage(true), 0,","," ") . " $unit";
+                break;
+            case 'MB':
+                $value = number_format(memory_get_usage(true) / (1024*1024), 0,","," ") . " $unit";
+                break;
+            case 'KB':
+            default:
+                $value = number_format(memory_get_usage(true) / 1024, 0,","," ") . " $unit";
+        }
+
+        return $value;
     }
 }

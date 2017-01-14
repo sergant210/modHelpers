@@ -1,7 +1,19 @@
+1.0.2-beta
+==============
+- Renamed "esc" function to "escape".
+- Added "memory" function.
+- Added "forward" function.
+- Added "orWhere" method to the collection class.
+- Added "each" method to the collection class.
+- Added "union" method to the collection class.
+- Added "members" method to the collection class.
+- Added an ability to pass a Closure to the collection functions.
+
+
 1.0.1-beta
 ==============
-- Rename the log functions.
-- Add withTV method to the collection class.
+- Renamed the log functions.
+- Added "withTV" method to the collection class.
 
 1.0.0-beta
 ==============
