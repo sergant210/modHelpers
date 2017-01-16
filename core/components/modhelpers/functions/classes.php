@@ -257,7 +257,7 @@ class CollectionManager
         if (empty($class)) $this->query->query['from']['tables'] = array();
     }
 
-    public function addRows($number = 10)
+    public function elements($number = 10)
     {
        if ($this->isFaked) {
            $this->rows = (int) abs($number);
