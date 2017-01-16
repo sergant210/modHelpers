@@ -1,1 +1,3 @@
 .idea
+/core/components/modhelpers/vendor/
+/core/components/modhelpers/composer.lock

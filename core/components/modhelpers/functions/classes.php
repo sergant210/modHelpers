@@ -1,7 +1,6 @@
 <?php
 /***********************************************/
 /*                Classes                      */
-
 /***********************************************/
 
 class extCacheManager
@@ -90,7 +89,7 @@ class LogManager
         }
         if (is_array($message) || is_object($message)) $message = print_r($message, 1);
         if (self::$modx->getLogTarget() == 'HTML' || $target == 'HTML') {
-            $message = '<style>.modx-debug-block{background-color:#002357;color:#fcffc4;margin:0;padding:5px} .modx-debug-block h5,.modx-debug-block pre {margin:0}</style><div>' . $message . '</div>';
+            $message = '<style>.modx-debug-block{ background-color:#002357;color:#fcffc4;margin:0;padding:5px} .modx-debug-block h5,.modx-debug-block pre { margin:0}</style><div>' . $message . '</div>';
         }
         if ($changeLevel) {
             $oldLevel = self::$modx->setLogLevel($level);
@@ -229,26 +228,62 @@ class CollectionManager
     /** @var string class */
     protected $class;
     protected $alias;
+    protected $rows = 0;
+    protected $isFaked = false;
 
     protected $where = array();
     protected $tvSelects = array();
     protected $tvJoins = array();
     protected $unions = array();
 
-    public function __construct(&$modx, $class)
+    public function __construct(&$modx, $class='')
     {
         /** @var modX $modx */
         $this->modx =& $modx;
-        $this->class = $class;
-        $this->alias = $class;
-
-        $this->query = $this->modx->newQuery($class);
+        if (empty($class)) {
+            $this->class = 'modResource';
+            $this->isFaked = true;
+        } else {
+            $this->class = $class;
+        }
+        $this->alias = $this->class;
+        $this->query = $this->modx->newQuery($this->class);
         /*if ($class == 'modUser') {
             $this->alias = 'User';
         }*/
         $this->query->setClassAlias($this->alias);
-
         $this->query->limit(100);
+
+        if (empty($class)) $this->query->query['from']['tables'] = array();
+    }
+
+    public function addRows($number = 10)
+    {
+       if ($this->isFaked) {
+           $this->rows = (int) abs($number);
+       }
+       return $this;
+    }
+
+    public function setClass($name = '')
+    {
+        if (!empty($name)) {
+            $this->class = $name;
+            $this->query = $this->modx->newQuery($name);
+            $this->query->setClassAlias($this->alias);
+            $this->query->limit(100);
+            $this->isFaked = false;
+        }
+        return $this;
+    }
+
+    public function from($table, $alias = '')
+    {
+        if (preg_match('/^select/i', $table)) $table = '(' . $table . ')';
+        $this->query->query['from']['tables'][] = array('table'=>$table, 'alias' => $alias);
+//DEBUGGING
+//log_error($this->query->query, 'HTML');
+        return $this;
     }
 
     public function alias($alias = '')
@@ -292,16 +327,16 @@ class CollectionManager
 
     public function each($callback)
     {
-        $collection = $this->toArray();
+        $collection = $this->isFaked ? range(1, $this->rows) : $this->toArray();
         if (is_callable($callback)) {
             $output = '';
             $idx = 1;
             foreach ($collection as $item) {
-                $_res = call_user_func($callback, $item, $idx);
+                $_res = call_user_func($callback, $item, $idx, $this->modx);
                 if ($_res === false) {
                     break;
                 }
-                $output .= call_user_func($callback, $item, $idx);
+                $output .= $_res;
                 $idx++;
             }
             return $output;
@@ -392,15 +427,39 @@ class CollectionManager
         return $this;
     }
 
-    public function where($condition)
+    public function where($criteria)
     {
-        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $condition);
+        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $criteria);
         return $this;
     }
 
-    public function orWhere($condition)
+    public function orWhere($criteria)
     {
-        $this->where[] = array('conjunction' => xPDOQuery::SQL_OR, 'where' => $condition);
+        $this->where[] = array('conjunction' => xPDOQuery::SQL_OR, 'where' => $criteria);
+        return $this;
+    }
+
+    public function whereExists($table, $criteria)
+    {
+        if (is_array($table)) {
+            foreach ($table as $key => $val) {
+                $table = escape($key) . ' as ' . escape($val);
+            }
+        }
+        $query = 'EXISTS (SELECT 1 FROM ' . $table . ' WHERE ' . $criteria . ')';
+        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $query);
+        return $this;
+    }
+
+    public function whereNotExists($table, $criteria)
+    {
+        if (is_array($table)) {
+            foreach ($table as $key => $val) {
+                $table = escape($key) . ' as ' . escape($val);
+            }
+        }
+        $query = 'NOT EXISTS (SELECT 1 FROM ' . $table . ' WHERE ' . $criteria . ')';
+        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $query);
         return $this;
     }
 
@@ -555,7 +614,7 @@ class CollectionManager
         $this->addJoins();
         $this->addWhere($this->query);
 //DEBUGGING
-//log_error($this->query->query);
+//log_error($this->query->query, 'HTML');
         if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
         $this->query->prepare();
         return $this->query->toSQL();
@@ -564,12 +623,13 @@ class CollectionManager
     public function members($group)
     {
         if ($this->class == 'modUser') {
+            $alias = !empty($this->alias) ? escape($this->alias) . '.' : '';
             switch (true) {
                 case is_numeric($group):
-                    $this->query->where(escape($this->alias).'.`id` IN (SELECT `member` FROM ' . table_name('modUserGroupMember') . " WHERE `user_group` = $group)");
+                    $this->query->where($alias.'`id` IN (SELECT `member` FROM ' . table_name('modUserGroupMember') . " WHERE `user_group` = $group)");
                     break;
                 case is_string($group):
-                    $query = escape($this->alias).'.`id` IN (SELECT `groupMember`.`member` FROM ' . table_name('modUserGroupMember') . ' as `groupMember`' .
+                    $query = $alias.'`id` IN (SELECT `groupMember`.`member` FROM ' . table_name('modUserGroupMember') . ' as `groupMember`' .
                         ' JOIN ' . table_name('modUserGroup') . ' as `Groups` ON `Groups`.`id` = `groupMember`.`user_group`' .
                         " WHERE `Groups`.`name` LIKE '$group')";
                     $this->query->where($query);
@@ -621,7 +681,12 @@ class QueryManager
         return $this;
     }
 
-    public function execute($bindings = '')
+    /**
+     * @param string $bindings
+     * @param bool $toString
+     * @return array|bool
+     */
+    public function execute($bindings = '', $toString = false)
     {
         if (!empty($bindings)) {
             if (!is_array($bindings)) {
@@ -636,7 +701,8 @@ class QueryManager
         if ($stmt->execute($this->bindings)) {
             $this->modx->queryTime += microtime(true) - $tstart;
             $this->modx->executedQueries++;
-            return $stmt->fetchAll();
+            $result = $stmt->fetchAll();
+            return $toString ? print_r($result,1) : $result;
         }
         return false;
     }
@@ -660,5 +726,4 @@ class QueryManager
         }
         return false;
     }
-
 }

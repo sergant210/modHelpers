@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/classes.php';
+require_once __DIR__ . '/../vendor/fzaninotto/faker/src/autoload.php';
 
 /***********************************************/
 /*              Functions                      */
@@ -94,21 +95,23 @@ if (!function_exists('abort')) {
 if (!function_exists('config')) {
     /**
      * Gets and sets the system settings
-     * @param string $key
-     * @param null|mixed $value
+     * @param string|array $key
+     * @param null|mixed $default
      * @return array|null|string
      */
-    function config($key = '', $value = NULL)
+    function config($key = '', $default = '')
     {
         global $modx;
         if (!empty($key)) {
-            if (isset($value)) {
-                $modx->config[$key] = $value;
-                return $value;
+            if (is_array($key)) {
+                foreach ($key as $itemKey => $itemValue) {
+                    $modx->config[$itemKey] = $itemValue;
+                }
+                return true;
             }
-            return isset($modx->config[$key]) ? $modx->config[$key] : '';
+            return isset($modx->config[$key]) ? $modx->config[$key] : $default;
         } else {
-            return $modx->config;
+            return print_r($modx->config,1);
         }
     }
 }
@@ -439,32 +442,52 @@ if (!function_exists('chunk')) {
     function chunk($chunkName, array $properties= array ())
     {
         global $modx;
-        if ($pdo = pdotools()) {
-            return $pdo->getChunk($chunkName, $properties);
+        $output = '';
+        //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
+        if (strpos($chunkName, '/') !== false && file_exists($chunkName)) {
+            $content = file_get_contents($chunkName);
+            /** @var modChunk $chunk */
+            $chunk = $modx->newObject('modChunk', array('name' => basename($chunkName)));
+            $chunk->_cacheable = false;
+            $chunk->_processed = false;
+            $chunk->_content = '';
+            $output = $chunk->process($properties, $content);
+/*        } elseif ($pdo = pdotools()) {
+            $output = $pdo->getChunk($chunkName, $properties);*/
+        } else {
+            $output = $modx->getChunk($chunkName, $properties);
         }
-        return $modx->getChunk($chunkName, $properties);
+        return $output;
     }
 }
 if (!function_exists('snippet')) {
     /**
-     * Runs the specified snippet.
+     * Runs the specified MODX snippet or file.
      * @param string $snippetName
-     * @param array $params
+     * @param array $scriptProperties
      * @param int|string|array $cacheOptions
      * @return string
      */
-    function snippet($snippetName, array $params= array (), $cacheOptions = array())
+    function snippet($snippetName, array $scriptProperties= array (), $cacheOptions = array())
     {
         $result = cache($snippetName);
         if (isset($result)) {
             return $result;
         }
-
-        if ($pdo = pdotools()) {
-            $result =  $pdo->runSnippet($snippetName, $params);
+        global $modx;
+        if (strpos($snippetName, '/') !== false && file_exists($snippetName)) {
+            ob_start();
+            extract($scriptProperties, EXTR_SKIP);
+            $result = include $snippetName;
+            $result = ($result === null ? '' : $result);
+            if (ob_get_length()) {
+                $result = ob_get_contents() . $result;
+            }
+            ob_end_clean();
+/*        } elseif ($pdo = pdotools()) {
+            $result =  $pdo->runSnippet($snippetName, $scriptProperties);*/
         } else {
-            global $modx;
-            $result = $modx->runSnippet($snippetName, $params);
+            $result = $modx->runSnippet($snippetName, $scriptProperties);
         }
         if (!empty($cacheOptions)) {
             cache(array($snippetName => $result), $cacheOptions);
@@ -518,7 +541,7 @@ if (!function_exists('collection')) {
      * @param array $criteria
      * @return CollectionManager
      */
-    function collection($class, $criteria = null)
+    function collection($class = '', $criteria = null)
     {
         global $modx;
         $collection = new CollectionManager($modx, $class);
@@ -1003,5 +1026,72 @@ if (!function_exists('memory')) {
         }
 
         return $value;
+    }
+}
+if (!function_exists('faker')) {
+    $faker = false;
+    /**
+     * Makes fake data
+     * @see https://github.com/fzaninotto/Faker
+     * @param string $locale
+     * @param string $property
+     * @return mixed
+     */
+    function faker($property = '', $locale = '')
+    {
+        global $faker;
+        if (empty($locale)) {
+            $lang = config('cultureKey');
+            switch ($lang) {
+                case 'ru':
+                    $locale = 'ru_RU';
+                    break;
+                case 'de':
+                    $locale = 'de_DE';
+                    break;
+                case 'fr':
+                    $locale = 'fr_FR';
+                    break;
+                default:
+                    $locale = 'en_US';
+            }
+        }
+        if (!$faker) {
+            $faker = \Faker\Factory::create($locale);
+        }
+        if (count(func_get_args()) == 0) return $faker;
+
+        try {
+            if (is_array($property)) {
+                $func = key($property);
+                $params = current($property);
+                $output = call_user_func_array(array($faker, $func), $params);
+            } else {
+                $output = $faker->$property;
+            }
+        } catch (Exception $e) {
+            log_error($e->getMessage());
+            $output = '';
+        }
+
+        return  $output;
+    }
+}
+if (!function_exists('img')) {
+    /**
+     * Returns the prepared "img" tag.
+     * @param string $src
+     * @param array $attrs
+     * @return string
+     */
+    function img($src, $attrs = array())
+    {
+        $attributes = '';
+        if (!empty($attrs) && is_array($attrs)) {
+            foreach ($attrs as $k => $v) {
+                $attributes .= $k . '="' . $v . '" ';
+            }
+        }
+        return '<img src="'. $src.'" ' . $attributes . '>';
     }
 }

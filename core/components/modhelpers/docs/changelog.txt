@@ -1,3 +1,11 @@
+1.1.0-beta
+==============
+- Added function "faker" that generates fake data.
+- Added function "img".
+- Added method "whereExists" to the collection class.
+- Added method "whereNotExists" to the collection class.
+- Added method "addRows" to the collection class.
+
 1.0.2-beta
 ==============
 - Renamed "esc" function to "escape".
