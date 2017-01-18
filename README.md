@@ -23,7 +23,7 @@ Available functions:
 * pdofetch() - get the pdoFetch object.
 * str_clean() - sanitize the string.
 * quote() - quote the string.
-* esc() - escapes the provided string using the platform-specific escape character.
+* escape() - escapes the provided string using the platform-specific escape character.
 * css() - register CSS to be injected inside the HEAD tag of a resource.
 * script() - register JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
 * html() - register HTML to be injected inside the HEAD tag or before the closing BODY tag.
@@ -38,7 +38,7 @@ Available functions:
 * user_id() - gets the id of the current user. 
 * tv() - gets the specified TV of the current resource. 
 * object() - to work with objects of MODX.
-* collection() - to work with object collections of MODX.
+* collection() - to work with collections.
 * resource() - works with a resource object.
 * resources() - works with a resource collection.
 * user() - works with a user object.
@@ -52,9 +52,11 @@ Available functions:
 * log_warn() — logs to the error log for the WARN log level.
 * log_info() — logs to the error log for the INFO log level.
 * log_debug() — logs to the error log for the DEBUG log level.
-* context() - gets the name of the current context.
-* query() - runs the query.
+* context() - gets the specified property of the current context. By default, returns the key.
+* query() - runs the specified SQL query.
 * memory() - returns the formatted string of the amount of memory allocated to PHP.
+* img() - prepares the HTML tag "img".
+* faker() - creates a faked data.
 
 
 ### Examples
@@ -142,7 +144,7 @@ $userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->e
 ```
 **Log error to the error log**
 ```
-log_error($array); // Convert the array to string using print_r().
+log_error($array); // The array wil be converted to a string using print_r().
 log_error($message, 'HTML'); // Show message on the page.
 ```
 **Get the list of the pagetitles**
@@ -157,6 +159,10 @@ $users = users()->members('%Managers')->get();
 foreach($users as $user) {
   echo $user->username;
 }
+```
+**Make a list of faked news (using a snippet)**
+```
+return collection(10)->each(function($item, $idx, $modx){return "<div>" . faker()->date() . img(faker()->imageUrl(500,300),['class'=>'img-news']) . '<br>' . faker()->text(700) . '</div>';});
 ```
   
 [Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).

@@ -240,9 +240,10 @@ class CollectionManager
     {
         /** @var modX $modx */
         $this->modx =& $modx;
-        if (empty($class)) {
+        if (empty($class) || is_numeric($class)) {
             $this->class = 'modResource';
             $this->isFaked = true;
+            if (is_numeric($class)) $this->rows = (int) abs($class);
         } else {
             $this->class = $class;
         }
@@ -442,9 +443,10 @@ class CollectionManager
     public function whereExists($table, $criteria)
     {
         if (is_array($table)) {
-            foreach ($table as $key => $val) {
-                $table = escape($key) . ' as ' . escape($val);
-            }
+log_error($table,'HTML');
+            $tableName = key($table);
+            $alias = current($table);
+            $table = escape($tableName) . ' as ' . escape($alias);
         }
         $query = 'EXISTS (SELECT 1 FROM ' . $table . ' WHERE ' . $criteria . ')';
         $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $query);
@@ -454,9 +456,9 @@ class CollectionManager
     public function whereNotExists($table, $criteria)
     {
         if (is_array($table)) {
-            foreach ($table as $key => $val) {
-                $table = escape($key) . ' as ' . escape($val);
-            }
+            $tableName = key($table);
+            $alias = current($table);
+            $table = escape($tableName) . ' as ' . escape($alias);
         }
         $query = 'NOT EXISTS (SELECT 1 FROM ' . $table . ' WHERE ' . $criteria . ')';
         $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $query);

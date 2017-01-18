@@ -1079,7 +1079,7 @@ if (!function_exists('faker')) {
 }
 if (!function_exists('img')) {
     /**
-     * Returns the prepared "img" tag.
+     * Returns the HTML tag "img".
      * @param string $src
      * @param array $attrs
      * @return string
