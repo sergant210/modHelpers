@@ -19,16 +19,14 @@ Available functions:
 * columns() - gets select columns from a specific class for building a query.
 * email() - send email.
 * email_user() - send email to the specified user.
-* pdotools() - get the pdoTools object.
-* pdofetch() - get the pdoFetch object.
 * str_clean() - sanitize the string.
 * quote() - quote the string.
 * escape() - escapes the provided string using the platform-specific escape character.
 * css() - register CSS to be injected inside the HEAD tag of a resource.
 * script() - register JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
 * html() - register HTML to be injected inside the HEAD tag or before the closing BODY tag.
-* chunk() - gets the specified chunk. Uses pdoTools if installed.
-* snippet() - runs the specified snippet. Uses pdoTools if installed.
+* chunk() - gets the specified chunk. 
+* snippet() - runs the specified snippet.
 * processor() - runs the specified processor.
 * is_auth() - determines if this user is authenticated in a specific context.
 * is_guest() - determines if the user is a guest.
@@ -57,6 +55,7 @@ Available functions:
 * memory() - returns the formatted string of the amount of memory allocated to PHP.
 * img() - prepares the HTML tag "img".
 * faker() - creates a faked data.
+* [load_model()]('./core/components/modhelpers/docs/en/load_model.md') - loads a model for a custom table.
 
 
 ### Examples
@@ -82,6 +81,23 @@ email('pussycat@mail.ru', 'Subject','Email content');
 email_user('admin', $subject, $content); 
 // or use the user id
 email_user(5, $subject, $content);
+// or like that
+email()->to('someemail@.gmail.com')->cc('copymail@mail.com')->subject('Hello')->content('Content')->attach('path/to/file.jpg')->send();
+```
+
+**Run a snippet and save the result to the cache**
+```
+$output = snippet('mySnippet', $params, 60); // store the snippet result for 60 seconds
+```
+
+**Run a snippet from file**
+```
+$output = snippet(MODX_CORE_PATH . 'elements/snippets/mysnippet.php', $params);
+```
+
+**Get a chunk from file**
+```
+$output = chunk(MODX_CORE_PATH . 'elements/chunks/mychunk.html', $placeholders);
 ```
 
 **Redirect**
@@ -160,9 +176,13 @@ foreach($users as $user) {
   echo $user->username;
 }
 ```
+**Add the first ten users to the "Manager" group**
+```
+users()->whereIn('id',range(1,10))->joinGroup('Manager');
+```
 **Make a list of faked news (using a snippet)**
 ```
 return collection(10)->each(function($item, $idx, $modx){return "<div>" . faker()->date() . img(faker()->imageUrl(500,300),['class'=>'img-news']) . '<br>' . faker()->text(700) . '</div>';});
 ```
   
-[Russian documentation](https://modzone.ru/blog/2016/12/31/helper-functions-for-modx/).
+[Russian documentation](https://modzone.ru/documentation/modhelpers/).

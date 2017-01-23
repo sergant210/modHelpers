@@ -1,6 +1,19 @@
+1.2.0-beta
+==============
+- Added function "load_model" for custom table.
+- Added method "joinGroup" to the collection class for users and resources.
+- Added method "leaveGroup" to the collection class for users and resources.
+- Added method "whereIn" to the collection class for users and resources.
+- Added method "whereNotIn" to the collection class for users and resources.
+- Added method "whereLike" to the collection class for users and resources.
+- Added method "whereNotLike" to the collection class for users and resources.
+- Added method "whereIsNull" to the collection class for users and resources.
+- Added method "whereIsNotNull" to the collection class for users and resources.
+- Added class modHelperMailer which allows to use chains of methods.
+
 1.1.0-beta
 ==============
-- Added function "faker" that generates fake data.
+- Added function "faker" which generates fake data.
 - Added function "img".
 - Added method "whereExists" to the collection class.
 - Added method "whereNotExists" to the collection class.

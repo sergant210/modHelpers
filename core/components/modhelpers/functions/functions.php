@@ -104,6 +104,7 @@ if (!function_exists('config')) {
         global $modx;
         if (!empty($key)) {
             if (is_array($key)) {
+                if (!can('settings')) return false;
                 foreach ($key as $itemKey => $itemValue) {
                     $modx->config[$itemKey] = $itemValue;
                 }
@@ -111,7 +112,7 @@ if (!function_exists('config')) {
             }
             return isset($modx->config[$key]) ? $modx->config[$key] : $default;
         } else {
-            return print_r($modx->config,1);
+            return $modx->config;
         }
     }
 }
@@ -175,7 +176,7 @@ if (!function_exists('cache')) {
     function cache($key = '', $options = NULL)
     {
         global $modx;
-        if (empty($key) && empty($options)) {
+        if (func_num_args() == 0) {
             return new extCacheManager($modx->getCacheManager());
         }
         if (is_string($options)) {
@@ -265,20 +266,21 @@ if (!function_exists('pls_delete')) {
 if (!function_exists('email')) {
     /**
      * Send Email.
-     * @param string $email Email.
+     * @param string|array $email Email.
      * @param string|array $subject Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
-     * @return bool
+     * @return bool|modHelperMailer
      */
-    function email($email, $subject, $content = '')
+    function email($email='', $subject='', $content = '')
     {
         global $modx;
+        if (func_num_args() == 0) return new modHelperMailer($modx);
         if (is_array($subject)) {
             $options = $subject;
-            $options['email'] = $email;
         } else {
-            $options = compact('email','subject','content');
+            $options = compact('subject','content');
         }
+        if (empty($email)) return false;
         $options['sender'] = isset($options['sender']) ? $options['sender'] : $modx->getOption('emailsender');
         $options['from'] = isset($options['from']) ? $options['from'] : $modx->getOption('emailsender');
         $options['fromName'] = isset($options['fromName']) ? $options['emailFromName'] : $modx->getOption('site_name');
@@ -290,8 +292,27 @@ if (!function_exists('email')) {
         $mail->set(modMail::MAIL_SENDER, $options['sender']);
         $mail->set(modMail::MAIL_FROM, $options['from']);
         $mail->set(modMail::MAIL_FROM_NAME, $options['fromName']);
+        if (!empty($options['cc'])) $mail->address('cc', $options['cc']);
+        if (!empty($options['bcc'])) $mail->address('bcc', $options['bcc']);
+        if (!empty($options['reply-to'])) $mail->address('reply-to', $options['reply-to']);
+        if (!empty($options['attach'])) {
+            if (is_array($options['attach'])) {
+                foreach ($options['attach'] as $name => $file) {
+                    if (!is_string($name)) $name = '';
+                    $mail->attach($file, $name);
+                }
+            } else {
+                $mail->attach($options['attach']);
+            }
+        }
 
-        $mail->address('to', $options['email']);
+        if (is_array($email)) {
+            foreach ($email as $e) {
+                $mail->address('to', $e);
+            }
+        } else {
+            $mail->address('to', $email);
+        }
         if (!$mail->send()) {
             $modx->log(modX::LOG_LEVEL_ERROR, 'An error occurred while trying to send the email: ' . $mail->mailer->ErrorInfo);
             $mail->reset();
@@ -312,53 +333,20 @@ if (!function_exists('email_user')) {
     function email_user($user, $subject, $content = '')
     {
         global $modx;
-        if (is_numeric($user)) {
-            $user = $modx->getObject('modUser', array('id' => (int) $user));
-        } elseif (is_string($user)) {
-            $user = $modx->getObject('modUser', array('id' => (int) $user));
+        if (!is_array($user)) $user = compact('user');
+        $email = array();
+        foreach ($user as $usr) {
+            if (is_numeric($usr)) {
+                $usr = $modx->getObject('modUser', array('id' => (int)$usr));
+            } elseif (is_string($usr)) {
+                $usr = $modx->getObject('modUser', array('username' => $usr));
+            }
+            if ($usr instanceof modUser && $eml = $usr->Profile->get('email')) $email[] = $eml;
         }
-        if ($user instanceof modUser) $email = $modx->user->Profile->get('email');
         return !empty($email) ? email($email, $subject, $content) : false;
     }
 }
-if (!function_exists('pdotools')) {
-    /**
-     * Gets instance of the pdoTools class
-     * @param array $options
-     * @return pdoTools|boolean
-     */
-    function pdotools($options = array())
-    {
-        global $modx;
-        $fqn = $modx->getOption('pdoTools.class', null, 'pdotools.pdotools', true);
-        if ($pdoClass = $modx->loadClass($fqn, '', false, true)) {
-            return new $pdoClass($modx, $options);
-        }
-        elseif ($pdoClass = $modx->loadClass($fqn, MODX_CORE_PATH . 'components/pdotools/model/', false, true)) {
-            return new $pdoClass($modx, $options);
-        }
-        return false;
-    }
-}
-if (!function_exists('pdofetch')) {
-    /**
-     * * Gets instance of the pdoFetch class
-     * @param array $options
-     * @return pdoFetch|boolean
-     */
-    function pdofetch($options = array())
-    {
-        global $modx;
-        $fqn = $modx->getOption('pdoFetch.class', null, 'pdotools.pdofetch', true);
-        if ($pdoClass = $modx->loadClass($fqn, '', false, true)) {
-            return new $pdoClass($modx, $options);
-        }
-        elseif ($pdoClass = $modx->loadClass($fqn, MODX_CORE_PATH . 'components/pdotools/model/', false, true)) {
-            return new $pdoClass($modx, $options);
-        }
-        return false;
-    }
-}
+
 if (!function_exists('css')) {
     /**
      * Register CSS to be injected inside the HEAD tag of a resource.
@@ -1040,26 +1028,27 @@ if (!function_exists('faker')) {
     function faker($property = '', $locale = '')
     {
         global $faker;
-        if (empty($locale)) {
-            $lang = config('cultureKey');
-            switch ($lang) {
-                case 'ru':
-                    $locale = 'ru_RU';
-                    break;
-                case 'de':
-                    $locale = 'de_DE';
-                    break;
-                case 'fr':
-                    $locale = 'fr_FR';
-                    break;
-                default:
-                    $locale = 'en_US';
-            }
-        }
         if (!$faker) {
+            if (empty($locale)) {
+                $lang = config('cultureKey');
+                switch ($lang) {
+                    case 'ru':
+                        $locale = 'ru_RU';
+                        break;
+                    case 'de':
+                        $locale = 'de_DE';
+                        break;
+                    case 'fr':
+                        $locale = 'fr_FR';
+                        break;
+                    default:
+                        $locale = 'en_US';
+                }
+            }
+
             $faker = \Faker\Factory::create($locale);
         }
-        if (count(func_get_args()) == 0) return $faker;
+        if (func_num_args() == 0) return $faker;
 
         try {
             if (is_array($property)) {
@@ -1093,5 +1082,33 @@ if (!function_exists('img')) {
             }
         }
         return '<img src="'. $src.'" ' . $attributes . '>';
+    }
+}
+
+if (!function_exists('load_model')) {
+    /**
+     * Load a model for a custom table.
+     * @param string $class Class name.
+     * @param string $table Table name without the prefix.
+     * @param callable $callback
+     * @return bool
+     */
+    function load_model($class, $table, $callback)
+    {
+        global $modx;
+        $key = strtolower($class) . '_map';
+        if ($map = cache($key)) {
+            $modx->map[$class] = $map;
+            return true;
+        }
+        $model = new modHelperModelBuilder($table);
+        if (is_callable($callback)) $callback($model);
+        $map = $model->output();
+        if (!empty($map)) {
+            $modx->map[$class] = $map;
+            cache()->set($key,$map);
+            return true;
+        }
+        return false;
     }
 }

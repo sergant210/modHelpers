@@ -316,7 +316,6 @@ class CollectionManager
         $unions = $this->addUnion();
         if (!empty($unions)) $data = array_merge($data, $unions);
         if ($toString) $data = print_r($data,1);
-
         return $data;
     }
 
@@ -371,7 +370,7 @@ class CollectionManager
             $this->addWhere($query);
             $collection = $this->modx->getIterator($this->class, $query);
             foreach ($collection as $object) {
-                $res = call_user_func_array($data, array(&$object, &$this->modx));
+                $res = call_user_func_array($data, array(&$object, $this->modx));
                 if ($res !== false && $object->save()) {
                     $count++;
                 }
@@ -428,9 +427,9 @@ class CollectionManager
         return $this;
     }
 
-    public function where($criteria)
+    public function where($criteria, $conjunction = xPDOQuery::SQL_AND)
     {
-        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $criteria);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
 
@@ -440,20 +439,24 @@ class CollectionManager
         return $this;
     }
 
-    public function whereExists($table, $criteria)
+    public function whereExists($table, $criteria, $conjunction = xPDOQuery::SQL_AND)
     {
+        /*if ($conjunction != strtolower('or')) {
+            $conjunction = '';
+        } else {
+            $conjunction = strtoupper($conjunction).':';
+        }*/
         if (is_array($table)) {
-log_error($table,'HTML');
             $tableName = key($table);
             $alias = current($table);
             $table = escape($tableName) . ' as ' . escape($alias);
         }
         $query = 'EXISTS (SELECT 1 FROM ' . $table . ' WHERE ' . $criteria . ')';
-        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $query);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $query);
         return $this;
     }
 
-    public function whereNotExists($table, $criteria)
+    public function whereNotExists($table, $criteria, $conjunction = xPDOQuery::SQL_AND)
     {
         if (is_array($table)) {
             $tableName = key($table);
@@ -461,10 +464,45 @@ log_error($table,'HTML');
             $table = escape($tableName) . ' as ' . escape($alias);
         }
         $query = 'NOT EXISTS (SELECT 1 FROM ' . $table . ' WHERE ' . $criteria . ')';
-        $this->where[] = array('conjunction' => xPDOQuery::SQL_AND, 'where' => $query);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $query);
         return $this;
     }
-
+    public function whereLike($field, $value, $conjunction = xPDOQuery::SQL_AND)
+    {
+        $criteria = array($field.':LIKE' => $value);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
+        return $this;
+    }
+    public function whereNotLike($field, $value, $conjunction = xPDOQuery::SQL_AND)
+    {
+        $criteria = array($field.':NOT LIKE' => $value);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
+        return $this;
+    }
+    public function whereIn($field, array $array, $conjunction = xPDOQuery::SQL_AND)
+    {
+        $criteria = array($field.':IN' => $array);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
+        return $this;
+    }
+    public function whereNotIn($field, array $array, $conjunction = xPDOQuery::SQL_AND)
+    {
+        $criteria = array($field.':NOT IN' => $array);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
+        return $this;
+    }
+    public function whereIsNull($field, $conjunction = xPDOQuery::SQL_AND)
+    {
+        $criteria = array($field.':IS' => NULL);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
+        return $this;
+    }
+    public function whereIsNotNull($field, $conjunction = xPDOQuery::SQL_AND)
+    {
+        $criteria = array($field.':IS NOT' => NULL);
+        $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
+        return $this;
+    }
     protected function addSelect()
     {
         if (!empty($this->tvSelects)) {
@@ -477,7 +515,7 @@ log_error($table,'HTML');
 
     protected function addWhere($query = '')
     {
-        if (empty($query)) $query =& $this->query;
+        if (empty($query)) $query = $this->query;
         if (!empty($this->where)) {
             foreach ($this->where as $where) {
                 $query->where($where['where'], $where['conjunction']);
@@ -642,6 +680,32 @@ log_error($table,'HTML');
         return $this;
     }
 
+    public function joinGroup($groupId, $roleId = null,$rank = null)
+    {
+        if ($this->class == 'modUser' || $this->class == 'modResource') {
+            $this->addWhere();
+            $collection = $this->modx->getIterator($this->class, $this->query);
+            /** @var modUser|modResource $object */
+            foreach ($collection as $object) {
+                $object->joinGroup($groupId, $roleId, $rank);
+            }
+        }
+        return $this;
+    }
+
+    public function leaveGroup($groupId)
+    {
+        if ($this->class == 'modUser' || $this->class == 'modResource') {
+            $this->addWhere();
+            $collection = $this->modx->getIterator($this->class, $this->query);
+            /** @var modUser|modResource $object */
+            foreach ($collection as $object) {
+                $object->leaveGroup($groupId);
+            }
+        }
+        return $this;
+    }
+
     /**
      * Call xPDOQuery methods.
      * @param  string $method
@@ -727,5 +791,760 @@ class QueryManager
             return $stmt->rowCount();
         }
         return false;
+    }
+}
+
+class modHelperMailer
+{
+    protected $modx;
+    /** @var modPHPMailer $mailer */
+    public $mailer;
+
+
+    public function __construct($modx)
+    {
+        /** @var  modX $modx */
+        $this->modx = $modx;
+        $this->mailer = $modx->getService('mail', 'mail.modPHPMailer');
+        $this->mailer->set(modMail::MAIL_SENDER, $modx->getOption('emailsender'));
+        $this->mailer->set(modMail::MAIL_FROM, $modx->getOption('emailsender'));
+        $this->mailer->set(modMail::MAIL_FROM_NAME, $modx->getOption('site_name'));
+        $this->mailer->setHTML(true);
+    }
+
+    public function to($email)
+    {
+        $this->mailer->address('to', $email);
+        return $this;
+    }
+
+    public function toUser($user)
+    {
+        if (is_numeric($user)) {
+            $user = $this->modx->getObject('modUser', array('id' => (int) $user));
+        } elseif (is_string($user)) {
+            $user = $this->modx->getObject('modUser', array('username' => $user));
+        }
+        if ($user instanceof modUser && $email = $user->Profile->get('email')) $this->mailer->address('to', $email);
+        return $this;
+    }
+
+    public function cc($email)
+    {
+        $this->mailer->address('cc', $email);
+        return $this;
+    }
+
+    public function bcc($email)
+    {
+        $this->mailer->address('bcc', $email);
+        return $this;
+    }
+
+    public function replyTo($email)
+    {
+        $this->mailer->address('reply-to', $email);
+        return $this;
+    }
+
+    public function subject($subject)
+    {
+        $this->mailer->set(modMail::MAIL_SUBJECT, $subject);
+        return $this;
+    }
+
+    public function content($content)
+    {
+        $this->mailer->set(modMail::MAIL_BODY, $content);
+        return $this;
+    }
+
+    public function sender($email)
+    {
+        $this->mailer->set(modMail::MAIL_SENDER, $email);
+        return $this;
+    }
+
+    public function from($name)
+    {
+        $this->mailer->set(modMail::MAIL_FROM, $name);
+        return $this;
+    }
+
+    public function fromName($name)
+    {
+        $this->mailer->set(modMail::MAIL_FROM_NAME, $name);
+        return $this;
+    }
+
+    public function attach($file, $name = '', $encoding = 'base64', $type = 'application/octet-stream')
+    {
+        $this->mailer->attach($file, $name, $encoding, $type);
+        return $this;
+    }
+
+    public function setHTML($toggle)
+    {
+        $this->mailer->setHTML($toggle);
+        return $this;
+    }
+
+    public function send()
+    {
+        if (empty($this->mailer->addresses['to'])) {
+            $this->modx->log(modX::LOG_LEVEL_ERROR, 'No addressed to send.');
+            return false;
+        }
+
+        if (!$this->mailer->send()) {
+            $this->modx->log(modX::LOG_LEVEL_ERROR, 'An error occurred while trying to send the email: ' . $this->mailer->mailer->ErrorInfo);
+            $this->mailer->reset();
+            return false;
+        }
+        $this->mailer->reset();
+        return true;
+    }
+}
+
+
+class modHelperModelBuilder
+{
+    protected $table;
+    public $columns = array();
+    protected $indexes = array();
+    protected $aggregates = array();
+    protected $composites = array();
+
+    public function __construct($table)
+    {
+        $this->table = $table;
+    }
+    /**
+     * Add a new char column to the model.
+     *
+     * @param  string  $name
+     * @param  int  $precision
+     * @return modHelpersModelColumn
+     */
+    public function char($name, $precision = 255)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('char', $name, compact('precision'));
+        return $column;
+    }
+
+    /**
+     * Add a new varchar column to the model.
+     *
+     * @param  string  $name
+     * @param  int  $precision
+     * @return modHelpersModelColumn
+     */
+    public function varchar($name, $precision = 255)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('varchar', $name, compact('precision'));
+        return $column;
+    }
+
+    /**
+     * Add a new text column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function text($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('text', $name);
+        return $column;
+    }
+
+    /**
+     * Add a new medium text column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function mediumText($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('mediumtext', $name);
+        return $column;
+    }
+
+    /**
+     * Add a new long text column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function longText($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('longtext', $name);
+        return $column;
+    }
+
+    /**
+     * Add an unsigned integer column to the model.
+     *
+     * @param  string   $name
+     * @param  int      $precision
+     * @return modHelpersModelColumn
+     */
+    public function id($name = 'id', $precision = 10)
+    {
+        return $this->int($name, $precision, true);
+    }
+    /**
+     * Add a new integer column to the model.
+     *
+     * @param  string   $name
+     * @param  int      $precision
+     * @param  bool     $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function int($name, $precision = 10, $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = 10;
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('int', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+    /**
+     * Add a new tiny integer (1-byte) colum to the modeln.
+     *
+     * @param  string   $name
+     * @param  int      $precision
+     * @param  bool     $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function tinyInt($name, $precision = 3, $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = 3;
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('tinyint', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+
+    /**
+     * Add a new small integer (2-byte) column to the model.
+     *
+     * @param  string   $name
+     * @param  int      $precision
+     * @param  bool     $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function smallInt($name, $precision = 5, $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = 5;
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('smallint', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+
+    /**
+     * Add a new medium integer (3-byte) column to the model.
+     *
+     * @param  string   $name
+     * @param  int      $precision
+     * @param  bool     $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function mediumInt($name, $precision = 8, $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = 8;
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('mediumint', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+
+    /**
+     * Add a new big integer (8-byte) column to the model.
+     *
+     * @param  string   $name
+     * @param  int      $precision
+     * @param  bool     $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function bigInt($name, $precision = 20, $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = 20;
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('bigint', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+    /**
+     * Add a new float column to the model.
+     *
+     * @param  string  $name
+     * @param  string  $precision
+     * @param  bool    $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function float($name, $precision = '12,2', $unsigned = false)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('float', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+
+    /**
+     * Add a new double column to the model.
+     *
+     * @param  string   $name
+     * @param  string   $precision
+     * @param  bool     $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function double($name, $precision = '20,2', $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = '20,2';
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('double', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+
+    /**
+     * Add a new decimal column to the model.
+     *
+     * @param  string  $name
+     * @param  string  $precision
+     * @param  bool    $unsigned
+     * @return modHelpersModelColumn
+     */
+    public function decimal($name, $precision = '12,2', $unsigned = false)
+    {
+        if (is_bool($precision)) {
+            $unsigned = $precision;
+            $precision = '12,2';
+        }
+        $this->columns[] = $column = new modHelpersModelColumn('decimal', $name, compact('precision', 'unsigned'));
+        return $column;
+    }
+
+    /**
+     * Add a new boolean column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function boolean($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('boolean', $name, array('precision' => 1, 'unsigned' => true));
+        return $column;
+    }
+    /**
+     * Add a new array column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function asArray($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('array', $name);
+        return $column;
+    }
+
+    public function arr($name)
+    {
+        return $this->asArray($name);
+    }
+    /**
+     * Add a new json column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function json($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('json', $name);
+        return $column;
+    }
+    /**
+     * Add a new date column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function date($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('date', $name);
+        return $column;
+    }
+
+    /**
+     * Add a new date-time column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function dateTime($name)
+    {
+        $this->columns[] = $column = new modHelpersModelColumn('timestamp', $name);
+        return $column;
+    }
+    /**
+     * Add a new time column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function time($name)
+    {
+        return $this->dateTime($name);
+    }
+    /**
+     * Add a new timestamp column to the model.
+     *
+     * @param  string  $name
+     * @return modHelpersModelColumn
+     */
+    public function timestamp($name)
+    {
+        return $this->dateTime($name);
+    }
+
+    public function aggregate($alias, $attributes)
+    {
+        $this->aggregates[$alias] = array(
+            'class' => $attributes['class'],
+            'local' => $attributes['local'],
+            'foreign' => $attributes['foreign'],
+            'cardinality' => $attributes['cardinality'],
+            'owner' => $attributes['owner'],
+        );
+        return $this;
+    }
+
+    public function composite($alias, $attributes)
+    {
+        $this->composites[$alias] = array(
+            'class' => $attributes['class'],
+            'local' => $attributes['local'],
+            'foreign' => $attributes['foreign'],
+            'cardinality' => $attributes['cardinality'],
+            'owner' => $attributes['owner'],
+        );
+        return $this;
+    }
+
+    public function output()
+    {
+        $output = $fields = $meta = $indexes = $indAliases = $aggregates = $composites = $aliases = $rules = array();
+        /** @var modHelpersModelColumn $column */
+        foreach ($this->columns as $column) {
+            $fields[$column->name] = $column->getDefault();
+            $meta[$column->name] = $column->attributes;
+            // Indexes
+            $iName = key($column->index);
+            $iAlias = $column->index[$iName]['alias'];
+            if (isset($indAliases[$iAlias])) {
+                $indexes[$indAliases[$iAlias]]['columns'] = array_merge($indexes[$indAliases[$iAlias]]['columns'],$column->index[$iName]['columns']);
+            } elseif (!empty($column->index)) {
+                $indAliases[$iAlias] = $iName;
+                $indexes[$iName] = $column->index[$iName];
+            }
+            // Aggregates and composites
+            if (!empty($column->aggregate)) $aggregates = array_merge($aggregates, $column->aggregate);
+            if (!empty($column->composite)) $composites = array_merge($composites, $column->composite);
+            // Aliases
+            if (!empty($column->alias)) $aliases = array_merge($aliases, $column->alias);
+            // Validations
+            if (!empty($column->rules)) $rules = array_merge($rules, $column->rules);
+        }
+        $output['table'] = $this->table;
+        $output['fields'] = $fields;
+        $output['fieldMeta'] = $meta;
+        if (!empty($aliases)) $output['fieldAliases'] = $aliases;
+
+        if (!empty($indexes)) $output['indexes'] = $indexes;
+        if (!empty($aggregates)) $output['aggregates'] = $aggregates;
+        if (!empty($this->aggregates)) {
+            if (is_null($output['aggregates'])) $output['aggregates'] = array();
+            $output['aggregates'] = array_merge($output['aggregates'], $this->aggregates);
+        }
+        if (!empty($composites)) $output['composites'] = $composites;
+        if (!empty($this->composites)) {
+            if (is_null($output['composites'])) $output['composites'] = array();
+            $output['composites'] = array_merge($output['composites'], $this->composites);
+        }
+        if (!empty($rules)) $output['validation']['rules'] = $rules;
+
+        return $output;
+    }
+}
+
+class modHelpersModelColumn
+{
+    public $attributes = array();
+    public $index = array();
+    public $aggregate = array();
+    public $composite = array();
+    public $alias = array();
+    public $rules = array();
+    public $name;
+    protected $_default;
+
+    public function __construct($dbtype, $name, $attributes = array())
+    {
+        $this->name = $name;
+        $types = $this->getTypes($dbtype);
+        if (isset($attributes['unsigned'])) {
+            if ($attributes['unsigned']) $attributes['attributes'] = 'unsigned';
+            unset($attributes['unsigned']);
+        }
+        $this->attributes = array_merge($types, $attributes);
+        $this->attributes['null'] = false;
+    }
+
+    protected function getTypes($dbtype)
+    {
+        if ($dbtype == 'boolean') $dbtype = 'tinyint';
+        switch ($dbtype) {
+        	case 'int': case 'tinyint': case 'smallint': case 'mediumint': case 'bigint': case 'year':
+        	    $phptype = 'integer';
+                $this->_default = 0;
+        		break;
+        	case 'char': case 'varchar': case 'tinytext': case 'text': case 'mediumtext': case 'longtext':
+        	    $phptype = 'string';
+                $this->_default = '';
+        		break;
+        	case 'date':
+        	    $phptype = 'date';
+                $this->_default = '0000-00-00';
+        		break;
+        	case 'datetime': case 'timestamp': case 'time':
+        	    $phptype = 'datetime';
+                $this->_default = '0000-00-00 00:00:00';
+        		break;
+        	case 'float': case 'decimal': case 'double':
+        	    $phptype = 'float';
+                $this->_default = 0;
+        		break;
+            case 'array':
+                $dbtype = 'text';
+                $phptype = 'array';
+                $this->_default = '';
+                break;
+            case 'json':
+                $dbtype = 'text';
+                $phptype = 'json';
+                $this->_default = '';
+                break;
+        }
+        return compact('dbtype','phptype');
+    }
+    public function phpType($type)
+    {
+        $this->attributes['phptype'] = $type;
+
+        return $this;
+    }
+    public function unsigned()
+    {
+        $this->attributes['attributes'] = 'unsigned';
+        return $this;
+    }
+    public function null($isNullable = true)
+    {
+        $this->attributes['null'] = $isNullable;
+        return $this;
+    }
+    public function setDefault($value)
+    {
+        $this->attributes['default'] = $value;
+        $this->attributes['null'] = false;
+        return $this;
+    }
+
+    public function index($alias = '')
+    {
+        $this->attributes['index'] = 'index';
+        return $this->setIndex($alias);
+    }
+    public function pk()
+    {
+        $this->attributes['index'] = 'pk';
+        return $this->setIndex('PRIMARY', true);
+    }
+    public function unique($alias = '')
+    {
+        $this->attributes['index'] = 'unique';
+        return $this->setIndex($alias, false, true);
+    }
+    public function fk($alias = '')
+    {
+        $this->attributes['index'] = 'fk';
+        return $this->setIndex($alias);
+    }
+    public function fulltext($alias = '')
+    {
+        $this->attributes['index'] = 'fulltext';
+        return $this->setIndex($alias, false, false, 'FULLTEXT');
+
+    }
+    protected function setIndex($alias='', $primary=false, $unique=false, $type='BTREE')
+    {
+        if (empty($alias)) {
+            $index = $alias = $this->name;
+        } else {
+            $index = $alias;
+        }
+        $this->index[$index] = array(
+            'alias' => $alias,
+            'primary' => $primary,
+            'unique' => $unique,
+            'type' => $type,
+            'columns' =>
+                array(
+                    $this->name =>
+                        array(
+                            'length' => '',
+                            'collation' => 'A',
+                            'null' => $this->attributes['null'],
+                        ),
+                ),
+        );
+        return $this;
+    }
+
+    public function getDefault()
+    {
+        if (isset($this->attributes['default'])) {
+            $value = $this->attributes['default'];
+        } else {
+            $value = $this->attributes['null'] === true ? NULL : $this->_default;
+        }
+        return $value;
+    }
+
+    public function alias($alias)
+    {
+        $this->alias = array($alias => $this->name);
+        return $this;
+    }
+
+    protected function addRule($name, $type, $rule, $message, $value = NULL)
+    {
+        $this->rules[$this->name][$name] = isset($value) ? compact('type','rule','message','value') :compact('type','rule','message');
+        return $this;
+    }
+
+    public function rulePregMatch($name, $rule, $message)
+    {
+        return $this->addRule($name, 'preg_match', $rule, $message);
+    }
+    public function ruleXPDO($name, $rule, $message, $value = NULL)
+    {
+        return $this->addRule($name, 'xPDOValidationRule', $rule, $message, $value);
+    }
+    public function ruleCallback($name, $rule, $message)
+    {
+        return $this->addRule($name, 'callback', $rule, $message);
+    }
+
+    public function aggregate($alias, $attributes)
+    {
+        $this->composite = array();
+        $this->aggregate[$alias] = array(
+            'class' => $attributes['class'],
+            'local' => $this->name,
+            'foreign' => $attributes['foreign'],
+            'cardinality' => $attributes['cardinality'],
+            'owner' => $attributes['owner'],
+        );
+        return $this;
+    }
+
+    public function composite($alias, $attributes)
+    {
+        $this->aggregate = array();
+        $this->composite[$alias] = array(
+            'class' => $attributes['class'],
+            'local' => $this->name,
+            'foreign' => $attributes['foreign'],
+            'cardinality' => $attributes['cardinality'],
+            'owner' => $attributes['owner'],
+        );
+        return $this;
+    }
+    /**
+     * Call aggregate and composite methods.
+     * @param  string $method
+     * @param  array $parameters
+     * @return mixed
+     */
+    public function __call($method, $parameters)
+    {
+        if (count($parameters) < 3) return $this;
+        switch ($method) {
+        	case 'aggregateManyForeign':
+        	case 'aggManyForeign':
+        	    $method = 'aggregate';
+        	    $cardinality = 'many';
+        	    $owner = 'foreign';
+        		break;
+            case 'aggregateOneForeign':
+            case 'aggOneForeign':
+            $method = 'aggregate';
+                $cardinality = 'one';
+                $owner = 'foreign';
+                break;
+            case 'aggregateManyLocal':
+            case 'aggManyLocal':
+                $method = 'aggregate';
+                $cardinality = 'many';
+                $owner = 'local';
+                break;
+            case 'aggregateOneLocal':
+            case 'aggOneLocal':
+                $method = 'aggregate';
+                $cardinality = 'one';
+                $owner = 'local';
+                break;
+            case 'compositeManyForeign':
+            case 'comManyForeign':
+                $method = 'composite';
+                $cardinality = 'many';
+                $owner = 'foreign';
+                break;
+            case 'compositeOneForeign':
+            case 'comOneForeign':
+                $method = 'composite';
+                $cardinality = 'one';
+                $owner = 'foreign';
+                break;
+            case 'compositeManyLocal':
+            case 'comManyLocal':
+                $method = 'composite';
+                $cardinality = 'many';
+                $owner = 'local';
+                break;
+            case 'compositeOneLocal':
+            case 'comOneLocal':
+                $method = 'composite';
+                $cardinality = 'one';
+                $owner = 'local';
+                break;
+        }
+        if (!isset($cardinality)) return $this;
+        $arguments = array();
+        $arguments[] = $parameters[0];
+        $arguments[] = array(
+            'class' => $parameters[1],
+            'foreign' => $parameters[2],
+            'cardinality' => $cardinality,
+            'owner' => $owner,
+        );
+
+        return call_user_func_array(array($this, $method), $arguments);
     }
 }
