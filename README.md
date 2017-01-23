@@ -55,7 +55,7 @@ Available functions:
 * memory() - returns the formatted string of the amount of memory allocated to PHP.
 * img() - prepares the HTML tag "img".
 * faker() - creates a faked data.
-* [load_model()]('./core/components/modhelpers/docs/en/load_model.md') - loads a model for a custom table.
+* [load_model()](./core/components/modhelpers/docs/en/load_model.md) - loads a model for a custom table.
 
 
 ### Examples
