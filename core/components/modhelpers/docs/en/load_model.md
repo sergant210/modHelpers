@@ -26,7 +26,7 @@ if (!class_exists('Object')) {
 }
 ```
 ####Step 3. Load the model file in a plugin.
-```
+```php
 switch ($modx->event->name) {
 	case 'OnMODXInit':
 	    include_once MODX_CORE_PATH . 'models/objects.php';
@@ -34,10 +34,9 @@ switch ($modx->event->name) {
 }
 ```
 That's all. Now you can use all xPDO methods.
-```
+```php
 $object = $modx->getObject('Object', 1);
 $Creater = $object->CreateUser->username;
-
 ```
 Created model is saved to the cache after the first use. So if you change your model you should delete the cached model file lying in the cache folder *core/cache/default/yourmodelclassname_map.php*. 
 
