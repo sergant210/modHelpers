@@ -5,7 +5,8 @@
 This function is intended for to simplify working with custom tables. It is very easy to use.
 ####Step 1. Create a table via phpMyAdmin.
 ####Step 2. Create a model file for your table.
-```
+```php
+<?php
 # core/models/objects.php
 if (!class_exists('Object')) {
     class Object extends xPDOObject{}
