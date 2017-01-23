@@ -78,12 +78,12 @@ Created model is saved to the cache after the first use. So if you change your m
 * rulePregMatch($name, $rule, $message) - sets a rule for a Regex validation (see [documentation](https://docs.modx.com/xpdo/2.x/getting-started/creating-a-model-with-xpdo/defining-a-schema/validation-rules-in-your-schema)).
 * ruleXPDO($name, $rule, $message, $value = NULL) - sets a rule for a xPDOValidationRule validation.
 * ruleCallback($name, $rule, $message) - sets a rule for a callback validation.
-* aggregate($alias, $attributes) - specified an aggregate relationship for a columns. $attributes is a associative array with keys 'class', 'foreign', 'cardinality' and 'owner'. You can use short methods - 
+* aggregate($alias, $attributes) - specified an aggregate relationship for a columns. $attributes is a associative array with keys 'class', 'foreign', 'cardinality' and 'owner'. You can use these short methods - 
 	* aggregateManyForeign/aggManyForeign($alias,$class,$foreign) - adds an aggregate relationship with the specified cardinality "many" and owner "foreign".
 	* aggregateOneForeign/aggOneForeign($alias,$class,$foreign) - adds an aggregate relationship with the specified cardinality "one" and owner "foreign".
 	* aggregateManyLocal/aggManyLocal($alias,$class,$foreign) - adds an aggregate relationship with the specified cardinality "many" and owner "local".
 	* aggregateOneLocal/aggOneLocal($alias,$class,$foreign) - adds an aggregate relationship with the specified cardinality "one" and owner "local".
-* composite($alias, $attributes) - specified a composite relationship for a columns. $attributes is a associative array with keys 'class', 'foreign', 'cardinality' and 'owner'. You can use short methods - 
+* composite($alias, $attributes) - specified a composite relationship for a columns. $attributes is a associative array with keys 'class', 'foreign', 'cardinality' and 'owner'. You can use these short methods - 
 	* compositeManyForeign/comManyForeign($alias,$class,$foreign) - adds a composite relationship with the specified cardinality "many" and owner "foreign".
 	* compositeOneForeign/comOneForeign($alias,$class,$foreign) - adds a composite relationship with the specified cardinality "one" and owner "foreign".
 	* compositeManyLocal/comManyLocal($alias,$class,$foreign) - adds a composite relationship with the specified cardinality "many" and owner "local".
