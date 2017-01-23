@@ -60,14 +60,14 @@ Available functions:
 
 ### Examples
 **Check the user exists**
-```
+```php
 if (user_exists(['email'=>'admin@mail.com']) {
     // Exists
 }
 ```
 
 **Get the data from the cache**
-```
+```php
 //Gets the data from the file *core/cache/my_data/key.cache.php*. 
 $value = cache('key', 'my_data');
 // Or 
@@ -75,7 +75,7 @@ $value = cache()->get('key', 'my_data');
 ```
 
 **Send an email**
-```
+```php
 email('pussycat@mail.ru', 'Subject','Email content');
 // To the user
 email_user('admin', $subject, $content); 
@@ -86,89 +86,89 @@ email()->to('someemail@.gmail.com')->cc('copymail@mail.com')->subject('Hello')->
 ```
 
 **Run a snippet and save the result to the cache**
-```
+```php
 $output = snippet('mySnippet', $params, 60); // store the snippet result for 60 seconds
 ```
 
 **Run a snippet from file**
-```
+```php
 $output = snippet(MODX_CORE_PATH . 'elements/snippets/mysnippet.php', $params);
 ```
 
 **Get a chunk from file**
-```
+```php
 $output = chunk(MODX_CORE_PATH . 'elements/chunks/mychunk.html', $placeholders);
 ```
 
 **Redirect**
-```
+```php
 redirect($url);
 //To the resource with the id = 5
 redirect(5);
 ```
 
 **The latest resource**
-```
+```php
 $resourceObject = resource()->last(); // Resource object
 $resourceArray = resource()->last()->toArray(); // Resource data as array
 ```
 
 **The last 10 resources**
-```
+```php
 $resObjects = resources()->last(10); 
 ```
 
 **Array of the resource pagetitles of the parent with the id = 20.**
-```
+```php
 $titles = resources()->where(['parent'=>20])->get('pagetitle'); // array('pagetitle 1', 'pagetitle 2', 'pagetitle 3')
 ```
 **Use a Closure for child resources of the category with the id = 20.**
-```
+```php
 return resources()->where(['id:IN'=>children(20)])->each(function($resource, $idx) {return "<div>{$idx}. " . $resource['pagetitle'] . "</div>";}); 
 ```
 **Set a value to the session**
-```
+```php
 session('key1.key2', 'value'); // => $_SESSION['key1']['key2'] = $value;
 ```
 **Get the value from session**
-```
+```php
 $value = session('key1.key2');  // $value = $_SESSION['key1']['key2']
 ```
 
 **Validates the email**
-```
+```php
 if (is_email($_POST['email'])) {
    // Valid
 }
 ```
 **Remove child resources of the resource with the id = 10**
-```
+```php
 resources()->where(['parent'=>10])->remove();
 ```
 **Count blocked users**
-```
+```php
 $count = users()->profile()->where(['Profile.blocked'=>1])->count();
 ```
 **Load script with the async attribute**
-```
+```php
 script('/path/to/script.js', 'async'); // <script async type="text/javascript" src="/path/to/script.js"></script>
 ```
 **Get an array of users**
-```
+```php
 // Can use the prepared query
 $userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->execute(( (int) $_POST['user_id']);
 ```
 **Log error to the error log**
-```
+```php
 log_error($array); // The array wil be converted to a string using print_r().
 log_error($message, 'HTML'); // Show message on the page.
 ```
 **Get the list of the pagetitles**
-```
+```php
 return resources()->where(['id:IN'=>children(5)])->each(function($resource, $idx){ return "<li>{$idx}. ".$resource['pagetitle']."</li>";});
 ```
 **Get users which are members of the "Manager" group**
-```
+```php
 $usersArray = users()->members('Managers')->toArray();
 // Get all users from "ContentManagers" and "SaleManagers" groups 
 $users = users()->members('%Managers')->get();
@@ -177,11 +177,11 @@ foreach($users as $user) {
 }
 ```
 **Add the first ten users to the "Manager" group**
-```
+```php
 users()->whereIn('id',range(1,10))->joinGroup('Manager');
 ```
 **Make a list of faked news (using a snippet)**
-```
+```php
 return collection(10)->each(function($item, $idx, $modx){return "<div>" . faker()->date() . img(faker()->imageUrl(500,300),['class'=>'img-news']) . '<br>' . faker()->text(700) . '</div>';});
 ```
   
