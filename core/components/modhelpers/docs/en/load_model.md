@@ -1,5 +1,5 @@
 ##load_model()
-------------
+
 ```load_model($class, $tableName, $callable)```    
 
 This function is intended for to simplify working with custom tables. It is very easy to use.
