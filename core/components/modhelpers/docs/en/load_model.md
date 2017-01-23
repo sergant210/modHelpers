@@ -4,20 +4,23 @@
 
 This function is intended for to simplify working with custom tables. It is very easy to use.
 ####Step 1. Create a table via phpMyAdmin.
+For example, lets create table for some objects and call it 'modx_objects'. 
+
 ####Step 2. Create a model file for your table.
 ```php
 <?php
 # core/models/objects.php
+// Our model will bee called 'Object'
 if (!class_exists('Object')) {
     class Object extends xPDOObject{}
-    class Object extends Tag{}
+    class Object_mysql extends Object{}
 
     load_model('Object', 'objects', function ($model) {
         $model->id('id')->pk(); // unsigned integer type with the primary index.
-        $model->varchar('name', 100)->setDefault('string')->rulePregMatch('invalid','/^[a-zA-Z\s]+$/','You can't use digits in the name!);
-        $modx->text('description')->null()->alias('desc');
+        $model->varchar('name', 100)->setDefault('string')->rulePregMatch('invalid','/^[a-zA-Z\s]+$/','You can not use digits in the name!');
+        $model->text('description')->null()->alias('desc');
         $model->arr('properties')->null(); // array phptype
-        $model->int('rid',true)->aggregate('Resource',['class'=>'modResource','foreign'=>'id','cardinality'=>'one', 'owner'=>'foreign'])->index();
+        $model->int('rid',true)->aggregate('Resource',array('class'=>'modResource','foreign'=>'id','cardinality'=>'one', 'owner'=>'foreign'))->index();
         $model->int('createdby')->unsigned()->aggOneForeign('CreateUser','modUser','id')->index(); 
         $model->int('createdby', true)->aggOneForeign('EditUser','modUser','id')->index(); 
         $model->datetime('createdon'); // if the type of the table field is datetime or timestamp.
