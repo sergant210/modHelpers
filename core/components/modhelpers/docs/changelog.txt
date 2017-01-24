@@ -10,6 +10,7 @@
 - Added method "whereIsNull" to the collection class for users and resources.
 - Added method "whereIsNotNull" to the collection class for users and resources.
 - Added class modHelperMailer which allows to use chains of methods.
+- Removed the functions "pdotools" and "pdofetch".
 
 1.1.0-beta
 ==============

@@ -2,9 +2,9 @@
 
 ```load_model($class, $tableName, $callable)```    
 
-This function is intended for to simplify working with custom tables. It is very easy to use.
+This function is intended to simplify working with custom tables. It is very easy to use.
 ####Step 1. Create a table via phpMyAdmin.
-For example, lets create table for some objects and call it 'modx_objects'. 
+For example, lets create a table for some objects and call it 'modx_objects'. 
 
 ####Step 2. Create a model file for your table.
 ```php
@@ -28,6 +28,12 @@ if (!class_exists('Object')) {
     });
 }
 ```
+By the way, you can enhance any existing model. For example, the model of the resource
+```php
+load_model('modResource', function ($model) {
+    $model->text('tags'); // add "tags" field for the resource model
+}
+```
 ####Step 3. Load the model file in a plugin.
 ```php
 switch ($modx->event->name) {
@@ -36,15 +42,23 @@ switch ($modx->event->name) {
 		break;
 }
 ```
-That's all. Now you can use all xPDO methods.
+That's all. Now you can use any xPDO methods.
 ```php
-$object = $modx->getObject('Object', 1);
+$object = $modx->getObject('Object', 1); // or object('Object',1).
 $Creater = $object->CreateUser->username;
+// Validation
+$obj->set('name', 'Super 777'); // Digits are not allowes -> validation error
+if (!$obj->validate()) {
+    $validator = $obj->getValidator();
+    log_error('[Validator] ' . $validator->getMessages()[0]['message']);
+} else {
+	$obj->save();
+}
 ```
 Created model is saved to the cache after the first use. So if you change your model you should delete the cached model file lying in the cache folder *core/cache/default/yourmodelclassname_map.php*. 
 
-### Model methods
-* char($name, $presision=255) - adds a char column to the model.
+### Model class methods
+* char($name, $presision=255) - adds a char column to the model. 
 * varchar($name, $presision=255) - adds a varchar column to the model.
 * text($name) - adds a text column to the model.
 * mediumText($name) - adds a mediumText column to the model.
@@ -67,8 +81,9 @@ Created model is saved to the cache after the first use. So if you change your m
 * time($name) - adds a new time column to the model.
 * aggregate($alias, $attributes) - adds an aggregate relationship. $attributes is an array with keys 'class', 'local', 'foreign', 'cardinality' and 'owner'.
 * composite($alias, $attributes) - adds an composite relationship. $attributes is an array with keys 'class', 'local', 'foreign', 'cardinality' and 'owner'.
+All these methods return a model's column object.
 
-### Column methods
+### Column class methods
 * phpType($type) - sets a phptype of the column. Needed for some cases. For example, if you store the date in the UNIX timestamp - the dbtype is integer, but the phptype is datetime or timestamp. 
 * null() - column can be nullable.
 * setDefault($value) - sets the default value for a column.

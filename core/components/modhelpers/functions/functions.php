@@ -294,7 +294,7 @@ if (!function_exists('email')) {
         $mail->set(modMail::MAIL_FROM_NAME, $options['fromName']);
         if (!empty($options['cc'])) $mail->address('cc', $options['cc']);
         if (!empty($options['bcc'])) $mail->address('bcc', $options['bcc']);
-        if (!empty($options['reply-to'])) $mail->address('reply-to', $options['reply-to']);
+        if (!empty($options['replyTo'])) $mail->address('reply-to', $options['replyTo']);
         if (!empty($options['attach'])) {
             if (is_array($options['attach'])) {
                 foreach ($options['attach'] as $name => $file) {
@@ -1089,25 +1089,39 @@ if (!function_exists('load_model')) {
     /**
      * Load a model for a custom table.
      * @param string $class Class name.
-     * @param string $table Table name without the prefix.
-     * @param callable $callback
+     * @param string|callable $table Table name without the prefix or Closure.
+     * @param callable $callback Closure
      * @return bool
      */
-    function load_model($class, $table, $callback)
+    function load_model($class, $table, $callback = NULL)
     {
         global $modx;
+        if (func_num_args() == 2 && is_callable($table)) {
+            $callback = $table;
+            $table = '';
+        }
         $key = strtolower($class) . '_map';
-        if ($map = cache($key)) {
-            $modx->map[$class] = $map;
+        if (config('modHelpers_cache_model', true) && $map = cache($key)) {
+            if (!empty($table)) {
+                $modx->map[$class] = $map;
+            } else {
+                $modx->map[$class] = array_merge_recursive($modx->map[$class], $map);
+            }
             return true;
         }
         $model = new modHelperModelBuilder($table);
-        if (is_callable($callback)) $callback($model);
-        $map = $model->output();
-        if (!empty($map)) {
-            $modx->map[$class] = $map;
-            cache()->set($key,$map);
-            return true;
+        if (is_callable($callback)) {
+            $callback($model);
+            $map = $model->output();
+            if (!empty($map)) {
+                if (!empty($table)) {
+                    $modx->map[$class] = $map;
+                } else {
+                    $modx->map[$class] = array_merge_recursive($modx->map[$class], $map);
+                }
+                if (config('modHelpers_cache_model', true)) cache()->set($key,$map);
+                return true;
+            }
         }
         return false;
     }

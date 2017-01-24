@@ -479,14 +479,16 @@ class CollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
-    public function whereIn($field, array $array, $conjunction = xPDOQuery::SQL_AND)
+    public function whereIn($field, $array, $conjunction = xPDOQuery::SQL_AND)
     {
+        if (!is_array($array)) $array = array($array);
         $criteria = array($field.':IN' => $array);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
-    public function whereNotIn($field, array $array, $conjunction = xPDOQuery::SQL_AND)
+    public function whereNotIn($field, $array, $conjunction = xPDOQuery::SQL_AND)
     {
+        if (!is_array($array)) $array = array($array);
         $criteria = array($field.':NOT IN' => $array);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -1260,7 +1262,7 @@ class modHelperModelBuilder
             // Validations
             if (!empty($column->rules)) $rules = array_merge($rules, $column->rules);
         }
-        $output['table'] = $this->table;
+        if (!empty($this->table)) $output['table'] = $this->table;
         $output['fields'] = $fields;
         $output['fieldMeta'] = $meta;
         if (!empty($aliases)) $output['fieldAliases'] = $aliases;
