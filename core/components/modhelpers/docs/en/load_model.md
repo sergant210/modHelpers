@@ -65,20 +65,20 @@ Created model is saved to the cache after the first use. So if you change your m
 * longText($name) - adds alongText column to the model.
 * id($name, $length=10) - adds an unsigned integer column to the model.
 * int($name, $length=10, $unsigned=false) - adds an integer column to the model. The third argument can be pass instead of the second one. Magic. 
-* tinyInt($name, $length=3, $unsigned=false) - adds an timyint column to the model. The third argument can be pass instead of the second one. Magic. 
-* smallInt($name, $length=5, $unsigned=false) - adds an smallint column to the model. The third argument can be pass instead of the second one. Magic. 
-* mediumInt($name, $length=8, $unsigned=false) - adds an mediumint column to the model. The third argument can be pass instead of the second one. Magic. 
-* bigInt($name, $length=20, $unsigned=false) - adds an bigint column to the model. The third argument can be pass instead of the second one. Magic. 
-* float($name, $precision='12,2', $unsigned=false) - adds an float column to the model. The third argument can be pass instead of the second one. Magic. 
-* decimal($name, $precision='12,2', $unsigned=false) - adds an float column to the model. The third argument can be pass instead of the second one. Magic. 
-* double($name, $precision='20,2', $unsigned=false) - adds an float column to the model. The third argument can be pass instead of the second one. Magic. 
-* bool($name) - adds a new boolean column to the model. 
-* arr/asArray($name) - adds a new array column to the model.
-* json($name) - adds a new json column to the model.
-* date($name) - adds a new date column to the model.
-* datetime($name) - adds a new datetime column to the model.
-* timestamp($name) - adds a new datetime column to the model.
-* time($name) - adds a new time column to the model.
+* tinyInt($name, $length=3, $unsigned=false) - adds a timyint column to the model. The third argument can be pass instead of the second one. Magic. 
+* smallInt($name, $length=5, $unsigned=false) - adds a smallint column to the model. The third argument can be pass instead of the second one. Magic. 
+* mediumInt($name, $length=8, $unsigned=false) - adds a mediumint column to the model. The third argument can be pass instead of the second one. Magic. 
+* bigInt($name, $length=20, $unsigned=false) - adds a bigint column to the model. The third argument can be pass instead of the second one. Magic. 
+* float($name, $precision='12,2', $unsigned=false) - adds a float column to the model. The third argument can be pass instead of the second one. Magic. 
+* decimal($name, $precision='12,2', $unsigned=false) - adds a float column to the model. The third argument can be pass instead of the second one. Magic. 
+* double($name, $precision='20,2', $unsigned=false) - adds a float column to the model. The third argument can be pass instead of the second one. Magic. 
+* bool($name) - adds a boolean column to the model. 
+* arr/asArray($name) - adds an array column to the model.
+* json($name) - adds an json column to the model.
+* date($name) - adds a date column to the model.
+* datetime($name) - adds a datetime column to the model.
+* timestamp($name) - adds a datetime column to the model.
+* time($name) - adds a time column to the model.
 * aggregate($alias, $attributes) - adds an aggregate relationship. $attributes is an array with keys 'class', 'local', 'foreign', 'cardinality' and 'owner'.
 * composite($alias, $attributes) - adds an composite relationship. $attributes is an array with keys 'class', 'local', 'foreign', 'cardinality' and 'owner'.
 All these methods return a model's column object.
@@ -87,7 +87,7 @@ All these methods return a model's column object.
 * phpType($type) - sets a phptype of the column. Needed for some cases. For example, if you store the date in the UNIX timestamp - the dbtype is integer, but the phptype is datetime or timestamp. 
 * null() - column can be nullable.
 * setDefault($value) - sets the default value for a column.
-* index($alias) - sets an index for a column. If you specify the same alias for multiple columns, the group index will be created.
+* index($alias=''') - sets an index for a column. If you specify the same alias for multiple columns, the group index will be created.
 * pk() - sets the primary index for column or columns.
 * fk($alias='') - works like the "index" method.
 * unique($alias='') - sets the unique index.
