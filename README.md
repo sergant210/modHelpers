@@ -3,12 +3,12 @@ Library of the helpfull functions for MODX.
 
 Available functions:
 
-* url() - make an url.
+* url() - make an url. Alias of the ```$modx->makeUrl()```.
 * redirect() - redirect to the url or site page if the id is passed.
 * forward() - forwards the request to another resource without changing the URL.
-* abort() - redirect to the error page.
-* config() - manage the config settings.
-* session() - manage the session using dot notation.
+* [abort()](./core/components/modhelpers/docs/en/abort.md) - redirect to the error page.
+* [config()](./core/components/modhelpers/docs/en/config.md) - manage the config settings.
+* [session()](./core/components/modhelpers/docs/en/session.md) - manage the session using dot notation.
 * cache() - manage the cache.
 * parents() - gets all of the parent resource ids for a given resource. 
 * children() - gets all of the child resource ids for a given resource.

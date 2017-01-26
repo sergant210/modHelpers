@@ -1,6 +1,9 @@
 ##load_model()
 
 ```load_model($class, $tableName, $callable)```    
+- $class - name of the new or the existing class.
+- $tableName - table name without the table prefix.
+- $callable - the closure. For existing models can be call as second argument. 
 
 This function is intended to simplify working with custom tables. It is very easy to use.
 ####Step 1. Create a table via phpMyAdmin.
@@ -9,7 +12,7 @@ For example, lets create a table for some objects and call it 'modx_objects'.
 ####Step 2. Create a model file for your table.
 ```php
 <?php # core/models/objects.php
-// Our model will bee called 'Object'
+// Our model will be called 'Object'
 if (!class_exists('Object')) {
     class Object extends xPDOObject{}
     class Object_mysql extends Object{}

@@ -511,7 +511,7 @@ if (!function_exists('object')) {
         if (isset($criteria)) {
             if (is_numeric($criteria)) {
                 $pk = $modx->getPK($class);
-                $where = array($pk => $criteria);
+                $where = array($pk => (int) $criteria);
             } elseif (is_array($criteria)) {
                 $where = $criteria;
             }
@@ -549,6 +549,9 @@ if (!function_exists('resource')) {
     function resource($criteria = null, $asObject = true)
     {
         /** @var ObjectManager $resourceManager */
+        if (is_numeric($criteria)) {
+            $criteria = array('id' => (int) $criteria);
+        }
         $resourceManager = object('modResource', $criteria);
         if (!isset($criteria)) return $resourceManager;
 
@@ -601,13 +604,18 @@ if (!function_exists('resources')) {
 if (!function_exists('user')) {
     /**
      * Gets a user object.
-     * @param int|array $criteria User id or array with criteria.
+     * @param int|string|array $criteria User id, username or array.
      * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modUser
      */
     function user($criteria = null, $asObject = true)
     {
         /** @var ObjectManager $userManager */
+        if (is_numeric($criteria)) {
+            $criteria = array('id' => (int) $criteria);
+        } elseif (is_string($criteria)) {
+            $criteria = array('username' => $criteria);
+        }
         $userManager = object('modUser', $criteria);
 
         return (isset($criteria) && $asObject) ? $userManager->get() : $userManager->toArray();
@@ -661,7 +669,6 @@ if (!function_exists('is_auth')) {
     function is_auth($ctx = '')
     {
         global $modx;
-
         if (empty($ctx)) $ctx = $modx->context->get('key');
         return ($modx->user->id > 0) ? $modx->user->isAuthenticated($ctx) : false;
     }
@@ -1124,5 +1131,50 @@ if (!function_exists('load_model')) {
             }
         }
         return false;
+    }
+}
+if (!function_exists('login')) {
+    /**
+     * Logs in the specified user.
+     * @param int|modUser $user
+     * @return bool
+     */
+    function login($user)
+    {
+        global $modx;
+        if (is_numeric($user)) $user = user($user);
+        if ($user instanceof modUser) {
+            $modx->user = $user;
+            $modx->user->addSessionContext($modx->context->key);
+            return true;
+        }
+        return false;
+    }
+}
+if (!function_exists('logout')) {
+    /**
+     * Logs out the current user.
+     * @param bool $redirect True to redirect to the unauthorized page.
+     * @return bool
+     */
+    function logout($redirect = true)
+    {
+        global $modx;
+        $response = $modx->runProcessor('security/logout');
+        if ($response->isError()) {
+            $modx->log(modX::LOG_LEVEL_ERROR, 'Logout error of the user: '.$modx->user->get('username').' ('.$modx->user->get('id').').');
+            return false;
+        }
+        $modx->user = $modx->getAuthenticatedUser('mgr');
+        if (!is_object($modx->user) || !$modx->user instanceof modUser) {
+            if ($redirect) abort(401);
+            $modx->user = $modx->newObject('modUser');
+            $modx->user->fromArray(array(
+                'id' => 0,
+                'username' => $modx->getOption('default_username', '', '(anonymous)', true)
+            ), '', true);
+            $modx->toPlaceholders($modx->user->get(array('id','username')),'modx.user');
+        }
+        return true;
     }
 }

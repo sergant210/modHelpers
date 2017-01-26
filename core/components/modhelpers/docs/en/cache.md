@@ -1,0 +1,70 @@
+##cache()
+
+```cache($key, $options)```
+- $key - a unique key identifying the item being set.
+- $options - an array of options OR lifetime in seconds OR a partition.
+
+The $options array can contain the following options indicating the cache partition to write to, the cache handler to use and the default expiry time.
+- xPDO::OPT_CACHE_KEY: the cache partition to write to.
+- xPDO::OPT_CACHE_HANDLER: the cache handler to use. Typically you shouldn’t hardcode this and instead let the specific implementation handle the cache handler via system settings (ie cache_PARTITION_handler system setting).
+- xPDO::OPT_CACHE_EXPIRES: the default expiry time. 
+
+See [documentation](https://docs.modx.com/revolution/2.x/developing-in-modx/advanced-development/caching).
+###Store to the cache
+```php
+# To set data to the core/cache/default/key.cache.php
+cache(['key' => $some_data]);
+# To set data to the core/cache/my_data/key.cache.php
+$options = array(
+    xPDO::OPT_CACHE_KEY = 'my_data'
+)
+cache(['key' => $some_data], $options);
+// is equivalent to
+cache(['key' => $some_data], 'my_data');
+# Store data for 60 seconds
+cache(['key' => $some_data], 60);
+```
+###Getting from the cache
+```php
+# The simplest way. To get the cached data from core/cache/default/key.cache.php
+$value = cache('key');
+
+// From core/cache/my_data/key.cache.php
+$options = array(
+    xPDO::OPT_CACHE_KEY = 'my_data' 
+)
+$value = cache('key', $options);
+// is equivalent to
+$value = cache('key', 'my_data');
+```
+###Use the modHelper's CacheManager
+####Store to the cache
+```php
+cache()->set('key', $some_data); 
+$options = array(
+    xPDO::OPT_CACHE_KEY = 'my_data'
+)
+cache($options)->set('key', $some_data, 0, $options);
+// is equivalent to
+cache($options)->set('key', $some_data, $options);
+// is equivalent to
+cache($options)->set('key', $some_data, 'my_data');
+# Set the lifetime
+cache($options)->set('key', $some_data, 7200, 'my_data');
+```
+####Getting from the cache
+```
+$options = array(
+    xPDO::OPT_CACHE_KEY = 'my_data'
+)
+$value = cache()->get('key', $options);
+// is equivalent to
+$value = cache()->get('key', 'my_data');
+```
+####Delete from the cache
+```php
+// Cache file core/cache/default/key.cache.php
+cache()->delete('key');
+// Cache file core/cache/my_data/key.cache.php
+cache()->delete('key', 'my_data');
+```
