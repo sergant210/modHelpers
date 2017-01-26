@@ -9,7 +9,7 @@ Available functions:
 * [abort()](./core/components/modhelpers/docs/en/abort.md) - redirect to the error page.
 * [config()](./core/components/modhelpers/docs/en/config.md) - manage the config settings.
 * [session()](./core/components/modhelpers/docs/en/session.md) - manage the session using dot notation.
-* cache() - manage the cache.
+* [cache()](./core/components/modhelpers/docs/en/cache.md) - manage the MODX cache.
 * parents() - gets all of the parent resource ids for a given resource. 
 * children() - gets all of the child resource ids for a given resource.
 * pls() - to work with placeholders.
