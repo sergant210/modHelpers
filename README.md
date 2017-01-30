@@ -24,7 +24,7 @@ Available functions:
 * escape() - escapes the provided string using the platform-specific escape character.
 * css() - register CSS to be injected inside the HEAD tag of a resource.
 * [script()](./core/components/modhelpers/docs/en/script.md) - register JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
-* html() - register HTML to be injected inside the HEAD tag or before the closing BODY tag.
+* [html()](./core/components/modhelpers/docs/en/html.md) - register HTML to be injected inside the HEAD tag or before the closing BODY tag.
 * chunk() - gets the specified chunk or file. 
 * snippet() - runs the specified snippet from DB or file. The result can be cached.
 * processor() - runs the specified processor.
