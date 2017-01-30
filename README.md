@@ -3,18 +3,18 @@ Library of the helpfull functions for MODX.
 
 Available functions:
 
-* url() - make an url. Alias of the ```$modx->makeUrl()```.
-* redirect() - redirect to the url or site page if the id is passed.
-* forward() - forwards the request to another resource without changing the URL.
-* [abort()](./core/components/modhelpers/docs/en/abort.md) - redirect to the error page.
+* url() - make an url. Alias of the method ```$modx->makeUrl()```.
+* redirect() - redirect to the url or site page if the id is passed. The short call of ```$modx->redirect```.
+* forward() - forwards the request to another resource without changing the URL. The short call of ```$modx->forward```.
+* [abort()](./core/components/modhelpers/docs/en/abort.md) - redirect to the error or the unauthenticated page.
 * [config()](./core/components/modhelpers/docs/en/config.md) - manage the config settings.
 * [session()](./core/components/modhelpers/docs/en/session.md) - manage the session using dot notation.
 * [cache()](./core/components/modhelpers/docs/en/cache.md) - manage the MODX cache.
-* parents() - gets all of the parent resource ids for a given resource. 
-* children() - gets all of the child resource ids for a given resource.
+* parents() - gets all of the parent resource ids for a given resource. The short call of ```$modx->getParentIds```.
+* children() - gets all of the child resource ids for a given resource. The short call of ```$modx->getChildIds```.
 * pls() - to work with placeholders.
 * pls_delete() - removes the specified placeholders.
-* lang() - to work with lexicon records.
+* lang() - to work with lexicon records. Can be used instead of ```$modx->lexicon()```.
 * table_name() - gets the table name of the specified class.
 * columns() - gets select columns from a specific class for building a query.
 * email() - send email.
@@ -23,12 +23,12 @@ Available functions:
 * quote() - quote the string.
 * escape() - escapes the provided string using the platform-specific escape character.
 * css() - register CSS to be injected inside the HEAD tag of a resource.
-* script() - register JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
+* [script()](./core/components/modhelpers/docs/en/script.md) - register JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
 * html() - register HTML to be injected inside the HEAD tag or before the closing BODY tag.
-* chunk() - gets the specified chunk. 
-* snippet() - runs the specified snippet.
+* chunk() - gets the specified chunk or file. 
+* snippet() - runs the specified snippet from DB or file. The result can be cached.
 * processor() - runs the specified processor.
-* is_auth() - determines if this user is authenticated in a specific context.
+* is_auth() - determines if the user is authenticated in a specific context.
 * is_guest() - determines if the user is a guest.
 * can() - returns true if user has the specified policy permission.
 * resource_id() - gets the id of the current resource. 
@@ -80,9 +80,9 @@ email('pussycat@mail.ru', 'Subject','Email content');
 // To the user
 email_user('admin', $subject, $content); 
 // or use the user id
-email_user(5, $subject, $content);
+email_user(5, $subject, chunk($tplEmail));
 // or like that
-email()->to('someemail@.gmail.com')->cc('copymail@mail.com')->subject('Hello')->content('Content')->attach('path/to/file.jpg')->send();
+email()->to('some.email@gmail.com')->cc('copymail@mail.com')->subject('Hello')->content('Content')->attach('path/to/file.jpg')->send();
 ```
 
 **Run a snippet and save the result to the cache**

@@ -2,11 +2,11 @@
 
 ```config($key, $default)```
 
-- $key - a system settings key to get or an associative array to set.
+- $key (string|array) - a system settings key to get or an associative array to set.
 - $default - a default value if the setting doesn't exist.
 ```php
-// To get the setting "site_name"
+// To get a setting
 $siteName = config('site_name', 'Default value');
-// To set 
+// To set a setting
 config(['site_name'=>'My new site name']);
 ```

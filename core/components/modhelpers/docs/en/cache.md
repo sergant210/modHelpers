@@ -38,7 +38,11 @@ $value = cache('key', $options);
 $value = cache('key', 'my_data');
 ```
 ###Use the modHelper's CacheManager
+The function "cache" returns the object of the special CacheManager class if no arguments are passed. 
 ####Store to the cache
+```set($key, $value, $lifetime = 0, $options = array())```  
+
+Examples.
 ```php
 cache()->set('key', $some_data); 
 $options = array(
@@ -53,6 +57,9 @@ cache($options)->set('key', $some_data, 'my_data');
 cache($options)->set('key', $some_data, 7200, 'my_data');
 ```
 ####Getting from the cache
+```get($key, $options = array())```  
+
+Examples.
 ```
 $options = array(
     xPDO::OPT_CACHE_KEY = 'my_data'
@@ -62,6 +69,7 @@ $value = cache()->get('key', $options);
 $value = cache()->get('key', 'my_data');
 ```
 ####Delete from the cache
+```delete($key, $options = array())```  
 ```php
 // Cache file core/cache/default/key.cache.php
 cache()->delete('key');
