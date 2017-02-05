@@ -1,4 +1,5 @@
 ##load_model()
+Loads a model for a custom table.
 
 ```load_model($class, $tableName, $callable)```    
 - $class - name of the new or the existing class.

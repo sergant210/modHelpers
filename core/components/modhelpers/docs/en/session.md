@@ -1,4 +1,5 @@
 ##session()
+Manages the session using dot notation.
 
 ```session($key, $default)```
 - $key - a key. Can be specified using the dot notation.

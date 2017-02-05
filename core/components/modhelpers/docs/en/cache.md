@@ -1,4 +1,5 @@
 ##cache()
+Manages the MODX cache.
 
 ```cache($key, $options)```
 - $key - a unique key identifying the item being set.

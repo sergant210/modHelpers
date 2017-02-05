@@ -89,7 +89,7 @@ class LogManager
         }
         if (is_array($message) || is_object($message)) $message = print_r($message, 1);
         if (self::$modx->getLogTarget() == 'HTML' || $target == 'HTML') {
-            $message = '<style>.modx-debug-block{ background-color:#002357;color:#fcffc4;margin:0;padding:5px} .modx-debug-block h5,.modx-debug-block pre { margin:0}</style><div>' . $message . '</div>';
+            $message = '<style>.modx-debug-block{ background-color:#002357;color:#fcffc4;margin:0;padding:5px } .modx-debug-block h5,.modx-debug-block pre { margin:0 }</style><div>' . $message . '</div>';
         }
         if ($changeLevel) {
             $oldLevel = self::$modx->setLogLevel($level);
@@ -737,6 +737,10 @@ class QueryManager
 
     }
 
+    /**
+     * @param array|mixed $bindings
+     * @return QueryManager $this
+     */
     public function bind($bindings)
     {
         if (!empty($bindings)) {
@@ -749,12 +753,21 @@ class QueryManager
         return $this;
     }
 
+    public function toString($bindings = NULL)
+    {
+        if (func_num_args()) {
+            if (!is_array($bindings)) {
+                $bindings = func_get_args();
+            }
+        }
+        $result = $this->execute($bindings);
+        return is_array($result) ? print_r($result,1) : $result;
+    }
     /**
-     * @param string $bindings
-     * @param bool $toString
+     * @param array|mixed $bindings
      * @return array|bool
      */
-    public function execute($bindings = '', $toString = false)
+    public function execute($bindings = NULL)
     {
         if (!empty($bindings)) {
             if (!is_array($bindings)) {
@@ -762,20 +775,23 @@ class QueryManager
             } else {
                 $this->bindings = $bindings;
             }
-            $this->bind($bindings);
         }
         $tstart = microtime(true);
         $stmt = $this->modx->prepare($this->query);
         if ($stmt->execute($this->bindings)) {
             $this->modx->queryTime += microtime(true) - $tstart;
             $this->modx->executedQueries++;
-            $result = $stmt->fetchAll();
-            return $toString ? print_r($result,1) : $result;
+            $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            return $result;
         }
         return false;
     }
 
-    public function count($bindings = '')
+    /**
+     * @param array|mixed $bindings
+     * @return bool|int
+     */
+    public function count($bindings = NULL)
     {
         if (!empty($bindings)) {
             if (!is_array($bindings)) {
@@ -783,7 +799,6 @@ class QueryManager
             } else {
                 $this->bindings = $bindings;
             }
-            $this->bind($bindings);
         }
         $tstart = microtime(true);
         $stmt = $this->modx->prepare($this->query);

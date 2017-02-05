@@ -456,7 +456,7 @@ if (!function_exists('snippet')) {
      * @param int|string|array $cacheOptions
      * @return string
      */
-    function snippet($snippetName, array $scriptProperties= array (), $cacheOptions = array())
+    function snippet($snippetName, array $scriptProperties = array (), $cacheOptions = array())
     {
         $result = cache($snippetName);
         if (isset($result)) {
@@ -729,13 +729,13 @@ if (!function_exists('object_exists')) {
     /**
      * Checks the object existence
      * @param string $className
-     * @param array $criteria
+     * @param int|string|array $criteria
      * @return bool
      */
     function object_exists($className, $criteria = null)
     {
         global $modx;
-        if (is_numeric($criteria)) {
+        if (is_scalar($criteria)) {
             $pk = $modx->getPK($className);
             $criteria = array($pk => $criteria);
         }
@@ -811,6 +811,16 @@ if (!function_exists('user_id')) {
     {
         global $modx;
         return isset($modx->user) ? $modx->user->id : false;
+    }
+}
+if (!function_exists('res_id')) {
+    /**
+     * Gets id of the current resource.
+     * @return int
+     */
+    function res_id()
+    {
+        return resource_id();
     }
 }
 if (!function_exists('resource_id')) {
@@ -934,10 +944,11 @@ if (!function_exists('log_error')) {
      *
      * @param string $message
      * @param bool $changeLevel Change log level
+     * @param string $target
      */
-    function log_error($message, $changeLevel = false)
+    function log_error($message, $changeLevel = false, $target = '')
     {
-        LogManager::error($message, $changeLevel);
+        LogManager::error($message, $changeLevel, $target);
     }
 }
 if (!function_exists('log_warn')) {
@@ -946,10 +957,11 @@ if (!function_exists('log_warn')) {
      *
      * @param string $message
      * @param bool $changeLevel Change log level
+     * @param string $target
      */
-    function log_warn($message, $changeLevel = false)
+    function log_warn($message, $changeLevel = false, $target = '')
     {
-        LogManager::warn($message, $changeLevel);
+        LogManager::warn($message, $changeLevel, $target);
     }
 }
 if (!function_exists('log_info')) {
@@ -958,10 +970,11 @@ if (!function_exists('log_info')) {
      *
      * @param string $message
      * @param bool $changeLevel Change log level
+     * @param string $target
      */
-    function log_info($message, $changeLevel = false)
+    function log_info($message, $changeLevel = false, $target = '')
     {
-        LogManager::info($message, $changeLevel);
+        LogManager::info($message, $changeLevel, $target);
     }
 }
 if (!function_exists('log_debug')) {
@@ -970,10 +983,11 @@ if (!function_exists('log_debug')) {
      *
      * @param string $message
      * @param bool $changeLevel Change log level
+     * @param string $target
      */
-    function log_debug($message, $changeLevel = false)
+    function log_debug($message, $changeLevel = false, $target = '')
     {
-        LogManager::debug($message, $changeLevel);
+        LogManager::debug($message, $changeLevel, $target);
     }
 }
 if (!function_exists('context')) {
@@ -1024,18 +1038,18 @@ if (!function_exists('memory')) {
     }
 }
 if (!function_exists('faker')) {
-    $faker = false;
+    $Faker = false;
     /**
      * Makes fake data
      * @see https://github.com/fzaninotto/Faker
+     * @param string|array $property
      * @param string $locale
-     * @param string $property
      * @return mixed
      */
     function faker($property = '', $locale = '')
     {
-        global $faker;
-        if (!$faker) {
+        global $Faker;
+        if (!$Faker) {
             if (empty($locale)) {
                 $lang = config('cultureKey');
                 switch ($lang) {
@@ -1053,17 +1067,17 @@ if (!function_exists('faker')) {
                 }
             }
 
-            $faker = \Faker\Factory::create($locale);
+            $Faker = \Faker\Factory::create($locale);
         }
-        if (func_num_args() == 0) return $faker;
+        if (func_num_args() == 0) return $Faker;
 
         try {
             if (is_array($property)) {
                 $func = key($property);
                 $params = current($property);
-                $output = call_user_func_array(array($faker, $func), $params);
+                $output = call_user_func_array(array($Faker, $func), $params);
             } else {
-                $output = $faker->$property;
+                $output = $Faker->$property;
             }
         } catch (Exception $e) {
             log_error($e->getMessage());
@@ -1155,9 +1169,10 @@ if (!function_exists('logout')) {
     /**
      * Logs out the current user.
      * @param bool $redirect True to redirect to the unauthorized page.
+     * @param int $code Response code
      * @return bool
      */
-    function logout($redirect = true)
+    function logout($redirect = false, $code = 401)
     {
         global $modx;
         $response = $modx->runProcessor('security/logout');
@@ -1167,7 +1182,7 @@ if (!function_exists('logout')) {
         }
         $modx->user = $modx->getAuthenticatedUser('mgr');
         if (!is_object($modx->user) || !$modx->user instanceof modUser) {
-            if ($redirect) abort(401);
+            if ($redirect) abort($code);
             $modx->user = $modx->newObject('modUser');
             $modx->user->fromArray(array(
                 'id' => 0,
@@ -1176,5 +1191,15 @@ if (!function_exists('logout')) {
             $modx->toPlaceholders($modx->user->get(array('id','username')),'modx.user');
         }
         return true;
+    }
+}
+if (!function_exists('is_ajax')) {
+    /**
+     * Checks request is ajax or not.
+     * @return bool
+     */
+    function is_ajax()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
 }
