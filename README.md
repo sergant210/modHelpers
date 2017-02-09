@@ -36,7 +36,7 @@ Available functions:
 * user_id() - gets the id of the current user. Returns the value of $modx->user->id.
 * tv() - gets the specified TV of the current resource. 
 * object() - to work with objects of MODX.
-* collection() - to work with collections.
+* [collection()](https://modzone.ru/documentation/modhelpers/collection-manager.html) - to work with collections.
 * resource() - works with a resource object.
 * resources() - works with a resource collection.
 * user() - works with a user object.

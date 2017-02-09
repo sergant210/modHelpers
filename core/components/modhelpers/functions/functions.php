@@ -1156,7 +1156,7 @@ if (!function_exists('login')) {
     function login($user)
     {
         global $modx;
-        if (is_numeric($user)) $user = user($user);
+        if (is_scalar($user) || is_array($user)) $user = user($user);
         if ($user instanceof modUser) {
             $modx->user = $user;
             $modx->user->addSessionContext($modx->context->key);

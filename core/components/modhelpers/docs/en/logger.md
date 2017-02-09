@@ -16,7 +16,7 @@ log_error($message, $changeLevel = false, $target = '')
 
 ```php
 log_error('Error message');
-# Show debugging information in site page.
+# Show debugging information on a site page.
 log_error($debugDataArray, 'HTML');
 # Log info message. The current log level is 'ERROR'.
 log_info('Information message', true); // Switch the log level to "INFO" for logging the message and switch it back to "ERROR".
