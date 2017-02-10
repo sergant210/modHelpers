@@ -1,4 +1,6 @@
 ##str_clean()
+Sanitizes the string. Similar to ```$modx->sanitizeString```.
+
 * [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitize the string. Similar to ```$modx->sanitizeString```.
 
 ```email($str, $chars = '/\'"();><', $allowedTags = array())```
