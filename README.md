@@ -19,7 +19,7 @@ Available functions:
 * columns() - gets select columns from a specific class for building a query. Can be used instead of ```xPDO::getSelectColumns()```.
 * [email()](./core/components/modhelpers/docs/en/email.md) - send emails.
 * [email_user()](./core/components/modhelpers/docs/en/email_user.md) - sends email to the specified user.
-* [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Wrapper for ```$modx->sanitizeString```.
+* [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Similar to ```$modx->sanitizeString```.
 * quote() - quote the string.
 * escape() - escapes the provided string using the platform-specific escape character.
 * css() - registers CSS to be injected inside the HEAD tag of a resource.
