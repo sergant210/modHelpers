@@ -1,9 +1,7 @@
 ## abort()  
 Redirects to the error or unauthorized page.
 
-```
-abort($options)
-```
+```abort($options)```
  - $option - an array of options or the response code - 401, 403, 404.
  
 ```php
