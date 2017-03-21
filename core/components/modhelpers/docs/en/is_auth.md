@@ -1,4 +1,4 @@
-##is_auth()
+## is_auth()
 Determines if the user is authenticated in a specific context.
 
 ```auth($ctx='')```

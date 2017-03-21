@@ -1,4 +1,4 @@
-##pls()
+## pls()
 Works with placeholders.
 
 ```pls($key = '', $default = '')```

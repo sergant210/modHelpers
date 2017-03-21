@@ -1,4 +1,4 @@
-##query()
+## query()
 Works with raw SQL queries.
 
 ```query($query)```

@@ -1,4 +1,4 @@
-##logout
+## logout
 Force logout the current authenticated user.
 
 ```

@@ -1,4 +1,4 @@
-##print_d()
+## print_d()
 Prints the value and dies. Converts the given value to the string format and prints  or returns it. 
 
 ```print_d($value, $template = '', $tag = 'output')```

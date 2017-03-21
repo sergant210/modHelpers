@@ -1,4 +1,4 @@
-##explode_trim(), explode_ltrim(), explode_rtrim()
+## explode_trim(), explode_ltrim(), explode_rtrim()  
 Split a string and strip whitespace (or other characters) from the beginning and end of an array values. 
 
 ```explode_trim($delimiter, $string, $chars = '', $func = 'trim')```

@@ -1,4 +1,4 @@
-##str_match()
+## str_match()
 Determine if a given string matches a given pattern.
 
 ```str_match($value, $pattern, $case = false)```

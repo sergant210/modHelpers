@@ -1,4 +1,4 @@
-##pls_delete()
+## pls_delete()
 Removes the specified placeholders.
 
 ```pls_delete($keys)```

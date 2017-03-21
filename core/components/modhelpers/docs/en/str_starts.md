@@ -1,4 +1,4 @@
-##str_starts()
+## str_starts()
 Determine if a given string starts with a given substring. 
 
 ```str_starts($haystack, $needles, $case = false)```

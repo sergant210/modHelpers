@@ -1,4 +1,4 @@
-##str_contains()
+## str_contains()
 Determine if a given string contains a given substring.
 
 ```str_contains($haystack, $needles, $case = false)```

@@ -1,4 +1,4 @@
-##print_str()
+## print_str()
 Extends the print_r function. Converts a given value to the string format and prints or returns it. 
 
 ```print_str($value, $return = false, $template = '', $tag = 'output')```

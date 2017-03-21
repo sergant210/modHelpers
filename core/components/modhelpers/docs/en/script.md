@@ -1,4 +1,4 @@
-##script()
+## script()
 Registers JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer" or other attributes.
 
 ```script($src, $start = false, $plaintext = false, $attr = false)```

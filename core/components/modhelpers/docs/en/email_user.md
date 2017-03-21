@@ -1,4 +1,4 @@
-##email_user()
+## email_user()
 Send an email to the specified user.
 
 ```email_user($user, $subject, $content = ''):bool```

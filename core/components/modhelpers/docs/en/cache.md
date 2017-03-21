@@ -1,4 +1,4 @@
-##cache()
+## cache()
 Manages the MODX cache.
 
 ```cache($key, $options)```

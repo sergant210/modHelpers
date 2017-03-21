@@ -1,4 +1,4 @@
-##login
+## login
 Force login the specified user to the current context.
 
 ```

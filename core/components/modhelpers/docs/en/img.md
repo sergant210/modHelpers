@@ -1,4 +1,4 @@
-##img
+## img
 Prepares the HTML tag "img".
 
 ```img($src, $attrs = array())```

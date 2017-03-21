@@ -1,4 +1,4 @@
-##logger
+## logger
 It's a special class which enhance the base functionality of the MODX log method. It's used by 4 functions:
 
 * log_error() - logs a message for the error log level. 

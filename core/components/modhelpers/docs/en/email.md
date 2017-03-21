@@ -1,4 +1,4 @@
-##email()
+## email()
 Sends an email.
 
 ```email($email='', $subject='', $content = ''):bool```

@@ -1,4 +1,4 @@
-##memory()
+## memory()
 Displays formatted memory value allocated to PHP.
 
 ```memory($unit = 'KB')```

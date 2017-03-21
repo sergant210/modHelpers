@@ -1,4 +1,4 @@
-##html()
+## html()
 Registers HTML to be injected inside the HEAD tag or before the closing BODY tag.
 
 ```html($src, $start = false)```

@@ -1,4 +1,4 @@
-##faker
+## faker
 Creates a faked data using the [Faker](https://github.com/fzaninotto/Faker) library.
 
 ```faker($property = '', $locale = '')```

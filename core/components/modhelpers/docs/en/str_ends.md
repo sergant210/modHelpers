@@ -1,4 +1,4 @@
-##str_ends()
+## str_ends()
 Determine if a given string ends with a given substring.
 
 ```str_ends($haystack, $needles, $case = false)```

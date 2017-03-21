@@ -1,4 +1,4 @@
-##config()
+## config()
 Manage the config settings.
 
 ```config($key, $default)```

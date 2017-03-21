@@ -1,4 +1,4 @@
-##array_trim(), array_ltrim(), array_rtrim()
+## array_trim(), array_ltrim(), array_rtrim()
 Strip whitespace (or other characters) from the beginning and end of an array values. Can be applies for multi-dimensional array.
 
 ```array_trim($value, $chars = '', $func = 'trim')```
