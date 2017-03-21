@@ -42,3 +42,36 @@ email()
 	->attach('path/to/file2.png')
 	->send();
 ```
+Use queues to defer the sending emails.
+ ```php
+# Use the mailer object
+email()
+	->to('user1@mail.ru')
+	->toUser(5)
+	->cc('user2@mail.ru') 
+	->subject('Subject')
+	->content('Message body')
+	->from('Administrator')
+	->replyTo('admin@mysite.com')
+	->attach('path/to/file1.jpg')
+	->attach('path/to/file2.png')
+	->toQueue(); // or save()
+```
+You can create different queues for different tasks.
+```php
+// Notify managers about a new order.
+email()...->save('for_manager');
+// Inform the admin about some user action (add to the quere "for_admin"). 
+email()...->save('for_admin'); // Set the second parameters to true to rewrite the queue.
+```
+All email will be stored to the cache. Then set the cron job.
+```php
+// email_admin.php
+# Connect to MODX
+...
+# Send emails from the queue (for example, every hour).
+email()->sendFromQueue(for_admin);
+// or
+email()->saved(for_admin);
+
+```

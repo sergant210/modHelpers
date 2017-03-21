@@ -1,3 +1,19 @@
+1.4.0-beta
+==============
+- Added function "is_mobile".
+- Added function "array_empty".
+- Added function "array_notempty".
+- Added functions "array_trim", "array_ltrim" and "array_rtrim".
+- Added functions "explode_trim", "explode_ltrim" and "explode_rtrim".
+- Added function "echo_nl".
+- Added function "print_str".
+- Added function "print_d".
+- Added function "parse".
+- Added functions - "str_starts", "str_ends", "str_contains" and "str_match".
+- Added the queue functionality to the mailer class.
+- The log functions can output objects which have the "toArray" method.
+- Code refactoring.
+
 1.3.0-beta
 ==============
 - Added function "login".
@@ -16,7 +32,7 @@
 - Added method "whereNotLike" to the collection class for users and resources.
 - Added method "whereIsNull" to the collection class for users and resources.
 - Added method "whereIsNotNull" to the collection class for users and resources.
-- Added class modHelperMailer which allows to use chains of methods.
+- Added class modHelpersMailer which allows to use chains of methods.
 - Removed the functions "pdotools" and "pdofetch".
 
 1.1.0-beta

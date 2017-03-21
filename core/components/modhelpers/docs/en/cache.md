@@ -49,13 +49,13 @@ cache()->set('key', $some_data);
 $options = array(
     xPDO::OPT_CACHE_KEY = 'my_data'
 )
-cache($options)->set('key', $some_data, 0, $options);
+cache()->set('key', $some_data, 0, $options);
 // is equivalent to
-cache($options)->set('key', $some_data, $options);
+cache()->set('key', $some_data, $options);
 // is equivalent to
-cache($options)->set('key', $some_data, 'my_data');
+cache()->set('key', $some_data, 'my_data');
 # Set the lifetime
-cache($options)->set('key', $some_data, 7200, 'my_data');
+cache()->set('key', $some_data, 7200, 'my_data');
 ```
 ####Getting from the cache
 ```get($key, $options = array())```  

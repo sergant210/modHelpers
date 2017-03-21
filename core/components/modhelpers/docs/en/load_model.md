@@ -19,7 +19,7 @@ if (!class_exists('Object')) {
     class Object_mysql extends Object{}
 
     load_model('Object', 'objects', function ($model) {
-        /** @var modHelperModelBuilder $model */
+        /** @var modHelpersModelBuilder $model */
         $model->id('id')->pk(); // unsigned integer type column with the primary index.
         $model->varchar('name', 100)->setDefault('string')->rulePregMatch('invalid','/^[a-zA-Z\s]+$/','You can not use digits in the name!');
         $model->text('description')->null()->alias('desc');

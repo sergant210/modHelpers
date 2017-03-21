@@ -1,6 +1,5 @@
 <?php
-require_once __DIR__ . '/classes.php';
-require_once __DIR__ . '/../vendor/fzaninotto/faker/src/autoload.php';
+//require_once __DIR__ . '/classes.php';
 
 /***********************************************/
 /*              Functions                      */
@@ -177,7 +176,7 @@ if (!function_exists('cache')) {
     {
         global $modx;
         if (func_num_args() == 0) {
-            return new extCacheManager($modx->getCacheManager());
+            return new modHelpersCacheManager($modx->getCacheManager());
         }
         if (is_string($options)) {
             $options = array(xPDO::OPT_CACHE_KEY => $options);
@@ -269,12 +268,12 @@ if (!function_exists('email')) {
      * @param string|array $email Email.
      * @param string|array $subject Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
-     * @return bool|modHelperMailer
+     * @return bool|modHelpersMailer
      */
     function email($email='', $subject='', $content = '')
     {
         global $modx;
-        if (func_num_args() == 0) return new modHelperMailer($modx);
+        if (func_num_args() == 0) return new modHelpersMailer($modx);
         if (is_array($subject)) {
             $options = $subject;
         } else {
@@ -450,7 +449,7 @@ if (!function_exists('chunk')) {
 }
 if (!function_exists('snippet')) {
     /**
-     * Runs the specified MODX snippet or file.
+     * Runs the specified MODX or file snippet.
      * @param string $snippetName
      * @param array $scriptProperties
      * @param int|string|array $cacheOptions
@@ -502,12 +501,12 @@ if (!function_exists('object')) {
      * Gets an object of the specified class.
      * @param string $class
      * @param integer|array $criteria
-     * @return ObjectManager
+     * @return modHelpersObjectManager
      */
     function object($class, $criteria = null)
     {
         global $modx;
-        $object = new ObjectManager($modx, $class);
+        $object = new modHelpersObjectManager($modx, $class);
         if (isset($criteria)) {
             if (is_numeric($criteria)) {
                 $pk = $modx->getPK($class);
@@ -527,12 +526,12 @@ if (!function_exists('collection')) {
      * Gets a collection of the specified class.
      * @param string $class
      * @param array $criteria
-     * @return CollectionManager
+     * @return modHelpersCollectionManager
      */
     function collection($class = '', $criteria = null)
     {
         global $modx;
-        $collection = new CollectionManager($modx, $class);
+        $collection = new modHelpersCollectionManager($modx, $class);
         if (isset($criteria) && is_array($criteria)) {
             $collection->where($criteria);
         }
@@ -544,11 +543,11 @@ if (!function_exists('resource')) {
      * Gets a resource object/array.
      * @param int|array $criteria Resource id or array with criteria.
      * @param bool $asObject True to return an object. Otherwise - an array.
-     * @return array|modResource|bool|ObjectManager
+     * @return array|modResource|bool|modHelpersObjectManager
      */
     function resource($criteria = null, $asObject = true)
     {
-        /** @var ObjectManager $resourceManager */
+        /** @var modHelpersObjectManager $resourceManager */
         if (is_numeric($criteria)) {
             $criteria = array('id' => (int) $criteria);
         }
@@ -563,12 +562,12 @@ if (!function_exists('resources')) {
      * Gets a collection of the resources.
      * @param array $criteria Criteria
      * @param bool $asObject True to return an array of the objects. Otherwise - an array of resources data arrays.
-     * @return array|bool|CollectionManager
+     * @return array|bool|modHelpersCollectionManager
      */
     function resources($criteria = null, $asObject = false)
     {
         global $modx;
-        /** @var CollectionManager $collection */
+        /** @var modHelpersCollectionManager $collection */
         $collection = collection('modResource');
 
         if (!isset($criteria)) {
@@ -610,7 +609,7 @@ if (!function_exists('user')) {
      */
     function user($criteria = null, $asObject = true)
     {
-        /** @var ObjectManager $userManager */
+        /** @var modHelpersObjectManager $userManager */
         if (is_numeric($criteria)) {
             $criteria = array('id' => (int) $criteria);
         } elseif (is_string($criteria)) {
@@ -625,12 +624,12 @@ if (!function_exists('users')) {
     /**
      * @param array $criteria
      * @param bool $asObject True to return an array of the user objects. Otherwise - an array of users data arrays.
-     * @return array|CollectionManager
+     * @return array|modHelpersCollectionManager
      */
     function users($criteria = null, $asObject = false)
     {
         global $modx;
-        /** @var CollectionManager $collection */
+        /** @var modHelpersCollectionManager $collection */
         $collection = collection('modUser');
 
         if (!isset($criteria)) {
@@ -946,9 +945,11 @@ if (!function_exists('log_error')) {
      * @param bool $changeLevel Change log level
      * @param string $target
      */
-    function log_error($message, $changeLevel = false, $target = '')
+    function log_error($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
-        LogManager::error($message, $changeLevel, $target);
+        global $modx;
+        modHelpersLogger::setModx($modx);
+        modHelpersLogger::error($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('log_warn')) {
@@ -959,9 +960,11 @@ if (!function_exists('log_warn')) {
      * @param bool $changeLevel Change log level
      * @param string $target
      */
-    function log_warn($message, $changeLevel = false, $target = '')
+    function log_warn($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
-        LogManager::warn($message, $changeLevel, $target);
+        global $modx;
+        modHelpersLogger::setModx($modx);
+        modHelpersLogger::warn($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('log_info')) {
@@ -972,9 +975,11 @@ if (!function_exists('log_info')) {
      * @param bool $changeLevel Change log level
      * @param string $target
      */
-    function log_info($message, $changeLevel = false, $target = '')
+    function log_info($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
-        LogManager::info($message, $changeLevel, $target);
+        global $modx;
+        modHelpersLogger::setModx($modx);
+        modHelpersLogger::info($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('log_debug')) {
@@ -985,9 +990,11 @@ if (!function_exists('log_debug')) {
      * @param bool $changeLevel Change log level
      * @param string $target
      */
-    function log_debug($message, $changeLevel = false, $target = '')
+    function log_debug($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
-        LogManager::debug($message, $changeLevel, $target);
+        global $modx;
+        modHelpersLogger::setModx($modx);
+        modHelpersLogger::debug($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('context')) {
@@ -1006,12 +1013,12 @@ if (!function_exists('query')) {
     /**
      * Manages a SQL query
      * @param string $query
-     * @return QueryManager
+     * @return modHelpersQueryManager
      */
     function query($query)
     {
         global $modx;
-        return new QueryManager($modx, $query);
+        return new modHelpersQueryManager($modx, $query);
     }
 }
 if (!function_exists('memory')) {
@@ -1130,7 +1137,7 @@ if (!function_exists('load_model')) {
             }
             return true;
         }
-        $model = new modHelperModelBuilder($table);
+        $model = new modHelpersModelBuilder($table);
         if (is_callable($callback)) {
             $callback($model);
             $map = $model->output();
@@ -1203,3 +1210,330 @@ if (!function_exists('is_ajax')) {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
 }
+if (!function_exists('is_mobile')) {
+    /**
+     * Mobile detector.
+     * @return bool
+     * @see http://detectmobilebrowsers.com/
+     */
+    function is_mobile()
+    {
+        $is_mobile = false;
+        $useragent=$_SERVER['HTTP_USER_AGENT'];
+        if (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($useragent,0,4))) {
+            $is_mobile = true;
+        }
+        return $is_mobile;
+    }
+}
+if (!function_exists('array_empty')) {
+    /**
+     * Checks the given variable is an array and empty.
+     *
+     * @param $array
+     * @return bool
+     */
+    function array_empty($array)
+    {
+        return empty($array) && is_array($array);
+    }
+}
+if (!function_exists('array_notempty')) {
+    /**
+     * Checks the given variable is an array and not empty.
+     *
+     * @param $array
+     * @return bool
+     */
+    function array_notempty($array)
+    {
+        return !empty($array) && is_array($array);
+    }
+}
+
+if (!function_exists('array_trim')) {
+    /**
+     * Execute the trim function for array values. Recursive.
+     *
+     * @param mixed $value
+     * @param string $chars
+     * @param string $func Trim functions - trim, ltrim, rtrim.
+     * @return string
+     */
+    function array_trim($value, $chars = '', $func = 'trim')
+    {
+        if (is_array($value)) {
+            return array_map(function ($v) use ($chars, $func) {
+                return array_trim($v, $chars, $func);
+            }, $value);
+        }
+        return empty($chars) ? $func($value) : $func($value, $chars);
+    }
+}
+if (!function_exists('array_ltrim')) {
+    /**
+     * Strip whitespace (or other characters) from the beginning of a string in the array
+     *
+     * @param $value
+     * @param string $chars
+     * @return string
+     */
+    function array_ltrim($value, $chars = '')
+    {
+        return array_trim($value, $chars, 'ltrim');
+    }
+}
+if (!function_exists('array_rtrim')) {
+    /**
+     * Strip whitespace (or other characters) from the end of a string in the array
+     *
+     * @param $value
+     * @param string $chars
+     * @return string
+     */
+    function array_rtrim($value, $chars = '')
+    {
+        return array_trim($value, $chars, 'rtrim');
+    }
+}
+if (!function_exists('explode_trim')) {
+    /**
+     * Combine two functions - explode and trim
+     *
+     * @param string $delimiter
+     * @param string $string
+     * @param string $chars
+     * @param string $func
+     * @return string
+     */
+    function explode_trim($delimiter, $string, $chars = '', $func = 'trim')
+    {
+        $array = explode($delimiter, $string);
+        return array_trim($array, $chars, $func);
+    }
+}
+if (!function_exists('explode_rtrim')) {
+    /**
+     * Combine two functions - explode and rtrim
+     *
+     * @param string $delimiter
+     * @param string $string
+     * @param string $chars
+     * @return string
+     */
+    function explode_rtrim($delimiter, $string, $chars = '')
+    {
+        $array = explode($delimiter, $string);
+        return array_trim($array, $chars, 'rtrim');
+    }
+}
+if (!function_exists('explode_ltrim')) {
+    /**
+     * Combine two functions - explode and ltrim
+     *
+     * @param string $delimiter
+     * @param string $string
+     * @param string $chars
+     * @return string
+     */
+    function explode_ltrim($delimiter, $string, $chars = '')
+    {
+        $array = explode($delimiter, $string);
+        return array_trim($array, $chars, 'ltrim');
+    }
+}
+if (!function_exists('echo_nl')) {
+    /**
+     * Convert the specified variable to the string type and print or return it.
+     *
+     * @param mixed $string
+     * @param string $nl.
+     * @return void
+     */
+    function echo_nl($string, $nl = PHP_EOL)
+    {
+        echo $string, $nl;
+    }
+}
+if (!function_exists('print_str')) {
+    /**
+     * Convert the specified variable to the string type and print or print it.
+     *
+     * @param mixed $value The input value
+     * @param bool $return If true the value will be returned. Otherwise it will be printed.
+     * @param string $template Wrapper.
+     * @param string $tag Tag to replace with the prepared string.
+     * @return string
+     */
+    function print_str($value, $return = false, $template = '', $tag = 'output')
+    {
+        if (is_null($value)) {
+            $value = 'NULL';
+        } elseif (is_bool($value)) {
+            $value = $value ? 'TRUE' : 'FALSE';
+        } elseif (is_array($value)) {
+            $value = '<pre>' . print_r($value, true) . '</pre>';
+        } elseif (is_object($value) && method_exists($value, 'toArray')) {
+            $value = '<pre>' . print_r($value->toArray(), true) . '</pre>';
+        }
+        $output = !empty($template) ? str_replace("[[+{$tag}]]", $value, $template) : $value;
+        if ((is_bool($return) || is_numeric($return)) && !$return) {
+            echo $output;
+        } elseif (is_string($return)) {
+            $tag = $template ?: $tag;
+            $template = $return;
+            echo !empty($template) ? str_replace("[[+{$tag}]]", $value, $template) : $value;
+        } else {
+            return $output;
+        }
+        return '';
+    }
+}
+if (!function_exists('print_d')) {
+    /**
+     * Prints the specified variable and die.
+     *
+     * @param mixed $string
+     * @param string $template
+     * @param string $tag Tag to replace with the prepared string.
+     * @return string
+     */
+    function print_d($string, $template = '', $tag = 'output')
+    {
+        $output = print_str($string, $template, $tag);
+        die($output);
+    }
+}
+if (! function_exists('parse')) {
+    /**
+     * Parse a string using an associative array of replacement variables.
+     *
+     * @param string $string Text to parse.
+     * @param array $data An array of placeholders to replace.
+     * @param string $prefix The placeholder prefix, defaults to [[+.
+     * @param string $suffix The placeholder suffix, defaults to ]].
+     * @return string The processed string with the placeholders replaced.
+     */
+    function parse($string, $data, $prefix = '[[+', $suffix = ']]')
+    {
+        if (!empty($string) || $string === '0') {
+            if (is_array($data)) {
+                reset($data);
+                while (list($key, $value) = each($data)) {
+                    $string = str_replace($prefix . $key . $suffix, $value, $string);
+                }
+            }
+        }
+        return $string;
+    }
+}
+if (! function_exists('str_starts')) {
+    /**
+     * Determine if a given string starts with a given substring.
+     * (Taken from Laravel helpers)
+     *
+     * @param  string  $haystack
+     * @param  string|array  $needles
+     * @param bool $case Match the case
+     * @return bool
+     */
+    function str_starts($haystack, $needles, $case = false)
+    {
+        if (!$case) {
+            $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack) : strtolower($haystack);
+        }
+        foreach ((array) $needles as $needle) {
+            if (!$case) $needle = function_exists('mb_strtolower') ? mb_strtolower($needle) : strtolower($needle);
+            if ($needle != '' && substr($haystack, 0, strlen($needle)) === (string) $needle) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+if (! function_exists('str_ends')) {
+    /**
+     * Determine if a given string ends with a given substring.
+     * (Taken from Laravel helpers)
+     *
+     * @param  string  $haystack
+     * @param  string|array  $needles
+     * @param bool $case Match the case
+     * @return bool
+     */
+    function str_ends($haystack, $needles, $case = false)
+    {
+        if (!$case) {
+            $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack) : strtolower($haystack);
+        }
+
+        foreach ((array) $needles as $needle) {
+            if (!$case) $needle = function_exists('mb_strtolower') ? mb_strtolower($needle) : strtolower($needle);
+            if (substr($haystack, -strlen($needle)) === (string) $needle) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+if (! function_exists('str_contains')) {
+    /**
+     * Determine if a given string contains a given substring.
+     * (Taken from Laravel helpers)
+     *
+     * @param  string $haystack
+     * @param  string|array $needles
+     * @param bool $case Match the case
+     * @return bool
+     */
+    function str_contains($haystack, $needles, $case = false)
+    {
+        if ($case) {
+            $func = function_exists('mb_strpos') ? 'mb_strpos' : 'strpos';
+        } else {
+            $func = function_exists('mb_stripos') ? 'mb_stripos' : 'stripos';
+        }
+        foreach ((array) $needles as $needle) {
+            if ($needle != '' && $func($haystack, $needle) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+if (! function_exists('str_match')) {
+    /**
+     * Determine if a given string matches a given pattern.
+     * (Taken from Laravel helpers - str_is() )
+     *
+     * @param  string $value
+     * @param  string $pattern
+     * @param bool $case Match the case
+     * @return bool
+     */
+    function str_match($value, $pattern, $case = false)
+    {
+        if ($pattern == $value) {
+            return true;
+        }
+        $ci = $case ? '' : 'i';
+        $pattern = preg_quote($pattern, '#');
+
+        // Asterisks are translated into zero-or-more regular expression wildcards
+        // to make it convenient to check if the strings starts with the given
+        // pattern such as "library/*", making any string check convenient.
+        $pattern = str_replace('\*', '.*', $pattern);
+
+        return (bool) preg_match('#^'.$pattern.'\z#u'.$ci, $value);
+    }
+}
+/*if (!function_exists('queue')) {
+    function queue()
+    {
+        return new modHelpersQueue;
+    }
+}*/

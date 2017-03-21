@@ -28,8 +28,12 @@ Available functions:
 * chunk() - gets the specified chunk or file. Can be used instead of ```$modx->getChunk()```.
 * [snippet()](./core/components/modhelpers/docs/en/snippet.md) - runs the specified snippet from DB or file. The result can be cached.
 * processor() - runs the specified processor. Can be used instead of ```$modx->runProcessor()```.
+* is_ajax() - returns true if the current request is asynchronous (ajax).
 * [is_auth()](./core/components/modhelpers/docs/en/is_auth.md) - determines if the user is authenticated in a specific context.
 * is_guest() - determines if the user is a guest. Checks equality ```$modx->user->id == 0```
+* is_email() - validates the email. Can be used to validate the form data.
+* is_url() - validates the url.
+* is_mobile - mobile detection.
 * can() - returns true if user has the specified policy permission. Can be used instead of ```$modx->hasPermission()```.
 * resource_id() | res_id() - gets the id of the current resource. Returns the value of $modx->resource->id. 
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.
@@ -44,8 +48,6 @@ Available functions:
 * object_exists() - checks if the specified object exists.
 * user_exists() - checks if the specified user exists.
 * resource_exists() - checks if the specified resource exists.
-* is_email() - validates the email. Can be used to validate the form data.
-* is_url() - validates the url.
 * [log_error()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the ERROR log level.
 * [log_warn()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the WARN log level.
 * [log_info()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the INFO log level.
@@ -56,9 +58,24 @@ Available functions:
 * [img()](./core/components/modhelpers/docs/en/img.md) - prepares the HTML tag "img".
 * [faker()](./core/components/modhelpers/docs/en/faker.md) - creates a faked data.
 * [load_model()](./core/components/modhelpers/docs/en/load_model.md) - loads a model for a custom table.
-* is_ajax() - returns true if the current request is asynchronous (ajax).
 * [login()](./core/components/modhelpers/docs/en/login.md) - force login the specified user to the current context.
 * [logout()](./core/components/modhelpers/docs/en/logout.md) - force logout the current user.
+* array_empty() - checks the variable is an array and empty.
+* array_empty() - checks the variable is an array and not empty.
+* [array_trim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning and end of an array values.
+* [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning of an array values.
+* [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the end of an array values.
+* [explode_trim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and trim.
+* [explode_ltrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and ltrim.
+* [explode_rtrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and rtrim.
+* echo_nl - the equivalent of ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol.
+* [print_str()](./core/components/modhelpers/docs/en/print_str.md) - extends the print_r function. Convert a given value to the string format and print it.
+* [print_d()](./core/components/modhelpers/docs/en/print_d.md) - prints the value and dies. Convert a given value to the string format, prints it and ends the script.
+* parse() - Parse a string using an associative array of replacement variables. The equivalent of the ```$modx->parseChunk```.
+* [str_starts()](./core/components/modhelpers/docs/en/str_starts.md) - Determine if a given string starts with a given substring.
+* [str_ends()](./core/components/modhelpers/docs/en/str_ends.md) - Determine if a given string ends with a given substring.
+* [str_contains()](./core/components/modhelpers/docs/en/str_contains.md) - Determine if a given string contains a given substring.
+* [str_match()](./core/components/modhelpers/docs/en/str_match.md) - Determine if a given string matches a given pattern.
 
 
 ### Examples
@@ -86,6 +103,10 @@ email_user('admin', $subject, $content);
 email_user(5, $subject, chunk($tplEmail));
 // or like that
 email()->to('some.email@gmail.com')->cc('copymail@mail.com')->subject('Hello')->content('Content')->attach('path/to/file.jpg')->send();
+// or send to queue
+email()->to('some.email@gmail.com')->cc('copymail@mail.com')->subject('Hello')->content('Content')->attach('path/to/file.jpg')->save();
+// and then send from the queue
+email()->saved();
 ```
 
 **Run a snippet and save the result to the cache**
@@ -158,8 +179,8 @@ script('/path/to/script.js', 'async'); // <script async type="text/javascript" s
 ```
 **Get an array of users**
 ```php
-// Can use the prepared query
-$userArray = query('select * from ' . table_name('modUser'). ' WHERE id < ?')->execute(( (int) $_POST['user_id']);
+// Use the prepared query
+$userArray = query('select * from ' . table_name('modUser'). ' WHERE id = ?')->execute( (int) $_POST['user_id']);
 ```
 **Log error to the error log**
 ```php
