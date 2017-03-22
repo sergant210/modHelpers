@@ -19,7 +19,7 @@ Available functions:
 * columns() - gets select columns from a specific class for building a query. Can be used instead of ```xPDO::getSelectColumns()```.
 * [email()](./core/components/modhelpers/docs/en/email.md) - sends an email.
 * [email_user()](./core/components/modhelpers/docs/en/email_user.md) - sends an email to the specified user.
-* [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Similar to ```$modx->sanitizeString```.
+* [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Strips HTML tags and removes the specified characters. It's like the ```modX::sanitizeString``` method.
 * quote() - quote the string.
 * escape() - escapes the provided string using the platform-specific escape character.
 * css() - registers CSS to be injected inside the HEAD tag of a resource.
@@ -27,7 +27,7 @@ Available functions:
 * [html()](./core/components/modhelpers/docs/en/html.md) - registers HTML to be injected inside the HEAD tag or before the closing BODY tag.
 * chunk() - gets the specified chunk or file. Can be used instead of ```$modx->getChunk()```.
 * [snippet()](./core/components/modhelpers/docs/en/snippet.md) - runs the specified snippet from DB or file. The result can be cached.
-* processor() - runs the specified processor. Can be used instead of ```$modx->runProcessor()```.
+* processor() - runs the specified processor. Equivalent of the ```$modx->runProcessor()```.
 * is_ajax() - returns true if the current request is asynchronous (ajax).
 * [is_auth()](./core/components/modhelpers/docs/en/is_auth.md) - determines if the user is authenticated in a specific context.
 * is_guest() - determines if the user is a guest. Checks equality ```$modx->user->id == 0```
@@ -71,11 +71,13 @@ Available functions:
 * echo_nl - the equivalent of ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol.
 * [print_str()](./core/components/modhelpers/docs/en/print_str.md) - extends the print_r function. Convert a given value to the string format and print it.
 * [print_d()](./core/components/modhelpers/docs/en/print_d.md) - prints the value and dies. Convert a given value to the string format, prints it and ends the script.
-* parse() - Parse a string using an associative array of replacement variables. The equivalent of the ```$modx->parseChunk```.
-* [str_starts()](./core/components/modhelpers/docs/en/str_starts.md) - Determine if a given string starts with a given substring.
-* [str_ends()](./core/components/modhelpers/docs/en/str_ends.md) - Determine if a given string ends with a given substring.
-* [str_contains()](./core/components/modhelpers/docs/en/str_contains.md) - Determine if a given string contains a given substring.
-* [str_match()](./core/components/modhelpers/docs/en/str_match.md) - Determine if a given string matches a given pattern.
+* parse() - parses a string using an associative array of replacement variables. The equivalent of the ```$modx->parseChunk```.
+* [str_between()](./core/components/modhelpers/docs/en/str_between.md) - gets a substring between two tags.
+* [str_limit()](./core/components/modhelpers/docs/en/str_limit.md) - limits the number of characters in a string. 
+* [str_starts()](./core/components/modhelpers/docs/en/str_starts.md) - determines if a given string starts with a given substring.
+* [str_ends()](./core/components/modhelpers/docs/en/str_ends.md) - determines if a given string ends with a given substring.
+* [str_contains()](./core/components/modhelpers/docs/en/str_contains.md) - determines if a given string contains a given substring.
+* [str_match()](./core/components/modhelpers/docs/en/str_match.md) - determines if a given string matches a given pattern.
 
 
 ### Examples

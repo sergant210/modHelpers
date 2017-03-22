@@ -1352,7 +1352,7 @@ if (!function_exists('echo_nl')) {
      */
     function echo_nl($string, $nl = PHP_EOL)
     {
-        echo $string, $nl;
+        echo print_str($string, true) . $nl;
     }
 }
 if (!function_exists('print_str')) {
@@ -1373,10 +1373,33 @@ if (!function_exists('print_str')) {
             $value = $value ? 'TRUE' : 'FALSE';
         } elseif (is_array($value)) {
             $value = '<pre>' . print_r($value, true) . '</pre>';
-        } elseif (is_object($value) && method_exists($value, 'toArray')) {
+        } elseif (is_object($value) && (method_exists($value, 'toArray'))) {
             $value = '<pre>' . print_r($value->toArray(), true) . '</pre>';
         }
-        $output = !empty($template) ? str_replace("[[+{$tag}]]", $value, $template) : $value;
+        if (is_string($return)) {
+            $tag = $template ?: $tag;
+            $template = $return;
+            $return = false;
+            //echo !empty($template) ? str_replace("[[+{$tag}]]", $value, $template) : $value;
+        }
+        if (!empty($template)) {
+            switch ($template) {
+            	case 'p':
+                    $output = '<p>'.$value.'</p>';
+            		break;
+            	case 'div':
+                    $output = '<div>'.$value.'</div>';
+            		break;
+            	case 'li':
+                    $output = '<li>'.$value.'</li>';
+            		break;
+                default:
+                    $output = str_replace("[[+{$tag}]]", $value, $template);
+            }
+        } else {
+            $output = $value;
+        }
+
         if ((is_bool($return) || is_numeric($return)) && !$return) {
             echo $output;
         } elseif (is_string($return)) {
@@ -1529,6 +1552,45 @@ if (! function_exists('str_match')) {
         $pattern = str_replace('\*', '.*', $pattern);
 
         return (bool) preg_match('#^'.$pattern.'\z#u'.$ci, $value);
+    }
+}
+if (! function_exists('str_between')) {
+    /**
+     * Get a substring between two tags.
+     * (Taken from Laravel helpers - str_is() )
+     *
+     * @param  string $string
+     * @param  string $start Start tag
+     * @param  string $end End tag
+     * @param bool $greedy
+     * @return string
+     */
+    function str_between($string, $start, $end, $greedy = true)
+    {
+        $mask = $greedy ? '(.*)' : '(.*?)';
+        preg_match('#'.preg_quote($start).$mask.preg_quote($end).'#is', $string, $match);
+        return $match[1];
+    }
+}
+if (! function_exists('str_limit')) {
+    /**
+     * Limit the number of characters in a string.
+     *
+     * @param  string $string
+     * @param  int $limit
+     * @param  string $end
+     * @return string
+     */
+    function str_limit($string, $limit = 100, $end = '...')
+    {
+        $lfunc = function_exists('mb_strwidth') ? 'mb_strwidth' : 'strlen';
+        if ($lfunc($string, 'UTF-8') <= $limit) {
+            return $string;
+        }
+
+        return function_exists('mb_strimwidth')
+                            ? rtrim(mb_strimwidth($string, 0, $limit, $end, 'UTF-8'))
+                            : rtrim(substr($string, 0, $limit)) . $end;
     }
 }
 /*if (!function_exists('queue')) {

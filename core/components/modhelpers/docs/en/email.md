@@ -61,7 +61,7 @@ You can create different queues for different tasks.
 ```php
 // Notify managers about a new order.
 email()...->save('for_manager');
-// Inform the admin about some user action (add to the quere "for_admin"). 
+// Inform the admin about some user action (add to the queue "for_admin"). 
 email()...->save('for_admin'); // Set the second parameters to true to rewrite the queue.
 ```
 All email will be stored to the cache. Then set the cron job.

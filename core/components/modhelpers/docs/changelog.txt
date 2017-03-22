@@ -9,6 +9,8 @@
 - Added function "print_str".
 - Added function "print_d".
 - Added function "parse".
+- Added function "str_between".
+- Added function "str_limit".
 - Added functions - "str_starts", "str_ends", "str_contains" and "str_match".
 - Added the queue functionality to the mailer class.
 - The log functions can output objects which have the "toArray" method.
