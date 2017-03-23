@@ -46,12 +46,15 @@ print_str($stringVar); // Output: 'Some text'
 
 # Output using the return statement
 return print_str($stringVar, true);
-
+```
+You can wrap the output with HTML tags or using a template.
+```
 # Wrap the output
 print_str('The string wrapped by the div tag', false, 'div'); //<div>The string wrapped by the div tag</div>
 // If the second parameter is false it can be omitted
 print_str('The string wrapped by the div tag', 'div');
 
-# Template wrapper
+# Template wrapper for one-time output
 print_str($stringVar, '<div style="color:red">[[+output]]</div>');
 ```
+Or you can define a template for every output - create the system setting "modhelpers.print_template" and put the template in it.

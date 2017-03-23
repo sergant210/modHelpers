@@ -1352,7 +1352,7 @@ if (!function_exists('echo_nl')) {
      */
     function echo_nl($string, $nl = PHP_EOL)
     {
-        echo print_str($string, true) . $nl;
+        echo $string . $nl;
     }
 }
 if (!function_exists('print_str')) {
@@ -1397,7 +1397,8 @@ if (!function_exists('print_str')) {
                     $output = str_replace("[[+{$tag}]]", $value, $template);
             }
         } else {
-            $output = $value;
+            $template = config('modhelpers.print_template');
+            $output = empty($template) ? $value : str_replace("[[+{$tag}]]", $value, $template);
         }
 
         if ((is_bool($return) || is_numeric($return)) && !$return) {
