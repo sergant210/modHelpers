@@ -2,13 +2,13 @@
 
 $settings = array();
 
-$tmp = array(/*
-	'some_setting' => array(
-		'xtype' => 'combo-boolean',
-		'value' => true,
+$tmp = array(
+	'print_template' => array(
+		'xtype' => 'textfield',
+		'value' => '',
 		'area' => 'modhelpers_main',
 	),
-	*/
+
 );
 
 foreach ($tmp as $k => $v) {
@@ -16,7 +16,7 @@ foreach ($tmp as $k => $v) {
 	$setting = $modx->newObject('modSystemSetting');
 	$setting->fromArray(array_merge(
 		array(
-			'key' => 'modhelpers_' . $k,
+			'key' => 'modhelpers.' . $k,
 			'namespace' => PKG_NAME_LOWER,
 		), $v
 	), '', true, true);
