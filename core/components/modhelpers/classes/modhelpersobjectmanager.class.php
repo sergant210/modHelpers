@@ -50,6 +50,21 @@ class modHelpersObjectManager
         return $object->save();
     }
 
+    public function create(array $data)
+    {
+        if (empty($data)) return $this;
+        if (!class_exists($this->class) || !$object = $this->modx->newObject($this->class)) {
+            return false;
+        }
+        /** @var xPDOObject $object */
+        $object->fromArray($data, '', true);
+        if (!$object->save()) {
+            $this->modx->log(1, '[modHelpers] Can\'t create an object!');
+            return false;
+        };
+        return $object;
+    }
+
     public function remove()
     {
         if (!$object = $this->modx->getObject($this->class, $this->query)) {

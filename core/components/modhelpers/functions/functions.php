@@ -785,6 +785,8 @@ if (!function_exists('user_exists')) {
         $query->innerJoin('modUserProfile', 'Profile');
         if (is_numeric($criteria)) {
             $criteria = array('id' => $criteria);
+        } elseif (is_string($criteria)) {
+            $criteria = array('username' => $criteria);
         }
         if (is_array($criteria)) {
             $where = array();
@@ -798,7 +800,7 @@ if (!function_exists('user_exists')) {
         if ($query->prepare() && $query->stmt->execute()) {
             $rowCount = $query->stmt->rowCount();
         }
-        return isset($rowCount) ? $rowCount > 0 : $rowCount;
+        return isset($rowCount) ? $rowCount > 0 : false;
     }
 }
 if (!function_exists('user_id')) {

@@ -41,13 +41,13 @@ Available functions:
 * tv() - gets the specified TV of the current resource. 
 * object() - to work with objects of MODX.
 * [collection()](https://modzone.ru/documentation/modhelpers/collection-manager.html) - to work with collections.
-* resource() - works with a resource object.
+* [resource()](./core/components/modhelpers/docs/en/resource.md) - works with a resource object.
 * resources() - works with a resource collection.
-* user() - works with a user object.
+* [user()](./core/components/modhelpers/docs/en/user.md) - works with a user object.
 * users() - works with a user collection.
 * object_exists() - checks if the specified object exists.
-* user_exists() - checks if the specified user exists.
-* resource_exists() - checks if the specified resource exists.
+* [user_exists()](./core/components/modhelpers/docs/en/user_exists.md) - checks the specified user exists.
+* [resource_exists()](./core/components/modhelpers/docs/en/resource_exists.md) - checks the specified resource exists.
 * [log_error()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the ERROR log level.
 * [log_warn()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the WARN log level.
 * [log_info()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the INFO log level.
