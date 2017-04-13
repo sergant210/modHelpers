@@ -4,7 +4,7 @@ Loads a model for a custom table.
 ```load_model($class, $tableName, $callable)```    
 - $class - name of the new or the existing class.
 - $tableName - table name without the table prefix.
-- $callable - the closure. For existing models can be call as second argument. 
+- $callable - the closure. For existing models can be call as the second argument. 
 
 This function is intended to simplify working with custom tables. It is very easy to use.
 ####Step 1. Create a table via phpMyAdmin.
