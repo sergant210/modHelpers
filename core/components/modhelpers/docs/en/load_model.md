@@ -10,7 +10,7 @@ This function is intended to simplify working with custom tables. It is very eas
 ####Step 1. Create a table via phpMyAdmin.
 For example, lets create a table for some objects and call it 'modx_objects'. 
 
-####Step 2. Create a model file for your table.
+#### Step 2. Create a model file for your table.
 ```php
 <?php # core/models/objects.php
 // Our model will be called 'Object'
@@ -38,7 +38,7 @@ load_model('modResource', function ($model) {
     $model->text('tags'); // add "tags" field for the resource model
 }
 ```
-####Step 3. Load the model file in a plugin.
+#### Step 3. Load the model file in a plugin.
 ```php
 switch ($modx->event->name) {
 	case 'OnMODXInit':
