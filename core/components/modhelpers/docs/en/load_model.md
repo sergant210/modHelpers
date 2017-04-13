@@ -26,7 +26,7 @@ if (!class_exists('Object')) {
         $model->arr('properties')->null(); // array phptype
         $model->int('rid',true)->aggregate('Resource',array('class'=>'modResource','foreign'=>'id','cardinality'=>'one', 'owner'=>'foreign'))->index();
         $model->int('createdby')->unsigned()->aggOneForeign('CreateUser','modUser','id')->index(); 
-        $model->int('createdby', true)->aggOneForeign('EditUser','modUser','id')->index(); 
+        $model->int('editedby', true)->aggOneForeign('EditUser','modUser','id')->index(); 
         $model->datetime('createdon'); // if the type of the table field is datetime or timestamp.
         $model->bigint('editedon',true)->phpType('datetime');// if you store the date in the UNIX format.
     });
