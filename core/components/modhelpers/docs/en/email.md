@@ -45,6 +45,7 @@ email()
 	->attach('path/to/file2.png')
 	->send();
 ```
+### Queues
 Use queues to defer the sending emails.
 ```php
 # Use the mailer object
@@ -73,9 +74,9 @@ All email will be stored to the cache. Then set the cron job.
 # Connect to MODX
 ...
 # Send emails from the queue (for example, every hour).
-email()->sendFromQueue(for_admin);
+email()->sendFromQueue('for_admin');
 // or
-email()->saved(for_admin);
+email()->saved('for_admin');
 ```
 Testing the email functionality. Use the log() method to save the email data to the log or use the toArray() method to output the data to the page.
 ```php
@@ -91,5 +92,4 @@ email()
 	->attach('path/to/file1.jpg')
 	->attach('path/to/file2.png')
 	->log() // to get the email data in the json format use log(true)
-
 ```
