@@ -4,13 +4,13 @@ Loads a model for a custom table.
 ```load_model($class, $tableName, $callable)```    
 - $class - name of the new or the existing class.
 - $tableName - table name without the table prefix.
-- $callable - the closure. For existing models can be call as second argument. 
+- $callable - the closure. For existing models can be call as the second argument. 
 
 This function is intended to simplify working with custom tables. It is very easy to use.
 ####Step 1. Create a table via phpMyAdmin.
 For example, lets create a table for some objects and call it 'modx_objects'. 
 
-####Step 2. Create a model file for your table.
+#### Step 2. Create a model file for your table.
 ```php
 <?php # core/models/objects.php
 // Our model will be called 'Object'
@@ -26,7 +26,7 @@ if (!class_exists('Object')) {
         $model->arr('properties')->null(); // array phptype
         $model->int('rid',true)->aggregate('Resource',array('class'=>'modResource','foreign'=>'id','cardinality'=>'one', 'owner'=>'foreign'))->index();
         $model->int('createdby')->unsigned()->aggOneForeign('CreateUser','modUser','id')->index(); 
-        $model->int('createdby', true)->aggOneForeign('EditUser','modUser','id')->index(); 
+        $model->int('editedby', true)->aggOneForeign('EditUser','modUser','id')->index(); 
         $model->datetime('createdon'); // if the type of the table field is datetime or timestamp.
         $model->bigint('editedon',true)->phpType('datetime');// if you store the date in the UNIX format.
     });
@@ -38,7 +38,7 @@ load_model('modResource', function ($model) {
     $model->text('tags'); // add "tags" field for the resource model
 }
 ```
-####Step 3. Load the model file in a plugin.
+#### Step 3. Load the model file in a plugin.
 ```php
 switch ($modx->event->name) {
 	case 'OnMODXInit':
