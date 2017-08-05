@@ -19,10 +19,6 @@ class modHelpersObjectManager
         $this->query = $this->modx->newQuery($class);
         $this->query->setClassAlias($class);
         $this->query->limit(1);
-        if ($class == 'modUser') {
-            $this->query->innerJoin('modUserProfile', 'Profile');
-            $this->query->select($modx->getSelectColumns('modUser', 'modUser') . ',' . $modx->getSelectColumns('modUserProfile', 'Profile', '', array('id'), true));
-        }
     }
 
     public function toArray()
@@ -52,7 +48,7 @@ class modHelpersObjectManager
 
     public function create(array $data)
     {
-        if (empty($data)) return $this;
+        if (empty($data)) return false;
         if (!class_exists($this->class) || !$object = $this->modx->newObject($this->class)) {
             return false;
         }
@@ -70,8 +66,6 @@ class modHelpersObjectManager
         if (!$object = $this->modx->getObject($this->class, $this->query)) {
             return false;
         }
-        /** @var xPDOObject $object */
-        $object->remove();
         return $object->remove();
     }
 
@@ -106,6 +100,15 @@ class modHelpersObjectManager
         $this->query->sortby('id', 'DESC');
 
         return $this->get($name);
+    }
+
+    public function withProfile()
+    {
+        if ($this->class == 'modUser') {
+            $this->query->innerJoin('modUserProfile', 'Profile');
+            $this->query->select($this->modx->getSelectColumns('modUser', 'modUser') . ',' . $this->modx->getSelectColumns('modUserProfile', 'Profile', '', array('id'), true));
+        }
+        return $this;
     }
 
     public function limit()

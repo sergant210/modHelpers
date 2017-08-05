@@ -4,14 +4,15 @@ Library of the helpfull functions for MODX. Most of these functions can be used 
 Available functions:
 
 * url() - makes an url. Alias of the method ```$modx->makeUrl()```.
-* redirect() - to redirect to the url or site page if the id is passed. Wrapper for ```$modx->redirect```.
-* forward() - to forward the request to another resource without changing the URL. The short call of ```$modx->forward```.
+* [redirect()](./core/components/modhelpers/docs/en/redirect.md) - redirect to the url or site page if the id is passed. Wraps the ```$modx->redirect()``` and ```$modx->makeUrl()```.
+* forward() - to forward the request to another resource without changing the URL. The short call of ```$modx->forward()```.
 * [abort()](./core/components/modhelpers/docs/en/abort.md) - to redirect to the error or unauthorized page.
 * [config()](./core/components/modhelpers/docs/en/config.md) - manages the config settings.
-* [session()](./core/components/modhelpers/docs/en/session.md) - manages the session using dot notation.
+* [session()](./core/components/modhelpers/docs/en/session.md) - manages the session. You can use the dot notation.
+* [session_pull()](./core/components/modhelpers/docs/en/session_pull.md) - gets the value of a given key and then unsets it.
 * [cache()](./core/components/modhelpers/docs/en/cache.md) - manages the MODX cache.
-* parents() - gets all of the parent resource ids for a given resource. The short call of ```$modx->getParentIds```.
-* children() - gets all of the child resource ids for a given resource. The short call of ```$modx->getChildIds```.
+* parents() - gets all of the parent resource ids for a given resource. The short call of ```$modx->getParentIds()```.
+* children() - gets all of the child resource ids for a given resource. The short call of ```$modx->getChildIds()```.
 * [pls()](./core/components/modhelpers/docs/en/pls.md) - to work with placeholders.
 * [pls_delete()](./core/components/modhelpers/docs/en/pls_delete.md) - removes the specified placeholders.
 * lang() - to work with lexicon records. Can be used instead of ```$modx->lexicon()```.
@@ -19,15 +20,15 @@ Available functions:
 * columns() - gets select columns from a specific class for building a query. Can be used instead of ```xPDO::getSelectColumns()```.
 * [email()](./core/components/modhelpers/docs/en/email.md) - sends an email.
 * [email_user()](./core/components/modhelpers/docs/en/email_user.md) - sends an email to the specified user.
-* [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Strips HTML tags and removes the specified characters. It's like the ```modX::sanitizeString``` method.
+* [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Strips HTML tags and removes the specified characters. It's like the ```modX::sanitizeString()``` method.
 * quote() - quote the string.
 * escape() - escapes the provided string using the platform-specific escape character.
-* css() - registers CSS to be injected inside the HEAD tag of a resource.
+* css() - registers CSS to be injected inside the HEAD tag of a resource. See the modX::regClientCSS() method.
 * [script()](./core/components/modhelpers/docs/en/script.md) - registers JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
 * [html()](./core/components/modhelpers/docs/en/html.md) - registers HTML to be injected inside the HEAD tag or before the closing BODY tag.
-* chunk() - gets the specified chunk or file. Can be used instead of ```$modx->getChunk()```.
+* [chunk()](./core/components/modhelpers/docs/en/chunk.md) - gets the specified chunk or file. Can be used instead of ```$modx->getChunk()```.
 * [snippet()](./core/components/modhelpers/docs/en/snippet.md) - runs the specified snippet from DB or file. The result can be cached.
-* processor() - runs the specified processor. Equivalent of the ```$modx->runProcessor()```.
+* processor() - runs the specified processor. Equivalent to the ```$modx->runProcessor()```.
 * is_ajax() - returns true if the current request is asynchronous (ajax).
 * [is_auth()](./core/components/modhelpers/docs/en/is_auth.md) - determines if the user is authenticated in a specific context.
 * is_guest() - determines if the user is a guest. Checks equality ```$modx->user->id == 0```
@@ -37,7 +38,7 @@ Available functions:
 * can() - returns true if user has the specified policy permission. Can be used instead of ```$modx->hasPermission()```.
 * resource_id() | res_id() - gets the id of the current resource. Returns the value of $modx->resource->id. 
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.
-* user_id() - gets the id of the current user. Returns the value of $modx->user->id.
+* user_id() - gets the id of the current user. Returns the value of ```$modx->user->id```.
 * tv() - gets the specified TV of the current resource. 
 * object() - to work with objects of MODX.
 * [collection()](https://modzone.ru/documentation/modhelpers/collection-manager.html) - to work with collections.
@@ -45,7 +46,7 @@ Available functions:
 * resources() - works with a resource collection.
 * [user()](./core/components/modhelpers/docs/en/user.md) - works with a user object.
 * users() - works with a user collection.
-* object_exists() - checks if the specified object exists.
+* [object_exists()](./core/components/modhelpers/docs/en/object_exists.md) - checks if the specified object exists.
 * [user_exists()](./core/components/modhelpers/docs/en/user_exists.md) - checks the specified user exists.
 * [resource_exists()](./core/components/modhelpers/docs/en/resource_exists.md) - checks the specified resource exists.
 * [log_error()](./core/components/modhelpers/docs/en/logger.md) — logs to the error log for the ERROR log level.
@@ -61,7 +62,7 @@ Available functions:
 * [login()](./core/components/modhelpers/docs/en/login.md) - force login the specified user to the current context.
 * [logout()](./core/components/modhelpers/docs/en/logout.md) - force logout the current user.
 * array_empty() - checks the variable is an array and empty.
-* array_empty() - checks the variable is an array and not empty.
+* array_notempty() - checks the variable is an array and not empty.
 * [array_trim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning and end of an array values.
 * [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning of an array values.
 * [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the end of an array values.

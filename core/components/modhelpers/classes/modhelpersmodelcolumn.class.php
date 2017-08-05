@@ -252,8 +252,11 @@ class modHelpersModelColumn
                 $cardinality = 'one';
                 $owner = 'local';
                 break;
+            default:
+                log_error('[Model] Incorrect method name.');
+                return $this;
         }
-        if (!isset($cardinality)) return $this;
+//        if (!isset($cardinality)) return $this;
         $arguments = array();
         $arguments[] = $parameters[0];
         $arguments[] = array(

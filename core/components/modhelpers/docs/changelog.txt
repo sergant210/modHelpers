@@ -1,3 +1,12 @@
+1.5.0-pl
+==============
+- IMPORTANT! Changed the signature of the session() function. To put data to the session use an array.
+- Added function "session_pull".
+- Added function "default_if".
+- Added method "log" to the modHelpersMailer class. It can be helpful for testing.
+- Added method "toArray" to the modHelpersMailer class.
+- Added method "tpl" to the modHelpersMailer class which set a chunk as template for the email content.
+
 1.4.0-beta
 ==============
 - Added function "is_mobile".
@@ -25,7 +34,7 @@
 
 1.2.0-beta
 ==============
-- Added function "load_model" for custom table.
+- Added function "load_model" for a custom table or base objects.
 - Added method "joinGroup" to the collection class for users and resources.
 - Added method "leaveGroup" to the collection class for users and resources.
 - Added method "whereIn" to the collection class for users and resources.

@@ -111,8 +111,7 @@ class modHelpersCollectionManager
             $unions = $this->addUnion();
             if (!empty($unions)) $data = array_merge($data, $unions);
         }
-        if ($toString) $data = print_r($data,1);
-        return $data;
+        return $toString ? print_str($data, 1) : $data;
     }
 
     public function all($name = null)
@@ -487,7 +486,7 @@ class modHelpersCollectionManager
                 case is_string($group):
                     $query = $alias.'`id` IN (SELECT `groupMember`.`member` FROM ' . table_name('modUserGroupMember') . ' as `groupMember`' .
                         ' JOIN ' . table_name('modUserGroup') . ' as `Groups` ON `Groups`.`id` = `groupMember`.`user_group`' .
-                        " WHERE `Groups`.`name` LIKE '$group')";
+                        " WHERE `Groups`.`name` LIKE " . $this->modx->quote($group) . ")";
                     $this->query->where($query);
                     break;
             }

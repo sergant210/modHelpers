@@ -1,6 +1,4 @@
 <?php
-//require_once __DIR__ . '/classes.php';
-
 /***********************************************/
 /*              Functions                      */
 /***********************************************/
@@ -34,21 +32,19 @@ if (!function_exists('redirect')) {
      * Redirect to the specified url or page
      * @param string|int $url Url or page id
      * @param array|string|bool $options Options
-     * @param string $type
-     * @param string $responseCode
      */
-    function redirect($url, $options = false, $type = '', $responseCode = '')
+    function redirect($url, $options = false)
     {
         global $modx;
         if (is_numeric($url)) {
             if (is_string($options)) {
                 $ctx = $options;
             } else {
-                $ctx = isset($options['context']) ? $options['context'] : '';
+                $ctx = $options['context'] ?: '';
             }
             $url = url($url, $ctx);
         }
-        if (!empty($url)) $modx->sendRedirect($url, $options, $type, $responseCode);
+        if (!empty($url)) $modx->sendRedirect($url, $options);
     }
 }
 if (!function_exists('forward')) {
@@ -103,7 +99,7 @@ if (!function_exists('config')) {
         global $modx;
         if (!empty($key)) {
             if (is_array($key)) {
-                if (!can('settings')) return false;
+                //if (!can('settings')) return false;
                 foreach ($key as $itemKey => $itemValue) {
                     $modx->config[$itemKey] = $itemValue;
                 }
@@ -119,49 +115,90 @@ if (!function_exists('session')) {
     /**
      * Manages the session
      * @param string $key Use the dot notation.
-     * @param string|null $value Value or NULL.
+     * @param string|bool $default In getting mode - default value. If setting - don't use the dot notation.
+     * @param bool $flat Don't use the dot notation
      * @return mixed
      */
-    function session($key = '', $value = '')
+    function session($key = null, $default = null, $flat = false)
+    {
+        if (is_null($key)) {
+            return $_SESSION ?: null;
+        }
+        // Set the value
+        if (is_array($key)) {
+            foreach ($key as $arrKey => $arrValue) {
+                // Flat mode
+                if ($default) {
+                    $_SESSION[$arrKey] = $arrValue;
+                    continue;
+                }
+                $keys = explode('.', $arrKey);
+                if (count($keys) == 1) {
+                    $_SESSION[array_shift($keys)] = $arrValue;
+                } else {
+                    $_key = array_shift($keys);
+                    if (!isset($_SESSION[$_key]) || !is_array($_SESSION[$_key])) {
+                        $_SESSION[$_key] = array();
+                    }
+                    $array =& $_SESSION[$_key];
+                    while (count($keys) > 1) {
+                        $_key = array_shift($keys);
+                        $array[$_key] = array();
+                        $array = &$array[$_key];
+                    }
+                    $array[array_shift($keys)] = $arrValue;
+                }
+            }
+//            return $_SESSION;
+        } else {
+            // Get the value
+            if ($flat) {
+                return $_SESSION[$key] ?: $default;
+            }
+            $array = $_SESSION;
+            foreach (explode('.', $key) as $segment) {
+                if (isset($array[$segment])) {
+                    $array = $array[$segment];
+                } else {
+                    return $default;
+                }
+            }
+            return $array;
+        }
+    }
+
+}
+if (!function_exists('session_pull')) {
+    /**
+     * Get the value of a given key and then unset it.
+     * @param string $key Use the dot notation.
+     * @param bool $flat Don't use the dot notation.
+     * @return mixed
+     */
+    function session_pull($key, $flat = false)
     {
         if (empty($key)) {
-            return $_SESSION;
+            return $_SESSION ?: null;
         }
-        $delete = is_null($value);
-        if (!empty($value) || $delete) {
-            $keys = explode('.', $key);
-            if (count($keys) == 1) {
-                $rootKey = array_shift($keys);
-                $_SESSION[$rootKey] = $value;
-            } else {
-                $_key = array_shift($keys);
-                if (!isset($rootKey)) $rootKey = $_key;
-                if (! isset($array[$key]) || ! is_array($array[$key])) {
-                    $_SESSION[$_key] = array();
+        if ($flat) {
+            $output = $_SESSION[$key];
+            unset($_SESSION[$key]);
+        } else {
+            $array =& $_SESSION;
+            $parts = explode('.', $key);
+            while (count($parts) > 1) {
+                $part = array_shift($parts);
+                if (isset($array[$part]) && is_array($array[$part])) {
+                    $array =& $array[$part];
+                } else {
+                    return null;
                 }
-                $array =& $_SESSION[$_key];
-                while (count($keys) > 1) {
-                    $_key = array_shift($keys);
-                    $array[$_key] = array();
-                    $array = &$array[$_key];
-                }
-                $array[array_shift($keys)] = $delete ? null : $value;
             }
-            return $_SESSION[$rootKey];
+            $part = array_shift($parts);
+            $output = $array[$part];
+            unset($array[$part]);
         }
-        if (isset($_SESSION[$key])) {
-            return $_SESSION[$key];
-        }
-        $array = $_SESSION;
-        foreach (explode('.', $key) as $segment) {
-            if (isset($array[$segment])) {
-                $array = $array[$segment];
-            } else {
-                return '';
-            }
-        }
-
-        return $array;
+        return $output;
     }
 }
 if (!function_exists('cache')) {
@@ -186,9 +223,9 @@ if (!function_exists('cache')) {
         if (is_array($key)) {
             foreach ($key as $itemKey => $itemValue) {
                 $lifetime = isset($options[xPDO::OPT_CACHE_EXPIRES]) ? $options[xPDO::OPT_CACHE_EXPIRES] : 0;
-                $response = $modx->getCacheManager()->set($itemKey, $itemValue, $lifetime, $options);
+                $cacheManager = $modx->getCacheManager()->set($itemKey, $itemValue, $lifetime, $options);
             }
-            return $response;
+            return $cacheManager ?: null;
         } else {
             return $modx->getCacheManager()->get($key, $options);
         }
@@ -273,52 +310,29 @@ if (!function_exists('email')) {
     function email($email='', $subject='', $content = '')
     {
         global $modx;
-        if (func_num_args() == 0) return new modHelpersMailer($modx);
+        $mailer = new modHelpersMailer($modx);
+        if (func_num_args() == 0) return $mailer;
         if (is_array($subject)) {
             $options = $subject;
         } else {
             $options = compact('subject','content');
         }
         if (empty($email)) return false;
-        $options['sender'] = isset($options['sender']) ? $options['sender'] : $modx->getOption('emailsender');
-        $options['from'] = isset($options['from']) ? $options['from'] : $modx->getOption('emailsender');
-        $options['fromName'] = isset($options['fromName']) ? $options['emailFromName'] : $modx->getOption('site_name');
-        /* @var modPHPMailer $mail */
-        $mail = $modx->getService('mail', 'mail.modPHPMailer');
-        $mail->setHTML(true);
-        $mail->set(modMail::MAIL_SUBJECT, $options['subject']);
-        $mail->set(modMail::MAIL_BODY, $options['content']);
-        $mail->set(modMail::MAIL_SENDER, $options['sender']);
-        $mail->set(modMail::MAIL_FROM, $options['from']);
-        $mail->set(modMail::MAIL_FROM_NAME, $options['fromName']);
-        if (!empty($options['cc'])) $mail->address('cc', $options['cc']);
-        if (!empty($options['bcc'])) $mail->address('bcc', $options['bcc']);
-        if (!empty($options['replyTo'])) $mail->address('reply-to', $options['replyTo']);
+        $mailer->to($email);
+        foreach (array('sender','from','fromName','subject','content','cc','bcc','replyTo') as $prop) {
+            if (!empty($options[$prop])) $mailer->$prop($options[$prop]);
+        }
         if (!empty($options['attach'])) {
             if (is_array($options['attach'])) {
                 foreach ($options['attach'] as $name => $file) {
                     if (!is_string($name)) $name = '';
-                    $mail->attach($file, $name);
+                    $mailer->attach($file, $name);
                 }
             } else {
-                $mail->attach($options['attach']);
+                $mailer->attach($options['attach']);
             }
         }
-
-        if (is_array($email)) {
-            foreach ($email as $e) {
-                $mail->address('to', $e);
-            }
-        } else {
-            $mail->address('to', $email);
-        }
-        if (!$mail->send()) {
-            $modx->log(modX::LOG_LEVEL_ERROR, 'An error occurred while trying to send the email: ' . $mail->mailer->ErrorInfo);
-            $mail->reset();
-            return false;
-        }
-        $mail->reset();
-        return true;
+        return $mailer->send();
     }
 }
 if (!function_exists('email_user')) {
@@ -615,7 +629,7 @@ if (!function_exists('user')) {
         } elseif (is_string($criteria)) {
             $criteria = array('username' => $criteria);
         }
-        $userManager = object('modUser', $criteria);
+        $userManager = object('modUser', $criteria)->withProfile();
 
         return (isset($criteria) && $asObject) ? $userManager->get() : $userManager->toArray();
     }
@@ -806,18 +820,18 @@ if (!function_exists('user_exists')) {
 if (!function_exists('user_id')) {
     /**
      * Gets id of the current user.
-     * @return int
+     * @return int|null
      */
     function user_id()
     {
         global $modx;
-        return isset($modx->user) ? $modx->user->id : false;
+        return isset($modx->user) ? $modx->user->id : null;
     }
 }
 if (!function_exists('res_id')) {
     /**
      * Gets id of the current resource.
-     * @return int
+     * @return int|null
      */
     function res_id()
     {
@@ -827,12 +841,12 @@ if (!function_exists('res_id')) {
 if (!function_exists('resource_id')) {
     /**
      * Gets id of the current resource.
-     * @return int
+     * @return int|null
      */
     function resource_id()
     {
         global $modx;
-        return isset($modx->resource) ? $modx->resource->id : false;
+        return isset($modx->resource) ? $modx->resource->id : null;
     }
 }
 if (!function_exists('template_id')) {
@@ -843,21 +857,21 @@ if (!function_exists('template_id')) {
     function template_id()
     {
         global $modx;
-        return isset($modx->resource) ? $modx->resource->template : false;
+        return isset($modx->resource) ? $modx->resource->template : null;
     }
 }
 
 if (!function_exists('tv')) {
     /**
      * Gets TV of the current resource.
-     * @param mixed $id
-     * @return null|mixed
+     * @param mixed $id Either the ID of the TV, or the name of the TV.
+     * @return null|mixed The value of the TV for the Resource, or null if the TV is not found.
      */
     function tv($id)
     {
         global $modx;
 
-        return isset($modx->resource) ? $modx->resource->getTVValue($id) : false;
+        return isset($modx->resource) ? $modx->resource->getTVValue($id) : null;
     }
 }
 
@@ -868,7 +882,7 @@ if (!function_exists('str_clean')) {
      * @param string $str
      * @param string|array $chars Magic. Chars or allowed tags.
      * @param array $allowedTags Allowed tags.
-     * @return string .
+     * @return string
      */
     function str_clean($str, $chars = '/\'"();><', $allowedTags = array())
     {
@@ -889,7 +903,7 @@ if (!function_exists('table_name')) {
      *
      * @param string $className
      * @param bool $includeDb
-     * @return string Название таблицы.
+     * @return string
      */
     function table_name($className, $includeDb = false)
     {
@@ -943,7 +957,7 @@ if (!function_exists('log_error')) {
     /**
      * $modx->log(modX::LOG_LEVEL_ERROR,$message)
      *
-     * @param string $message
+     * @param string|array $message
      * @param bool $changeLevel Change log level
      * @param string $target
      */
@@ -1260,7 +1274,7 @@ if (!function_exists('array_trim')) {
      * @param mixed $value
      * @param string $chars
      * @param string $func Trim functions - trim, ltrim, rtrim.
-     * @return string
+     * @return string|array
      */
     function array_trim($value, $chars = '', $func = 'trim')
     {
@@ -1594,6 +1608,26 @@ if (! function_exists('str_limit')) {
         return function_exists('mb_strimwidth')
                             ? rtrim(mb_strimwidth($string, 0, $limit, $end, 'UTF-8'))
                             : rtrim(substr($string, 0, $limit)) . $end;
+    }
+}
+
+if (! function_exists('default_if')) {
+    /**
+     * Returns default value if a given value equals null or the specified value.
+     *
+     * @param  mixed $value
+     * @param  mixed $default
+     * @param null $compared
+     * @return mixed
+     */
+    function default_if($value, $default = '', $compared = null)
+    {
+        if (isset($compared)) {
+            $value = $value === $compared ? $default : $value;
+        } elseif (is_null($value)) {
+            $value = $default;
+        }
+        return $value;
     }
 }
 /*if (!function_exists('queue')) {

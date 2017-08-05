@@ -7,8 +7,8 @@ Sends an email.
 - $content (string) - email body.
 
 If no arguments are passed the function returns an object of the special mailer class which allows to use chains of methods.
+#### Simple using
 ```php
-# Simple using
 email('user@mail.ru', 'Subject', 'Message body');
 # Sending to multiple users
 email(['user1@mail.ru','user2@mail.ru','user3@mail.ru'], 'Subject', 'Message body');
@@ -29,13 +29,16 @@ $params = array(
 if (! email('user@mail.ru', $params)) {
     // Some trouble. See the MODX error log.
 }
-# Use the mailer object
+```
+#### Use the mailer object
+```php
 email()
 	->to('user1@mail.ru')
 	->toUser(5)
 	->cc('user2@mail.ru') 
 	->subject('Subject')
 	->content('Message body')
+	->tpl('chunkName or file', $params) // ignored if the content is set.
 	->from('Administrator')
 	->replyTo('admin@mysite.com')
 	->attach('path/to/file1.jpg')
@@ -43,7 +46,7 @@ email()
 	->send();
 ```
 Use queues to defer the sending emails.
- ```php
+```php
 # Use the mailer object
 email()
 	->to('user1@mail.ru')
@@ -55,7 +58,7 @@ email()
 	->replyTo('admin@mysite.com')
 	->attach('path/to/file1.jpg')
 	->attach('path/to/file2.png')
-	->toQueue(); // or save()
+	->queue(); // or save()
 ```
 You can create different queues for different tasks.
 ```php
@@ -73,5 +76,20 @@ All email will be stored to the cache. Then set the cron job.
 email()->sendFromQueue(for_admin);
 // or
 email()->saved(for_admin);
+```
+Testing the email functionality. Use the log() method to save the email data to the log or use the toArray() method to output the data to the page.
+```php
+# Email to log
+email()
+	->to('user1@mail.ru')
+	->toUser(5)
+	->cc('user2@mail.ru') 
+	->subject('Subject')
+	->tpl(MODX_CORE_PATH . 'chunks/myChunk.tpl', $params)
+	->from('Administrator')
+	->replyTo('admin@mysite.com')
+	->attach('path/to/file1.jpg')
+	->attach('path/to/file2.png')
+	->log() // to get the email data in the json format use log(true)
 
 ```

@@ -5,10 +5,10 @@ Checks if the specified user exists
 - $criteria(string|integer|array) - User id, username or an array.
 
 ```php
-if (user_exists(['email'=>'admin@mail.com']) {
+if (user_exists(['email'=>'admin@mail.com'])) {
     // The user with the specified email exists
 }
-if (user_exists(['username'=>'manager']) {
+if (user_exists(['username'=>'manager'])) {
     // The user with the specified username exists
 }
 ```
