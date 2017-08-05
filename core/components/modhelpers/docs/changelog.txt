@@ -1,4 +1,4 @@
-1.5.0-pl
+2.0.0-pl
 ==============
 - IMPORTANT! Changed the signature of the session() function. To put data to the session use an array.
 - Added function "session_pull".

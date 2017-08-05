@@ -28,9 +28,3 @@ if (isset($data) && $data == array()) {
 	$message = 'The array is empty!';
 }
 ```
-Example 4.
-```php
-if (default_if($user['name'], true, 'John')) {...}
-// is equivalent to
-if (isset($user['name']) && $user['name'] == 'John') {...}
-```
