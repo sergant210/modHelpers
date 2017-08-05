@@ -24,7 +24,7 @@ Example 3.
 ```php
 $message = default_if($data, 'The array is empty!', array()); 
 // is equivalent to
-if (isset($data) && is_array($data)) {
+if (isset($data) && $data == array()) {
 	$message = 'The array is empty!';
 }
 ```
@@ -33,5 +33,4 @@ Example 4.
 if (default_if($user['name'], true, 'John')) {...}
 // is equivalent to
 if (isset($user['name']) && $user['name'] == 'John') {...}
- 
 ```
