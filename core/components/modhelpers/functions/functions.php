@@ -319,7 +319,7 @@ if (!function_exists('email')) {
         }
         if (empty($email)) return false;
         $mailer->to($email);
-        foreach (array('sender','from','fromName','subject','content','cc','bcc','replyTo') as $prop) {
+        foreach (array('sender','from','fromName','subject','content','cc','bcc','replyTo','tpl') as $prop) {
             if (!empty($options[$prop])) $mailer->$prop($options[$prop]);
         }
         if (!empty($options['attach'])) {

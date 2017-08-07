@@ -37,12 +37,12 @@
 - Added function "load_model" for a custom table or base objects.
 - Added method "joinGroup" to the collection class for users and resources.
 - Added method "leaveGroup" to the collection class for users and resources.
-- Added method "whereIn" to the collection class for users and resources.
-- Added method "whereNotIn" to the collection class for users and resources.
-- Added method "whereLike" to the collection class for users and resources.
-- Added method "whereNotLike" to the collection class for users and resources.
-- Added method "whereIsNull" to the collection class for users and resources.
-- Added method "whereIsNotNull" to the collection class for users and resources.
+- Added method "whereIn" to the collection class.
+- Added method "whereNotIn" to the collection class.
+- Added method "whereLike" to the collection class.
+- Added method "whereNotLike" to the collection class.
+- Added method "whereIsNull" to the collection class.
+- Added method "whereIsNotNull" to the collection class.
 - Added class modHelpersMailer which allows to use chains of methods.
 - Removed the functions "pdotools" and "pdofetch".
 
