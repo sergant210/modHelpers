@@ -1,3 +1,14 @@
+2.1.0-pl
+==============
+- Added function "is_tablet".
+- Added function "is_desktop".
+- Added function "app".
+- Added function "filter_data".
+- Added function "null_if".
+- Added the "relogin" parameter to the "logout" function.
+- Improve the "pls" function.
+- Improve the "parse" function.
+
 2.0.0-pl
 ==============
 - IMPORTANT! Changed the signature of the session() function. To put data to the session use an array.
@@ -5,7 +16,7 @@
 - Added function "default_if".
 - Added method "log" to the modHelpersMailer class. It can be helpful for testing.
 - Added method "toArray" to the modHelpersMailer class.
-- Added method "tpl" to the modHelpersMailer class which set a chunk as template for the email content.
+- Added method "tpl" to the modHelpersMailer class which set a chunk for the email content.
 
 1.4.0-beta
 ==============

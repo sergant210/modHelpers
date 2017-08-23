@@ -264,8 +264,8 @@ if (!function_exists('pls')) {
     /**
      * Gets/sets placeholders
      * @param string|array $key String to get a placeholder, array ('key'=>'value') - to set one/ones.
-     * @param string $default
-     * @return array|bool|string
+     * @param string $default Default value (if getting) or the options (if setting).
+     * @return mixed
      */
     function pls($key = '', $default = '')
     {
@@ -275,10 +275,16 @@ if (!function_exists('pls')) {
             return $modx->placeholders;
         }
         if (is_array($key)) {
-            foreach ($key as $itemKey => $itemValue) {
-                $modx->placeholders[$itemKey] = $itemValue;
+            $options = array(
+                'prefix' => '',
+                'separator' => '.',
+                'restore' => false,
+            );
+            if (is_array($default)) {
+                $options = array_merge($options, $default);
             }
-            return true;
+            extract($options);
+            return $modx->toPlaceholders($key, $prefix, $separator, $restore);
         } else {
             return isset($modx->placeholders[$key]) ? $modx->placeholders[$key] : $default;
         }
@@ -514,7 +520,7 @@ if (!function_exists('object')) {
     /**
      * Gets an object of the specified class.
      * @param string $class
-     * @param integer|array $criteria
+     * @param integer|array|xPDOCriteria $criteria A valid xPDO criteria expression.
      * @return modHelpersObjectManager
      */
     function object($class, $criteria = null)
@@ -522,10 +528,10 @@ if (!function_exists('object')) {
         global $modx;
         $object = new modHelpersObjectManager($modx, $class);
         if (isset($criteria)) {
-            if (is_numeric($criteria)) {
+            if (is_scalar($criteria)) {
                 $pk = $modx->getPK($class);
-                $where = array($pk => (int) $criteria);
-            } elseif (is_array($criteria)) {
+                $where = array($pk => $criteria);
+            } else {
                 $where = $criteria;
             }
             if (isset($where)) {
@@ -539,14 +545,14 @@ if (!function_exists('collection')) {
     /**
      * Gets a collection of the specified class.
      * @param string $class
-     * @param array $criteria
+     * @param mixed $criteria A valid xPDO criteria expression.
      * @return modHelpersCollectionManager
      */
     function collection($class = '', $criteria = null)
     {
         global $modx;
         $collection = new modHelpersCollectionManager($modx, $class);
-        if (isset($criteria) && is_array($criteria)) {
+        if (!empty($criteria)) {
             $collection->where($criteria);
         }
         return $collection;
@@ -616,7 +622,7 @@ if (!function_exists('resources')) {
 
 if (!function_exists('user')) {
     /**
-     * Gets a user object.
+     * Gets a user object or an array of user's data.
      * @param int|string|array $criteria User id, username or array.
      * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modUser
@@ -636,6 +642,7 @@ if (!function_exists('user')) {
 }
 if (!function_exists('users')) {
     /**
+     * Gets a collection of user's objects or user's data.
      * @param array $criteria
      * @param bool $asObject True to return an array of the user objects. Otherwise - an array of users data arrays.
      * @return array|modHelpersCollectionManager
@@ -682,13 +689,13 @@ if (!function_exists('is_auth')) {
     function is_auth($ctx = '')
     {
         global $modx;
-        if (empty($ctx)) $ctx = $modx->context->get('key');
-        return ($modx->user->id > 0) ? $modx->user->isAuthenticated($ctx) : false;
+        if (! trim($ctx)) $ctx = $modx->context->get('key');
+        return is_object($modx->user) ? $modx->user->isAuthenticated($ctx) : false;
     }
 }
 if (!function_exists('is_guest')) {
     /**
-     * Checks the user is guest.
+     * Checks if the user is a guest
      * @return bool
      */
     function is_guest()
@@ -699,7 +706,7 @@ if (!function_exists('is_guest')) {
 }
 if (!function_exists('can')) {
     /**
-     * Returns true if user has the specified policy permission.
+     * Returns true if the user has the specified policy permission.
      * @param string $pm Permission
      * @return bool
      */
@@ -960,6 +967,9 @@ if (!function_exists('log_error')) {
      * @param string|array $message
      * @param bool $changeLevel Change log level
      * @param string $target
+     * @param string $def
+     * @param string $file
+     * @param string $line
      */
     function log_error($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
@@ -975,6 +985,9 @@ if (!function_exists('log_warn')) {
      * @param string $message
      * @param bool $changeLevel Change log level
      * @param string $target
+     * @param string $def
+     * @param string $file
+     * @param string $line
      */
     function log_warn($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
@@ -990,6 +1003,9 @@ if (!function_exists('log_info')) {
      * @param string $message
      * @param bool $changeLevel Change log level
      * @param string $target
+     * @param string $def
+     * @param string $file
+     * @param string $line
      */
     function log_info($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
@@ -1005,6 +1021,9 @@ if (!function_exists('log_debug')) {
      * @param string $message
      * @param bool $changeLevel Change log level
      * @param string $target
+     * @param string $def
+     * @param string $file
+     * @param string $line
      */
     function log_debug($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
@@ -1061,7 +1080,6 @@ if (!function_exists('memory')) {
     }
 }
 if (!function_exists('faker')) {
-    $Faker = false;
     /**
      * Makes fake data
      * @see https://github.com/fzaninotto/Faker
@@ -1071,42 +1089,42 @@ if (!function_exists('faker')) {
      */
     function faker($property = '', $locale = '')
     {
-        global $Faker;
-        if (!$Faker) {
-            if (empty($locale)) {
-                $lang = config('cultureKey');
-                switch ($lang) {
-                    case 'ru':
-                        $locale = 'ru_RU';
-                        break;
-                    case 'de':
-                        $locale = 'de_DE';
-                        break;
-                    case 'fr':
-                        $locale = 'fr_FR';
-                        break;
-                    default:
-                        $locale = 'en_US';
+        if (!app()->bound('faker')) {
+            app()->singleton('faker', function() use ($locale) {
+                if (empty($locale)) {
+                    $lang = config('cultureKey');
+                    switch ($lang) {
+                        case 'ru':
+                            $locale = 'ru_RU';
+                            break;
+                        case 'de':
+                            $locale = 'de_DE';
+                            break;
+                        case 'fr':
+                            $locale = 'fr_FR';
+                            break;
+                        default:
+                            $locale = 'en_US';
+                    }
                 }
-            }
-
-            $Faker = \Faker\Factory::create($locale);
+                return \Faker\Factory::create($locale);
+            });
         }
-        if (func_num_args() == 0) return $Faker;
+        $faker = app('faker');
+        if (func_num_args() == 0) return $faker;
 
         try {
             if (is_array($property)) {
                 $func = key($property);
                 $params = current($property);
-                $output = call_user_func_array(array($Faker, $func), $params);
+                $output = call_user_func_array(array($faker, $func), $params);
             } else {
-                $output = $Faker->$property;
+                $output = $faker->$property;
             }
         } catch (Exception $e) {
             log_error($e->getMessage());
             $output = '';
         }
-
         return  $output;
     }
 }
@@ -1173,19 +1191,19 @@ if (!function_exists('load_model')) {
 if (!function_exists('login')) {
     /**
      * Logs in the specified user.
-     * @param int|modUser $user
+     * @param mixed $user
      * @return bool
      */
     function login($user)
     {
         global $modx;
         if (is_scalar($user) || is_array($user)) $user = user($user);
-        if ($user instanceof modUser) {
+        if ($user instanceof modUser && !$user->hasSessionContext($modx->context->key)) {
             $modx->user = $user;
             $modx->user->addSessionContext($modx->context->key);
-            return true;
+            $modx->getUser();
         }
-        return false;
+        return ($user instanceof modUser) ? true : false;
     }
 }
 if (!function_exists('logout')) {
@@ -1193,26 +1211,30 @@ if (!function_exists('logout')) {
      * Logs out the current user.
      * @param bool $redirect True to redirect to the unauthorized page.
      * @param int $code Response code
+     * @param bool $relogin Only logout or login as admin (if the user is authenticated in the mgr context).
      * @return bool
      */
-    function logout($redirect = false, $code = 401)
+    function logout($redirect = false, $code = 401, $relogin = true)
     {
         global $modx;
         $response = $modx->runProcessor('security/logout');
         if ($response->isError()) {
-            $modx->log(modX::LOG_LEVEL_ERROR, 'Logout error of the user: '.$modx->user->get('username').' ('.$modx->user->get('id').').');
+            $modx->log(modX::LOG_LEVEL_ERROR, 'Logout error of the user: '.$modx->user->get('username').' ('.$modx->user->get('id').'). Response: ' . $response->getMessage());
             return false;
         }
-        $modx->user = $modx->getAuthenticatedUser('mgr');
-        if (!is_object($modx->user) || !$modx->user instanceof modUser) {
-            if ($redirect) abort($code);
+        if ($relogin) {
+            $modx->getUser();
+        } else {
             $modx->user = $modx->newObject('modUser');
             $modx->user->fromArray(array(
                 'id' => 0,
                 'username' => $modx->getOption('default_username', '', '(anonymous)', true)
             ), '', true);
             $modx->toPlaceholders($modx->user->get(array('id','username')),'modx.user');
+
         }
+        if ($redirect) abort($code);
+
         return true;
     }
 }
@@ -1226,20 +1248,59 @@ if (!function_exists('is_ajax')) {
         return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
 }
+if (! function_exists('app')) {
+    /**
+     * Get the available container instance.
+     *
+     * @param  string  $abstract
+     * @param  array   $parameters
+     * @return mixed|modHelpersContainer
+     */
+    function app($abstract = null, array $parameters = array())
+    {
+        if (is_null($abstract)) {
+            return modHelpersContainer::getInstance();
+        }
+
+        return empty($parameters)
+            ? modHelpersContainer::getInstance()->make($abstract)
+            : modHelpersContainer::getInstance()->makeWith($abstract, $parameters);
+    }
+}
 if (!function_exists('is_mobile')) {
     /**
      * Mobile detector.
      * @return bool
-     * @see http://detectmobilebrowsers.com/
+     * @see http://mobiledetect.net/
      */
     function is_mobile()
     {
-        $is_mobile = false;
-        $useragent=$_SERVER['HTTP_USER_AGENT'];
-        if (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($useragent,0,4))) {
-            $is_mobile = true;
-        }
-        return $is_mobile;
+        $detector = app('detector');
+        return $detector->isMobile();
+    }
+}
+if (!function_exists('is_tablet')) {
+    /**
+     * Mobile detector.
+     * @return bool
+     * @see http://mobiledetect.net/
+     */
+    function is_tablet()
+    {
+        $detector = app('detector');
+        return $detector->isTablet();
+    }
+}
+if (!function_exists('is_desktop')) {
+    /**
+     * Mobile detector.
+     * @return bool
+     * @see http://mobiledetect.net/
+     */
+    function is_desktop()
+    {
+        $detector = app('detector');
+        return !$detector->isMobile() && !$detector->isTablet();
     }
 }
 if (!function_exists('array_empty')) {
@@ -1368,6 +1429,7 @@ if (!function_exists('echo_nl')) {
      */
     function echo_nl($string, $nl = PHP_EOL)
     {
+        if ($nl == 'br') $nl = '<br>';
         echo $string . $nl;
     }
 }
@@ -1450,17 +1512,27 @@ if (! function_exists('parse')) {
      *
      * @param string $string Text to parse.
      * @param array $data An array of placeholders to replace.
-     * @param string $prefix The placeholder prefix, defaults to [[+.
-     * @param string $suffix The placeholder suffix, defaults to ]].
+     * @param string $prefix Magic. The placeholder prefix or flag for complete parsing.
+     * @param string $suffix The placeholder suffix.
      * @return string The processed string with the placeholders replaced.
      */
     function parse($string, $data, $prefix = '[[+', $suffix = ']]')
     {
-        if (!empty($string) || $string === '0') {
+        global $modx;
+        if (!empty($string)) {
             if (is_array($data)) {
-                reset($data);
-                while (list($key, $value) = each($data)) {
-                    $string = str_replace($prefix . $key . $suffix, $value, $string);
+                if (is_bool($prefix) && $prefix) {
+                    $parser = $modx->getParser();
+                    $maxIterations = (is_numeric($suffix)) ? (int) $suffix : (int) $modx->getOption('parser_max_iterations', null, 10);
+                    $scope = $modx->toPlaceholders($data, '', '.', true);
+                    $parser->processElementTags('', $string, false, false, '[[', ']]', array(), $maxIterations);
+                    $parser->processElementTags('', $string, true, true, '[[', ']]', array(), $maxIterations);
+                    if (isset($scope['keys'])) $modx->unsetPlaceholders($scope['keys']);
+                    if (isset($scope['restore'])) $modx->toPlaceholders($scope['restore']);
+                } else {
+                    foreach ($data as $key => $value) {
+                        $string = str_replace($prefix . $key . $suffix, $value, $string);
+                    }
                 }
             }
         }
@@ -1610,7 +1682,27 @@ if (! function_exists('str_limit')) {
                             : rtrim(substr($string, 0, $limit)) . $end;
     }
 }
+if (! function_exists('str_random')) {
+    /**
+     * Generate a more truly "random" alpha-numeric string.
+     *
+     * @param  int  $length
+     * @return string
+     */
+    function str_random($length = 16)
+    {
+        $string = '';
+        while (($len = strlen($string)) < $length) {
+            $size = $length - $len;
 
+            $bytes = random_bytes($size);
+
+            $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
+        }
+
+        return $string;
+    }
+}
 if (! function_exists('default_if')) {
     /**
      * Returns default value if a given value equals null or the specified value.
@@ -1628,6 +1720,125 @@ if (! function_exists('default_if')) {
             $value = $default;
         }
         return $value;
+    }
+}
+if (! function_exists('null_if')) {
+    /**
+     * Returns NULL if the given values are equal.
+     *
+     * @param mixed $value
+     * @param mixed $compared
+     * @return mixed
+     */
+    function null_if($value, $compared = '')
+    {
+        return $value === $compared ? null : $value;
+    }
+}
+if (! function_exists('filter_data')) {
+    /**
+     * Filters the array according to the specified rules.
+     *
+     * @param  array $data
+     * @param  array $rules
+     * @param bool $intersect
+     * @return mixed
+     */
+    function filter_data(array $data, array $rules, $intersect = false)
+    {
+        global $modx;
+        $filtered = array();
+        foreach ($rules as $key => $types) {
+            $types = is_callable($types) ? array('func'=>$types) : explode('|', $types);
+            $_var = $data[$key];
+            foreach ($types as $type) {
+                $options = null;
+                if (!is_callable($type) && strpos($type, ':') !== false) {
+                    list($type, $options) = explode(':', $type);
+                }
+                if (isset($_var) || in_array($type, array('bool', 'boolean', 'default')) || is_callable($type)) {
+                    if (is_callable($type) && !in_array($type, array('implode','explode','trim','email','url'))) {
+                        if ($options == 'true') $options = true;
+                        if ($options == 'false') $options = false;
+                        if (isset($_var)) $_var = isset($options) ? $type($_var, $options) : $type($_var);
+                    } else {
+                        switch ($type) {
+                            case 'int':
+                            case 'integer':
+                                $_var = (int) $_var;
+                                break;
+                            case 'string':
+                                $_var = filter_var(trim($_var), FILTER_SANITIZE_STRING);
+                                break;
+                            case 'float':
+                                $_var = (float) $_var;
+                                break;
+                            case 'array':
+                                $_var = is_array($_var) ? $_var : (!empty($_var) ? array($_var) : array());
+                                break;
+                            case 'bool':
+                            case 'boolean':
+                                $_var = filter_var($_var, FILTER_VALIDATE_BOOLEAN);
+                                break;
+                            case 'alpha':
+                                $_var = preg_replace('/[^[:alpha:]]/', '', $_var);
+                                break;
+                            case 'alpha_num':
+                                $_var = preg_replace('/[^[:alnum:]]/', '', $_var);
+                                break;
+                            case 'num':
+                                $_var = str_replace(array('-', '+'), '', filter_var($_var, FILTER_SANITIZE_NUMBER_INT));
+                                break;
+                            case 'email':
+                                $_var = filter_var($_var, FILTER_SANITIZE_EMAIL);
+                                break;
+                            case 'url':
+                                $_var = filter_var($_var, FILTER_SANITIZE_URL);
+                                break;
+                            case 'limit':
+                                $options = !empty($options) ? explode(',', $options) : array(100, '...');
+                                if (!isset($options[1])) $options[1] = '...';
+                                $_var = str_limit($_var, $options[0], $options[1]);
+                                break;
+                            case 'implode':
+                                if (is_array($_var)) {
+                                    $delimeter = $options ?: ',';
+                                    $_var = implode($delimeter, $_var);
+                                }
+                                break;
+                            case 'explode':
+                                $delimeter = $options ?: ',';
+                                $_var = explode($delimeter, $_var);
+                                break;
+                            case 'trim':
+                                $chars = $options ?: " \t\n\r\0\x0B";
+                                if (is_array($_var)) {
+                                    $_var = array_trim($_var, $chars);
+                                } elseif (is_string($_var)) {
+                                    trim($_var, $chars);
+                                }
+                                break;
+                            case 'fromJSON':
+                                $_var = json_decode($_var, true);
+                                break;
+                            case 'toJSON':
+                                $_var = json_encode($_var, true);
+                                break;
+                            case 'default':
+                                //$option = isset($option) ? $option : null;
+                                $_var = default_if($_var, $options);
+                                break;
+                            default:
+                                if (class_exists($type)) {
+                                    $_var = $modx->getObject($type, $_var);
+                                }
+                        }
+                    }
+                }
+            }
+            if (isset($_var)) $filtered[$key] = $_var;
+        }
+        return $intersect ? $filtered : array_merge($data, $filtered);
     }
 }
 /*if (!function_exists('queue')) {

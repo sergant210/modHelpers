@@ -6,5 +6,6 @@ switch ($modx->event->name) {
         if (file_exists($file)) {
             require_once $file;
         }
+        app()->singleton('detector', 'Mobile_Detect');
         break;
 }

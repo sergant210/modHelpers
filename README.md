@@ -35,6 +35,8 @@ Available functions:
 * is_email() - validates the email. Can be used to validate the form data.
 * is_url() - validates the url.
 * is_mobile - mobile detection.
+* is_tablet - tablet detection.
+* is_desktop - desktop detection.
 * can() - returns true if user has the specified policy permission. Can be used instead of ```$modx->hasPermission()```.
 * resource_id() | res_id() - gets the id of the current resource. Returns the value of $modx->resource->id. 
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.
@@ -61,24 +63,28 @@ Available functions:
 * [load_model()](./core/components/modhelpers/docs/en/load_model.md) - loads a model for a custom table.
 * [login()](./core/components/modhelpers/docs/en/login.md) - force login the specified user to the current context.
 * [logout()](./core/components/modhelpers/docs/en/logout.md) - force logout the current user.
-* array_empty() - checks the variable is an array and empty.
-* array_notempty() - checks the variable is an array and not empty.
+* array_empty() - checks whether a variable is an empty array.
+* array_notempty() - checks whether a variable is an array and not empty.
 * [array_trim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning and end of an array values.
 * [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning of an array values.
 * [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the end of an array values.
 * [explode_trim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and trim.
 * [explode_ltrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and ltrim.
 * [explode_rtrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and rtrim.
-* echo_nl - the equivalent of ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol.
+* echo_nl - the equivalent to ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol or the specified value.
 * [print_str()](./core/components/modhelpers/docs/en/print_str.md) - extends the print_r function. Convert a given value to the string format and print it.
 * [print_d()](./core/components/modhelpers/docs/en/print_d.md) - prints the value and dies. Convert a given value to the string format, prints it and ends the script.
-* parse() - parses a string using an associative array of replacement variables. The equivalent of the ```$modx->parseChunk```.
+* parse() - parses a string using an associative array of replacement variables. The equivalent to the ```$modx->parseChunk()```.
 * [str_between()](./core/components/modhelpers/docs/en/str_between.md) - gets a substring between two tags.
 * [str_limit()](./core/components/modhelpers/docs/en/str_limit.md) - limits the number of characters in a string. 
 * [str_starts()](./core/components/modhelpers/docs/en/str_starts.md) - determines if a given string starts with a given substring.
 * [str_ends()](./core/components/modhelpers/docs/en/str_ends.md) - determines if a given string ends with a given substring.
 * [str_contains()](./core/components/modhelpers/docs/en/str_contains.md) - determines if a given string contains a given substring.
 * [str_match()](./core/components/modhelpers/docs/en/str_match.md) - determines if a given string matches a given pattern.
+* [default_if()](./core/components/modhelpers/docs/en/default_if.md) - returns default value if a given value equals null or the specified value.
+* [null_if()](./core/components/modhelpers/docs/en/null_if.md) - returns NULL if the given values are equal.
+* [app()](./core/components/modhelpers/docs/en/app.md) - gets the available container instance.
+* [filter_data()](./core/components/modhelpers/docs/en/filter_data.md) - filters the array according to the specified rules.
 
 
 ### Examples
@@ -155,11 +161,15 @@ return resources()->where(['id:IN'=>children(20)])->each(function($resource, $id
 ```
 **Set a value to the session**
 ```php
-session('key1.key2', 'value'); // => $_SESSION['key1']['key2'] = $value;
+session(['key1.key2', 'value']); // => $_SESSION['key1']['key2'] = $value;
+# Disable the dot notation parsing
+session(['key1.key2' => 'value'], true); // ==> $_SESSION['key1.key2'] = $value;
 ```
 **Get the value from session**
 ```php
 $value = session('key1.key2');  // $value = $_SESSION['key1']['key2']
+# Disable the dot notation parsing
+$value = session('key1.key2', 'default', true); // ==> $value = isset($_SESSION['key1.key2']) ? $_SESSION['key1.key2'] : 'default';
 ```
 
 **Validates the email**
@@ -187,7 +197,7 @@ $userArray = query('select * from ' . table_name('modUser'). ' WHERE id = ?')->e
 ```
 **Log error to the error log**
 ```php
-log_error($array); // The array wil be converted to a string using print_r().
+log_error($array); // The array will be converted to string using the print_r() function.
 log_error($message, 'HTML'); // Show message on the page.
 ```
 **Get the list of the pagetitles**

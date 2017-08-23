@@ -4,13 +4,16 @@ Works with placeholders.
 ```pls($key = '', $default = '')```
 
 - $key (string|array) - a placeholder to get or an associative array to set.
-- $default (mixed) - Default value if the placeholder does not exist.
+- $default (mixed) - Default value (if getting) or the options (if setting) - "prefix", "separator" and "restore". Options must be set as an array.
 
 If no arguments are passed the function return an array of all stored placeholders.
-```php
-# Get a placeholder
-$val = pls('my.Placeholder', 'Default value');
 
+#### Get a placeholder
+```php
+$val = pls('my.Placeholder', 'Default value');
+```
+#### Set placeholders
+```php
 # Set placeholder
 pls(array('my.Placeholder'=>'value'));
 
@@ -20,4 +23,11 @@ pls([
     'my.Placeholder2'=>'value2',
     'my.Placeholder3'=>'value3',
 ]);
+
+# Use options
+pls(['placeholder'=>'value'], [
+    'prefix' => 'my',
+    'separator' => '_',
+]);
+// my_placeholder
 ```

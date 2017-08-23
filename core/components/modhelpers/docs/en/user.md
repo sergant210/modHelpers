@@ -23,4 +23,7 @@ $user = user([
 ]);
 // Current user
 $username = user(user_id())->username;
+
+$user = user(['Profile.email' => 'user@mail.org']);
+
 ```

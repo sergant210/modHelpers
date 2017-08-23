@@ -15,7 +15,7 @@ $value = $_SESSION['key1']['key2']
 # Disable the dot notation parsing
 $value = session('key1.key2', '', true); 
 // is equivalent to
-$value = $_SESSION['key1.key2'] ?: '';
+$value = isset($_SESSION['key1.key2']) ? $_SESSION['key1.key2'] : '';
 ```
 #### To set data to the session
 ```php
@@ -24,7 +24,7 @@ session(['key1.key2' => 'value']);
 // is equivalent to
 $_SESSION['key1']['key2'] = $value;
 
-// Disable the dot notation parsing
+# Disable the dot notation parsing
 session(['key1.key2' => 'value'], true); 
 // is equivalent to
 $_SESSION['key1.key2'] = $value;
