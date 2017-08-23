@@ -34,20 +34,18 @@ $rules = [
 	'checkbox1' => 'bool',  // Validate as checkbox.
 	'checkbox2' => 'bool'  //  Validate as checkbox.
 ];
-// Returns all data (fullname exists and not filtered)
+// Return all data (fullname exists and not filtered)
 $filteredData = filter_data($_POST, $rules);
 //  ['id' => 5, 'name' => 'John', 'fullname' => '   Silver   ', 'checkbox1' => true, 'checkbox2' => false]
 
-// Returns only filtered (fullname does not exist)
+// Return only filtered (fullname does not exist)
 $filteredData = filter_data($_POST, $rules, true);
 //  ['id' => 5, 'name' => 'John', 'checkbox1' => true, 'checkbox2' => false]
 ```
 Use php functions
 ```php
 // $_POST = ['name' => 'john doe'];
-$post = filter_data($_POST, [
-                              'name' => 'ucwords',
-                            ]);
+$post = filter_data($_POST, ['name' => 'ucwords']);
 // $post = ['name' => 'John Doe']
 ```
 Use Closure

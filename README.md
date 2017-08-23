@@ -34,9 +34,9 @@ Available functions:
 * is_guest() - determines if the user is a guest. Checks equality ```$modx->user->id == 0```
 * is_email() - validates the email. Can be used to validate the form data.
 * is_url() - validates the url.
-* is_mobile - mobile detection.
-* is_tablet - tablet detection.
-* is_desktop - desktop detection.
+* is_mobile() - mobile detection.
+* is_tablet() - tablet detection.
+* is_desktop() - desktop detection.
 * can() - returns true if user has the specified policy permission. Can be used instead of ```$modx->hasPermission()```.
 * resource_id() | res_id() - gets the id of the current resource. Returns the value of $modx->resource->id. 
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.

@@ -11,7 +11,7 @@ Send an email to the specified user.
 email_user(5, $subject, $content);
 email_user('user1', $subject, $content);
 # Use the collection. Slow way. The function every time will get a user object to get his email.
-users()->members('Subscribers')->each(function($user){email_user($user['id']);});
+users()->members('Subscribers')->each(function($user){email_user($user['id'], 'subject', 'content');});
 # More faster
-users()->profile()->members('Subscribers')->each(function($user){email($user['email']);});
+users()->profile()->members('Subscribers')->each(function($user){email($user['email'],'subject', 'content');});
 ```
