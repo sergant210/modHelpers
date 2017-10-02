@@ -11,7 +11,7 @@ The $options array can contain the following options indicating the cache partit
 - xPDO::OPT_CACHE_EXPIRES: the default expiry time. 
 
 See [documentation](https://docs.modx.com/revolution/2.x/developing-in-modx/advanced-development/caching).
-###Store to the cache
+### Store to the cache
 ```php
 # To set data to the core/cache/default/key.cache.php
 cache(['key' => $some_data]);
@@ -25,7 +25,7 @@ cache(['key' => $some_data], 'my_data');
 # Store data for 60 seconds
 cache(['key' => $some_data], 60);
 ```
-###Getting from the cache
+### Getting from the cache
 ```php
 # The simplest way. To get the cached data from core/cache/default/key.cache.php
 $value = cache('key');
@@ -38,9 +38,9 @@ $value = cache('key', $options);
 // is equivalent to
 $value = cache('key', 'my_data');
 ```
-###Use the modHelper's CacheManager
+### Use the modHelper's CacheManager
 The function "cache" returns the object of the special CacheManager class if no arguments are passed. 
-####Store to the cache
+#### Store data in the cache
 ```set($key, $value, $lifetime = 0, $options = array())```  
 
 Examples.
@@ -57,10 +57,10 @@ cache()->set('key', $some_data, 'my_data');
 # Set the lifetime
 cache()->set('key', $some_data, 7200, 'my_data');
 ```
-####Getting from the cache
+#### Retrieve from the cache
 ```get($key, $options = array())```  
 
-Examples.
+Example.
 ```
 $options = array(
     xPDO::OPT_CACHE_KEY = 'my_data'
@@ -69,7 +69,17 @@ $value = cache()->get('key', $options);
 // is equivalent to
 $value = cache()->get('key', 'my_data');
 ```
-####Delete from the cache
+#### Retrieve & Store
+Retrieve a value from the cache. if the requested value doesn't exist, store a default value.
+```remember($key, $options, Closure $callback)```  
+
+Example. Get the number of all active users from the cache. If it doesn't exist, retrieve it from the database and store it to the cache.
+```php
+cache()->remember('count_users', 300, function() use ($modx) {
+    return $modx->getCount('modUser', array('active' => 1));
+});
+```
+#### Delete from the cache
 ```delete($key, $options = array())```  
 ```php
 // Cache file core/cache/default/key.cache.php

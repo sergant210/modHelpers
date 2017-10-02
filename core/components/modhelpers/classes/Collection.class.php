@@ -1,6 +1,13 @@
 <?php
+namespace modHelpers;
 
-class modHelpersCollectionManager
+use modX;
+use xPDOQuery;
+use PDO;
+use modUser;
+use modResource;
+
+class Collection
 {
     /** @var  modX $modx */
     protected $modx;
@@ -17,10 +24,9 @@ class modHelpersCollectionManager
     protected $tvJoins = array();
     protected $unions = array();
 
-    public function __construct(&$modx, $class='')
+    public function __construct(modX $modx, $class='')
     {
-        /** @var modX $modx */
-        $this->modx =& $modx;
+        $this->modx = $modx;
         if (empty($class) || is_numeric($class)) {
             //$this->class = 'modResource';
             $this->arrayCollection = true;
@@ -268,6 +274,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $query);
         return $this;
     }
+
     public function whereLike($field, $value, $conjunction = xPDOQuery::SQL_AND)
     {
         if (!$this->class) return $this;
@@ -275,6 +282,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
+
     public function whereNotLike($field, $value, $conjunction = xPDOQuery::SQL_AND)
     {
         if (!$this->class) return $this;
@@ -282,6 +290,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
+
     public function whereIn($field, $array, $conjunction = xPDOQuery::SQL_AND)
     {
         if (!$this->class) return $this;
@@ -290,6 +299,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
+
     public function whereNotIn($field, $array, $conjunction = xPDOQuery::SQL_AND)
     {
         if (!is_array($array)) $array = array($array);
@@ -297,6 +307,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
+
     public function whereIsNull($field, $conjunction = xPDOQuery::SQL_AND)
     {
         if (!$this->class) return $this;
@@ -304,6 +315,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
+
     public function whereIsNotNull($field, $conjunction = xPDOQuery::SQL_AND)
     {
         if (!$this->class) return $this;
@@ -311,6 +323,7 @@ class modHelpersCollectionManager
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
+
     protected function addSelect()
     {
         if (!empty($this->tvSelects)) {
@@ -460,6 +473,7 @@ class modHelpersCollectionManager
     }
 
     /**
+     * Retrieve the parsed SQL.
      * @return string
      */
     public function toSql()
@@ -468,13 +482,16 @@ class modHelpersCollectionManager
         $this->addSelect();
         $this->addJoins();
         $this->addWhere($this->query);
-//DEBUGGING
-//log_error($this->query->query, 'HTML');
         if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
         $this->query->prepare();
         return $this->query->toSQL();
     }
 
+    /**
+     * Prepare the query for users which belong to the specified group.
+     * @param integer|string $group
+     * @return Collection
+     */
     public function members($group)
     {
         if ($this->class == 'modUser') {
@@ -495,6 +512,13 @@ class modHelpersCollectionManager
         return $this;
     }
 
+    /**
+     * Joins a resource or user to the appropriate group.
+     * @param string|integer $groupId Id or name of the group.
+     * @param mixed $roleId
+     * @param integer $rank Rank for users.
+     * @return Collection
+     */
     public function joinGroup($groupId, $roleId = null,$rank = null)
     {
         if ($this->class == 'modUser' || $this->class == 'modResource') {
@@ -508,6 +532,11 @@ class modHelpersCollectionManager
         return $this;
     }
 
+    /**
+     * Removes a resource or user from the specified group.
+     * @param mixed $groupId
+     * @return Collection
+     */
     public function leaveGroup($groupId)
     {
         if ($this->class == 'modUser' || $this->class == 'modResource') {

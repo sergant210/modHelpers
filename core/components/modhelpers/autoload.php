@@ -3,6 +3,9 @@
  * Helpers files autoloader
  */
 
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/functions/functions.php';
+
 $path = __DIR__ . '/classes/';
 $files= scandir($path);
 foreach ($files as $file) {
@@ -10,5 +13,5 @@ foreach ($files as $file) {
         require_once $path . $file;
     }
 }
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/functions/functions.php';
+
+

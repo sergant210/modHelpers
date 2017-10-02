@@ -1,7 +1,15 @@
 <?php
 
-class modHelpersMailer
+namespace modHelpers;
+
+use modX;
+use modPHPMailer;
+use modMail;
+
+class Mailer
 {
+    protected static $instance;
+    /** @var modX */
     protected $modx;
     /** @var modPHPMailer $mailer */
     protected $mailer;
@@ -12,7 +20,7 @@ class modHelpersMailer
     protected $initialized = false;
 
 
-    public function __construct($modx)
+    private function __construct($modx)
     {
         /** @var  modX $modx */
         $this->modx = $modx;
@@ -21,6 +29,23 @@ class modHelpersMailer
         $this->attributes['from'] = $this->modx->getOption('emailsender');
         $this->attributes['fromName'] = $this->modx->getOption('site_name');
         $this->attributes['setHTML'] = true;
+    }
+
+    private function __clone(){}
+
+    /**
+     * Set the globally available instance of the mailer.
+     *
+     * @param modX $modx
+     * @return static
+     */
+    public static function getInstance(modX $modx)
+    {
+        if (is_null(static::$instance)) {
+            static::$instance = new static($modx);
+        }
+
+        return static::$instance;
     }
 
     protected function getUserRepository()
@@ -365,7 +390,7 @@ class modHelpersMailer
      * Store the email to the cache.
      * @param string $name Name of the queue
      * @param bool $clear Replace the existing queue
-     * @return modHelpersMailer
+     * @return Mailer
      */
     public function save($name = 'emails', $clear = false)
     {

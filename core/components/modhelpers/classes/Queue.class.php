@@ -1,6 +1,7 @@
 <?php
+namespace modHelpers;
 
-class modHelpersQueue
+class Queue
 {
     public function __construct()
     {

@@ -1,6 +1,7 @@
 <?php
+namespace modHelpers;
 
-class modHelpersModelColumn
+class ModelColumn
 {
     public $attributes = array();
     public $index = array();

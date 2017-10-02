@@ -1,3 +1,16 @@
+3.0.0-beta
+==============
+- IMPORTANT! Added namespace "modHelpers" to the modHelpers' classes.
+- The requirement of the minimum PHP version is changed to 5.5.
+- Added a new function "request".
+- Added a new function "switch_context".
+- Added a new method "object" to the Object class.
+- Added a new method "parent" to the Object class.
+- Added a new method "first" to the Query class.
+- Added a new method "toString" to the Query class.
+- Added a new method "remember" to the CacheManager class.
+- All classes can be extended.
+
 2.1.0-pl
 ==============
 - Added function "is_tablet".

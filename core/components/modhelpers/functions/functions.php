@@ -92,9 +92,10 @@ if (!function_exists('config')) {
      * Gets and sets the system settings
      * @param string|array $key
      * @param null|mixed $default
+     * @param bool $skipEmpty
      * @return array|null|string
      */
-    function config($key = '', $default = '')
+    function config($key = '', $default = '', $skipEmpty = false)
     {
         global $modx;
         if (!empty($key)) {
@@ -105,7 +106,10 @@ if (!function_exists('config')) {
                 }
                 return true;
             }
-            return isset($modx->config[$key]) ? $modx->config[$key] : $default;
+            return $skipEmpty
+                            ? (!empty($modx->config[$key]) ? $modx->config[$key] : $default)
+                            : (isset($modx->config[$key]) ? $modx->config[$key] : $default);
+
         } else {
             return $modx->config;
         }
@@ -113,11 +117,11 @@ if (!function_exists('config')) {
 }
 if (!function_exists('session')) {
     /**
-     * Manages the session
+     * Manages the session.
      * @param string $key Use the dot notation.
      * @param string|bool $default In getting mode - default value. If setting - don't use the dot notation.
      * @param bool $flat Don't use the dot notation
-     * @return mixed
+     * @return mixed|null
      */
     function session($key = null, $default = null, $flat = false)
     {
@@ -207,13 +211,17 @@ if (!function_exists('cache')) {
      * @see https://docs.modx.com/revolution/2.x/developing-in-modx/advanced-development/caching
      * @param string|array $key
      * @param null|int|string|array $options
-     * @return mixed|modCacheManager
+     * @return mixed|modHelpers\CacheManager
      */
     function cache($key = '', $options = NULL)
     {
         global $modx;
+        /** @var modHelpers\CacheManager $class */
+        $class = config('modhelpers_cacheManagerClass', 'modHelpers\CacheManager', true);
+        /** @var modHelpers\CacheManager $cacheManager */
+        $cacheManager = $class::getInstance($modx);
         if (func_num_args() == 0) {
-            return new modHelpersCacheManager($modx->getCacheManager());
+            return $cacheManager;
         }
         if (is_string($options)) {
             $options = array(xPDO::OPT_CACHE_KEY => $options);
@@ -223,11 +231,11 @@ if (!function_exists('cache')) {
         if (is_array($key)) {
             foreach ($key as $itemKey => $itemValue) {
                 $lifetime = isset($options[xPDO::OPT_CACHE_EXPIRES]) ? $options[xPDO::OPT_CACHE_EXPIRES] : 0;
-                $cacheManager = $modx->getCacheManager()->set($itemKey, $itemValue, $lifetime, $options);
+                $cacheManager->set($itemKey, $itemValue, $lifetime, $options);
             }
-            return $cacheManager ?: null;
+//            return $cacheManager ?: null;
         } else {
-            return $modx->getCacheManager()->get($key, $options);
+            return $cacheManager->get($key, $options);
         }
     }
 }
@@ -284,6 +292,9 @@ if (!function_exists('pls')) {
                 $options = array_merge($options, $default);
             }
             extract($options);
+            /** @var string $prefix */
+            /** @var string $separator */
+            /** @var bool $restore */
             return $modx->toPlaceholders($key, $prefix, $separator, $restore);
         } else {
             return isset($modx->placeholders[$key]) ? $modx->placeholders[$key] : $default;
@@ -311,12 +322,15 @@ if (!function_exists('email')) {
      * @param string|array $email Email.
      * @param string|array $subject Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
-     * @return bool|modHelpersMailer
+     * @return bool|modHelpers\Mailer
      */
     function email($email='', $subject='', $content = '')
     {
         global $modx;
-        $mailer = new modHelpersMailer($modx);
+        /** @var modHelpers\Mailer $class */
+        $class = config('modhelpers_mailerClass', 'modHelpers\Mailer', true);
+        /** @var modHelpers\Mailer $mailer */
+        $mailer = $class::getInstance($modx); // new $class($modx);
         if (func_num_args() == 0) return $mailer;
         if (is_array($subject)) {
             $options = $subject;
@@ -449,7 +463,7 @@ if (!function_exists('chunk')) {
     function chunk($chunkName, array $properties= array ())
     {
         global $modx;
-        $output = '';
+//        $output = '';
         //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
         if (strpos($chunkName, '/') !== false && file_exists($chunkName)) {
             $content = file_get_contents($chunkName);
@@ -469,7 +483,7 @@ if (!function_exists('chunk')) {
 }
 if (!function_exists('snippet')) {
     /**
-     * Runs the specified MODX or file snippet.
+     * Run the specified MODX snippet or file snippet.
      * @param string $snippetName
      * @param array $scriptProperties
      * @param int|string|array $cacheOptions
@@ -504,7 +518,7 @@ if (!function_exists('snippet')) {
 }
 if (!function_exists('processor')) {
     /**
-     * Runs the specified processor.
+     * Run the specified processor.
      * @param string $action
      * @param array $scriptProperties
      * @param array $options
@@ -518,15 +532,17 @@ if (!function_exists('processor')) {
 }
 if (!function_exists('object')) {
     /**
-     * Gets an object of the specified class.
+     * Get an object of the specified class.
      * @param string $class
      * @param integer|array|xPDOCriteria $criteria A valid xPDO criteria expression.
-     * @return modHelpersObjectManager
+     * @return modHelpers\Object
      */
     function object($class, $criteria = null)
     {
         global $modx;
-        $object = new modHelpersObjectManager($modx, $class);
+        $objectClass = config('modhelpers_objectClass', 'modHelpers\Object', true);
+        /** @var modHelpers\Object $object */
+        $object = new $objectClass($modx, $class);
         if (isset($criteria)) {
             if (is_scalar($criteria)) {
                 $pk = $modx->getPK($class);
@@ -543,15 +559,18 @@ if (!function_exists('object')) {
 }
 if (!function_exists('collection')) {
     /**
-     * Gets a collection of the specified class.
+     * Get a collection of the specified class.
      * @param string $class
      * @param mixed $criteria A valid xPDO criteria expression.
-     * @return modHelpersCollectionManager
+     * @return modHelpers\Collection
      */
     function collection($class = '', $criteria = null)
     {
         global $modx;
-        $collection = new modHelpersCollectionManager($modx, $class);
+
+        $collectionClass = config('modhelpers_collectionClass', 'modHelpers\Collection', true);
+        /** @var modHelpers\Collection $collection */
+        $collection = new $collectionClass($modx, $class);
         if (!empty($criteria)) {
             $collection->where($criteria);
         }
@@ -560,14 +579,14 @@ if (!function_exists('collection')) {
 }
 if (!function_exists('resource')) {
     /**
-     * Gets a resource object/array.
+     * Get a resource object/array.
      * @param int|array $criteria Resource id or array with criteria.
      * @param bool $asObject True to return an object. Otherwise - an array.
-     * @return array|modResource|bool|modHelpersObjectManager
+     * @return array|modResource|bool|modHelpers\Object
      */
     function resource($criteria = null, $asObject = true)
     {
-        /** @var modHelpersObjectManager $resourceManager */
+        /** @var modHelpers\Object $resourceManager */
         if (is_numeric($criteria)) {
             $criteria = array('id' => (int) $criteria);
         }
@@ -579,15 +598,15 @@ if (!function_exists('resource')) {
 }
 if (!function_exists('resources')) {
     /**
-     * Gets a collection of the resources.
+     * Get a collection of the resources.
      * @param array $criteria Criteria
      * @param bool $asObject True to return an array of the objects. Otherwise - an array of resources data arrays.
-     * @return array|bool|modHelpersCollectionManager
+     * @return array|bool|modHelpers\Collection
      */
     function resources($criteria = null, $asObject = false)
     {
         global $modx;
-        /** @var modHelpersCollectionManager $collection */
+        /** @var modHelpers\Collection $collection */
         $collection = collection('modResource');
 
         if (!isset($criteria)) {
@@ -622,14 +641,14 @@ if (!function_exists('resources')) {
 
 if (!function_exists('user')) {
     /**
-     * Gets a user object or an array of user's data.
+     * Get a user object or an array of user's data.
      * @param int|string|array $criteria User id, username or array.
      * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modUser
      */
     function user($criteria = null, $asObject = true)
     {
-        /** @var modHelpersObjectManager $userManager */
+        /** @var modHelpers\Object $userManager */
         if (is_numeric($criteria)) {
             $criteria = array('id' => (int) $criteria);
         } elseif (is_string($criteria)) {
@@ -642,15 +661,15 @@ if (!function_exists('user')) {
 }
 if (!function_exists('users')) {
     /**
-     * Gets a collection of user's objects or user's data.
+     * Get a collection of user's objects or user's data.
      * @param array $criteria
      * @param bool $asObject True to return an array of the user objects. Otherwise - an array of users data arrays.
-     * @return array|modHelpersCollectionManager
+     * @return array|modHelpers\Collection
      */
     function users($criteria = null, $asObject = false)
     {
         global $modx;
-        /** @var modHelpersCollectionManager $collection */
+        /** @var modHelpers\Collection $collection */
         $collection = collection('modUser');
 
         if (!isset($criteria)) {
@@ -974,8 +993,9 @@ if (!function_exists('log_error')) {
     function log_error($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
         global $modx;
-        modHelpersLogger::setModx($modx);
-        modHelpersLogger::error($message, $changeLevel, $target, $def, $file, $line);
+        /** @var modHelpers\Logger $class */
+        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class::getInstance($modx)->error($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('log_warn')) {
@@ -992,8 +1012,9 @@ if (!function_exists('log_warn')) {
     function log_warn($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
         global $modx;
-        modHelpersLogger::setModx($modx);
-        modHelpersLogger::warn($message, $changeLevel, $target, $def, $file, $line);
+        /** @var modHelpers\Logger $class */
+        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class::getInstance($modx)->warn($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('log_info')) {
@@ -1010,8 +1031,9 @@ if (!function_exists('log_info')) {
     function log_info($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
         global $modx;
-        modHelpersLogger::setModx($modx);
-        modHelpersLogger::info($message, $changeLevel, $target, $def, $file, $line);
+        /** @var modHelpers\Logger $class */
+        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class::getInstance($modx)->info($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('log_debug')) {
@@ -1028,8 +1050,9 @@ if (!function_exists('log_debug')) {
     function log_debug($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
         global $modx;
-        modHelpersLogger::setModx($modx);
-        modHelpersLogger::debug($message, $changeLevel, $target, $def, $file, $line);
+        /** @var modHelpers\Logger $class */
+        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class::getInstance($modx)->debug($message, $changeLevel, $target, $def, $file, $line);
     }
 }
 if (!function_exists('context')) {
@@ -1048,12 +1071,13 @@ if (!function_exists('query')) {
     /**
      * Manages a SQL query
      * @param string $query
-     * @return modHelpersQueryManager
+     * @return modHelpers\Query
      */
     function query($query)
     {
         global $modx;
-        return new modHelpersQueryManager($modx, $query);
+        $queryClass = config('modhelpers_queryClass', 'modHelpers\Query', true);
+        return new $queryClass($modx, $query);
     }
 }
 if (!function_exists('memory')) {
@@ -1171,7 +1195,9 @@ if (!function_exists('load_model')) {
             }
             return true;
         }
-        $model = new modHelpersModelBuilder($table);
+        $builderClass = config('modhelpers_modelBuilderClass', 'modHelpers\ModelBuilder', true);
+        /** @var modHelpers\ModelBuilder $model */
+        $model = new $builderClass($table);
         if (is_callable($callback)) {
             $callback($model);
             $map = $model->output();
@@ -1181,7 +1207,7 @@ if (!function_exists('load_model')) {
                 } else {
                     $modx->map[$class] = array_merge_recursive($modx->map[$class], $map);
                 }
-                if (config('modHelpers_cache_model', true)) cache()->set($key,$map);
+                if (config('modHelpers_cache_model', true)) cache()->set($key, $map);
                 return true;
             }
         }
@@ -1222,6 +1248,7 @@ if (!function_exists('logout')) {
             $modx->log(modX::LOG_LEVEL_ERROR, 'Logout error of the user: '.$modx->user->get('username').' ('.$modx->user->get('id').'). Response: ' . $response->getMessage());
             return false;
         }
+        $modx->user = null;
         if ($relogin) {
             $modx->getUser();
         } else {
@@ -1234,7 +1261,6 @@ if (!function_exists('logout')) {
 
         }
         if ($redirect) abort($code);
-
         return true;
     }
 }
@@ -1254,17 +1280,19 @@ if (! function_exists('app')) {
      *
      * @param  string  $abstract
      * @param  array   $parameters
-     * @return mixed|modHelpersContainer
+     * @return mixed|modHelpers\Container
      */
     function app($abstract = null, array $parameters = array())
     {
+        /** @var modHelpers\Container $class */
+        $class = config('modhelpers_containerClass', 'modHelpers\Container', true);
         if (is_null($abstract)) {
-            return modHelpersContainer::getInstance();
+            return $class::getInstance();
         }
 
         return empty($parameters)
-            ? modHelpersContainer::getInstance()->make($abstract)
-            : modHelpersContainer::getInstance()->makeWith($abstract, $parameters);
+            ? $class::getInstance()->make($abstract)
+            : $class::getInstance()->makeWith($abstract, $parameters);
     }
 }
 if (!function_exists('is_mobile')) {
@@ -1381,7 +1409,7 @@ if (!function_exists('explode_trim')) {
      * @param string $string
      * @param string $chars
      * @param string $func
-     * @return string
+     * @return array
      */
     function explode_trim($delimiter, $string, $chars = '', $func = 'trim')
     {
@@ -1396,7 +1424,7 @@ if (!function_exists('explode_rtrim')) {
      * @param string $delimiter
      * @param string $string
      * @param string $chars
-     * @return string
+     * @return array
      */
     function explode_rtrim($delimiter, $string, $chars = '')
     {
@@ -1411,7 +1439,7 @@ if (!function_exists('explode_ltrim')) {
      * @param string $delimiter
      * @param string $string
      * @param string $chars
-     * @return string
+     * @return array
      */
     function explode_ltrim($delimiter, $string, $chars = '')
     {
@@ -1639,14 +1667,12 @@ if (! function_exists('str_match')) {
         // to make it convenient to check if the strings starts with the given
         // pattern such as "library/*", making any string check convenient.
         $pattern = str_replace('\*', '.*', $pattern);
-
         return (bool) preg_match('#^'.$pattern.'\z#u'.$ci, $value);
     }
 }
 if (! function_exists('str_between')) {
     /**
      * Get a substring between two tags.
-     * (Taken from Laravel helpers - str_is() )
      *
      * @param  string $string
      * @param  string $start Start tag
@@ -1841,9 +1867,59 @@ if (! function_exists('filter_data')) {
         return $intersect ? $filtered : array_merge($data, $filtered);
     }
 }
+if (!function_exists('request')) {
+    /**
+     * Returns a modHelpers\Request object or an input item from the request.
+     * @param string $key
+     * @param mixed $default
+     * @return mixed|\modHelpers\Request
+     */
+    function request($key = null, $default = null)
+    {
+        $request = app('request');
+        if (func_num_args() == 0) return $request;
+        return $request->input($key, $default);
+    }
+}
+if (!function_exists('switch_context')) {
+    /**
+     * Switches the primary Context for the modX instance.
+     * @param string|array|callable $key
+     * @param array $excluded
+     * @return bool
+     */
+    function switch_context($key, $excluded = array())
+    {
+        global $modx;
+        if (is_string($key)) {
+            return $modx->switchContext($key);
+        } elseif (is_array($key)) {
+            reset($key);
+            $attribute = key($key);
+            $value = current($key);
+            if (empty($attribute) || empty($value)) return false;
+            $query = query('SELECT `context_key` FROM ' . table_name('modContextSetting') . ' WHERE `key` = ? AND TRIM(BOTH \'/\' FROM `value`) = ?')->bind($attribute, $value)->first();
+            $ctx = $query['context_key'];
+var_dump($ctx);
+            if (!empty($ctx) && !in_array($ctx, $excluded)) {
+                if ($attribute == 'base_url' && $modx->getOption('friendly_urls')) {
+                    $alias = $modx->getOption('request_param_alias', null, 'alias', true);
+                    $_REQUEST[$alias] = preg_replace('/^' . $value . '\//', '', $_REQUEST[$alias]);
+                }
+                return $modx->switchContext($ctx);
+            }
+        } elseif (is_callable($key)) {
+            $ctx = $key($modx);
+            return $modx->switchContext($ctx);
+        }
+        return false;
+    }
+}
+
+
 /*if (!function_exists('queue')) {
     function queue()
     {
-        return new modHelpersQueue;
+        return new modHelpers\Queue;
     }
 }*/

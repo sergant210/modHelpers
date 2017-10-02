@@ -1,27 +1,32 @@
 <?php
 
-class modHelpersModelBuilder
+namespace modHelpers;
+
+class ModelBuilder
 {
     protected $table;
     public $columns = array();
     protected $indexes = array();
     protected $aggregates = array();
     protected $composites = array();
+    /** @var ModelColumn $modelColumnClass*/
+    protected $modelColumnClass;
 
     public function __construct($table)
     {
         $this->table = $table;
+        $this->modelColumnClass = config('modhelpers_modelColumnClass', 'ModelColumn', true);
     }
     /**
      * Add a new char column to the model.
      *
      * @param  string  $name
      * @param  int  $precision
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function char($name, $precision = 255)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('char', $name, compact('precision'));
+        $this->columns[] = $column = new $this->modelColumnClass('char', $name, compact('precision'));
         return $column;
     }
 
@@ -30,11 +35,11 @@ class modHelpersModelBuilder
      *
      * @param  string  $name
      * @param  int  $precision
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function varchar($name, $precision = 255)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('varchar', $name, compact('precision'));
+        $this->columns[] = $column = new $this->modelColumnClass('varchar', $name, compact('precision'));
         return $column;
     }
 
@@ -42,11 +47,11 @@ class modHelpersModelBuilder
      * Add a new text column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function text($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('text', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('text', $name);
         return $column;
     }
 
@@ -54,11 +59,11 @@ class modHelpersModelBuilder
      * Add a new medium text column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function mediumText($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('mediumtext', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('mediumtext', $name);
         return $column;
     }
 
@@ -66,11 +71,11 @@ class modHelpersModelBuilder
      * Add a new long text column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function longText($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('longtext', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('longtext', $name);
         return $column;
     }
 
@@ -79,7 +84,7 @@ class modHelpersModelBuilder
      *
      * @param  string   $name
      * @param  int      $precision
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function id($name = 'id', $precision = 10)
     {
@@ -91,7 +96,7 @@ class modHelpersModelBuilder
      * @param  string   $name
      * @param  int      $precision
      * @param  bool     $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function int($name, $precision = 10, $unsigned = false)
     {
@@ -99,7 +104,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = 10;
         }
-        $this->columns[] = $column = new modHelpersModelColumn('int', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('int', $name, compact('precision', 'unsigned'));
         return $column;
     }
     /**
@@ -108,7 +113,7 @@ class modHelpersModelBuilder
      * @param  string   $name
      * @param  int      $precision
      * @param  bool     $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function tinyInt($name, $precision = 3, $unsigned = false)
     {
@@ -116,7 +121,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = 3;
         }
-        $this->columns[] = $column = new modHelpersModelColumn('tinyint', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('tinyint', $name, compact('precision', 'unsigned'));
         return $column;
     }
 
@@ -126,7 +131,7 @@ class modHelpersModelBuilder
      * @param  string   $name
      * @param  int      $precision
      * @param  bool     $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function smallInt($name, $precision = 5, $unsigned = false)
     {
@@ -134,7 +139,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = 5;
         }
-        $this->columns[] = $column = new modHelpersModelColumn('smallint', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('smallint', $name, compact('precision', 'unsigned'));
         return $column;
     }
 
@@ -144,7 +149,7 @@ class modHelpersModelBuilder
      * @param  string   $name
      * @param  int      $precision
      * @param  bool     $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function mediumInt($name, $precision = 8, $unsigned = false)
     {
@@ -152,7 +157,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = 8;
         }
-        $this->columns[] = $column = new modHelpersModelColumn('mediumint', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('mediumint', $name, compact('precision', 'unsigned'));
         return $column;
     }
 
@@ -162,7 +167,7 @@ class modHelpersModelBuilder
      * @param  string   $name
      * @param  int      $precision
      * @param  bool     $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function bigInt($name, $precision = 20, $unsigned = false)
     {
@@ -170,7 +175,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = 20;
         }
-        $this->columns[] = $column = new modHelpersModelColumn('bigint', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('bigint', $name, compact('precision', 'unsigned'));
         return $column;
     }
     /**
@@ -179,11 +184,11 @@ class modHelpersModelBuilder
      * @param  string  $name
      * @param  string  $precision
      * @param  bool    $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function float($name, $precision = '12,2', $unsigned = false)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('float', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('float', $name, compact('precision', 'unsigned'));
         return $column;
     }
 
@@ -193,7 +198,7 @@ class modHelpersModelBuilder
      * @param  string   $name
      * @param  string   $precision
      * @param  bool     $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function double($name, $precision = '20,2', $unsigned = false)
     {
@@ -201,7 +206,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = '20,2';
         }
-        $this->columns[] = $column = new modHelpersModelColumn('double', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('double', $name, compact('precision', 'unsigned'));
         return $column;
     }
 
@@ -211,7 +216,7 @@ class modHelpersModelBuilder
      * @param  string  $name
      * @param  string  $precision
      * @param  bool    $unsigned
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function decimal($name, $precision = '12,2', $unsigned = false)
     {
@@ -219,7 +224,7 @@ class modHelpersModelBuilder
             $unsigned = $precision;
             $precision = '12,2';
         }
-        $this->columns[] = $column = new modHelpersModelColumn('decimal', $name, compact('precision', 'unsigned'));
+        $this->columns[] = $column = new $this->modelColumnClass('decimal', $name, compact('precision', 'unsigned'));
         return $column;
     }
 
@@ -227,22 +232,22 @@ class modHelpersModelBuilder
      * Add a new boolean column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function boolean($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('boolean', $name, array('precision' => 1, 'unsigned' => true));
+        $this->columns[] = $column = new $this->modelColumnClass('boolean', $name, array('precision' => 1, 'unsigned' => true));
         return $column;
     }
     /**
      * Add a new array column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function asArray($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('array', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('array', $name);
         return $column;
     }
 
@@ -254,22 +259,22 @@ class modHelpersModelBuilder
      * Add a new json column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function json($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('json', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('json', $name);
         return $column;
     }
     /**
      * Add a new date column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function date($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('date', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('date', $name);
         return $column;
     }
 
@@ -277,18 +282,18 @@ class modHelpersModelBuilder
      * Add a new date-time column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function dateTime($name)
     {
-        $this->columns[] = $column = new modHelpersModelColumn('timestamp', $name);
+        $this->columns[] = $column = new $this->modelColumnClass('timestamp', $name);
         return $column;
     }
     /**
      * Add a new time column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function time($name)
     {
@@ -298,7 +303,7 @@ class modHelpersModelBuilder
      * Add a new timestamp column to the model.
      *
      * @param  string  $name
-     * @return modHelpersModelColumn
+     * @return ModelColumn
      */
     public function timestamp($name)
     {
@@ -332,7 +337,7 @@ class modHelpersModelBuilder
     public function output()
     {
         $output = $fields = $meta = $indexes = $indAliases = $aggregates = $composites = $aliases = $rules = array();
-        /** @var modHelpersModelColumn $column */
+        /** @var ModelColumn $column */
         foreach ($this->columns as $column) {
             $fields[$column->name] = $column->getDefault();
             $meta[$column->name] = $column->attributes;

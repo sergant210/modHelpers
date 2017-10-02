@@ -85,6 +85,8 @@ Available functions:
 * [null_if()](./core/components/modhelpers/docs/en/null_if.md) - returns NULL if the given values are equal.
 * [app()](./core/components/modhelpers/docs/en/app.md) - gets the available container instance.
 * [filter_data()](./core/components/modhelpers/docs/en/filter_data.md) - filters the array according to the specified rules.
+* [request()](./core/components/modhelpers/docs/en/request.md) - function for request management.
+* [switch_context()](./core/components/modhelpers/docs/en/switch_context.md) - switches the context according to the conditions.
 
 
 ### Examples
