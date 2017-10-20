@@ -71,10 +71,11 @@ Available functions:
 * [explode_trim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and trim.
 * [explode_ltrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and ltrim.
 * [explode_rtrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and rtrim.
-* echo_nl - the equivalent to ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol or the specified value.
+* echo_nl - equivalent to ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol or the specified value.
+* echo_br - equivalent to ```echo 'some text' . "<br>"```.
 * [print_str()](./core/components/modhelpers/docs/en/print_str.md) - extends the print_r function. Convert a given value to the string format and print it.
 * [print_d()](./core/components/modhelpers/docs/en/print_d.md) - prints the value and dies. Convert a given value to the string format, prints it and ends the script.
-* parse() - parses a string using an associative array of replacement variables. The equivalent to the ```$modx->parseChunk()```.
+* [parse()](./core/components/modhelpers/docs/en/parse.md) - parses a string using an associative array of replacement variables. 
 * [str_between()](./core/components/modhelpers/docs/en/str_between.md) - gets a substring between two tags.
 * [str_limit()](./core/components/modhelpers/docs/en/str_limit.md) - limits the number of characters in a string. 
 * [str_starts()](./core/components/modhelpers/docs/en/str_starts.md) - determines if a given string starts with a given substring.
@@ -85,7 +86,7 @@ Available functions:
 * [null_if()](./core/components/modhelpers/docs/en/null_if.md) - returns NULL if the given values are equal.
 * [app()](./core/components/modhelpers/docs/en/app.md) - gets the available container instance.
 * [filter_data()](./core/components/modhelpers/docs/en/filter_data.md) - filters the array according to the specified rules.
-* [request()](./core/components/modhelpers/docs/en/request.md) - function for request management.
+* [request()](./core/components/modhelpers/docs/en/request.md) - for HTTP request management.
 * [switch_context()](./core/components/modhelpers/docs/en/switch_context.md) - switches the context according to the conditions.
 
 

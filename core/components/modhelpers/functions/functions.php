@@ -1449,7 +1449,7 @@ if (!function_exists('explode_ltrim')) {
 }
 if (!function_exists('echo_nl')) {
     /**
-     * Convert the specified variable to the string type and print or return it.
+     * Output a string with the end of line symbol.
      *
      * @param mixed $string
      * @param string $nl.
@@ -1457,8 +1457,18 @@ if (!function_exists('echo_nl')) {
      */
     function echo_nl($string, $nl = PHP_EOL)
     {
-        if ($nl == 'br') $nl = '<br>';
         echo $string . $nl;
+    }
+}if (!function_exists('echo_br')) {
+    /**
+     * Add a tag to the end of the string and output the result.
+     *
+     * @param mixed $string
+     * @return void
+     */
+    function echo_br($string)
+    {
+        echo $string . "<br>";
     }
 }
 if (!function_exists('print_str')) {
@@ -1538,10 +1548,11 @@ if (! function_exists('parse')) {
     /**
      * Parse a string using an associative array of replacement variables.
      *
-     * @param string $string Text to parse.
+     * @param string $string Source string to parse.
      * @param array $data An array of placeholders to replace.
-     * @param string $prefix Magic. The placeholder prefix or flag for complete parsing.
-     * @param string $suffix The placeholder suffix.
+     * @param string|bool $prefix Magic. The placeholder prefix or flag for complete parsing.
+     * @param string|int $suffix Magic. The placeholder suffix (for simple mode) or
+     * the maximum iterations to recursively process tags.
      * @return string The processed string with the placeholders replaced.
      */
     function parse($string, $data, $prefix = '[[+', $suffix = ']]')
@@ -1900,7 +1911,6 @@ if (!function_exists('switch_context')) {
             if (empty($attribute) || empty($value)) return false;
             $query = query('SELECT `context_key` FROM ' . table_name('modContextSetting') . ' WHERE `key` = ? AND TRIM(BOTH \'/\' FROM `value`) = ?')->bind($attribute, $value)->first();
             $ctx = $query['context_key'];
-var_dump($ctx);
             if (!empty($ctx) && !in_array($ctx, $excluded)) {
                 if ($attribute == 'base_url' && $modx->getOption('friendly_urls')) {
                     $alias = $modx->getOption('request_param_alias', null, 'alias', true);
@@ -1908,8 +1918,7 @@ var_dump($ctx);
                 }
                 return $modx->switchContext($ctx);
             }
-        } elseif (is_callable($key)) {
-            $ctx = $key($modx);
+        } elseif (is_callable($key) && $ctx = $key($modx)) {
             return $modx->switchContext($ctx);
         }
         return false;

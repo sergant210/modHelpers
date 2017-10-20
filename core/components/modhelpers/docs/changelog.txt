@@ -1,3 +1,9 @@
+3.0.1-beta
+==============
+- Fixed bug with loading the ModelColunm class.
+- Removed debug info.
+- Updated the Faker library.
+
 3.0.0-beta
 ==============
 - IMPORTANT! Added namespace "modHelpers" to the modHelpers' classes.

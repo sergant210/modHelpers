@@ -1,7 +1,22 @@
 {
+    "name": "sergant210/modxhelpers",
+    "description": "Helpful functions for MODX",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sergey Shlokov",
+            "email": "sergant210@bk.ru",
+            "homepage": "https://modzone.ru"
+        }
+    ],
     "require": {
-        "fzaninotto/Faker": "^1.6",
+        "fzaninotto/Faker": "^1.7",
         "mobiledetect/mobiledetectlib": "^2.8",
         "symfony/http-foundation": "~3.2"
+    },
+    "autoload": {
+        "files": [
+            "functions/functions.php"
+        ]
     }
 }

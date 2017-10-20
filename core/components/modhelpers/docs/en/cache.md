@@ -75,8 +75,8 @@ Retrieve a value from the cache. if the requested value doesn't exist, store a d
 
 Example. Get the number of all active users from the cache. If it doesn't exist, retrieve it from the database and store it to the cache.
 ```php
-cache()->remember('count_users', 300, function() use ($modx) {
-    return $modx->getCount('modUser', array('active' => 1));
+cache()->remember('count_users', 300, function() {
+    return collection('modUser')->where(['active' => 1])->count();
 });
 ```
 #### Delete from the cache

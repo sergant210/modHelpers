@@ -224,8 +224,9 @@ class Object
     {
         $object = $existing = $this->object();
         for ($i = 1; $i<= $level; $i++) {
-            if ($object && $object = $object->getOne('Parent')) $existing = $object;
-
+            if ($object && $object = $object->getOne('Parent')) {
+                $existing = $object;
+            }
         }
         return $object ?: $existing;
     }

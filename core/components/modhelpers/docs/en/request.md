@@ -1,5 +1,5 @@
 ## request()  
-Create a instance to manage the current HTTP request. It uses *symfony/http-foundation* package.
+Create a instance to manage the current HTTP request. It uses [symfony/http-foundation](https://symfony.com/doc/current/components/http_foundation.html) package.
 
 ```request($key = null, $default = null)```
  - $key (string) - Name of input item. Optional.

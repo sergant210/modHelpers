@@ -15,7 +15,7 @@ class ModelBuilder
     public function __construct($table)
     {
         $this->table = $table;
-        $this->modelColumnClass = config('modhelpers_modelColumnClass', 'ModelColumn', true);
+        $this->modelColumnClass = config('modhelpers_modelColumnClass', 'modHelpers\ModelColumn', true);
     }
     /**
      * Add a new char column to the model.

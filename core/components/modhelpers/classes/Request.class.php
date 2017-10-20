@@ -1,5 +1,4 @@
 <?php
-//require_once MODX_CORE_PATH . 'model/modx/modrequest.class.php';
 namespace modHelpers;
 
 use SplFileInfo;
