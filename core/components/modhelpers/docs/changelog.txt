@@ -1,5 +1,6 @@
 3.0.1-beta
 ==============
+- Added a new function "echo_br".
 - Fixed bug with loading the ModelColunm class.
 - Removed debug info.
 - Updated the Faker library.

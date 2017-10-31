@@ -56,11 +56,14 @@ class UploadedFile extends SymfonyUploadedFile
      */
     public function saveUploadedFile($path, $name) {
         /** @var \modFileMediaSource $source */
-        $source = $this->getSource();
+        if ( !$source = $this->getSource() ) {
+            log_error($source->xpdo->lexicon('source_err_nf'));
+            return false;
+        }
         $bases = $source->getBases($path);
         $path = $bases['pathAbsolute'] . ltrim($path,'/');
         $name = ltrim($name,'/');
-        if (!$source->checkFiletype($file = $path . $name)) {
+        if ( !$source->checkFiletype($file = $path . $name) ) {
             log_error($source->xpdo->lexicon('upf_err_filetype'));
             return false;
         }

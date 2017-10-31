@@ -65,16 +65,16 @@ Available functions:
 * [logout()](./core/components/modhelpers/docs/en/logout.md) - force logout the current user.
 * array_empty() - checks whether a variable is an empty array.
 * array_notempty() - checks whether a variable is an array and not empty.
-* [array_trim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning and end of an array values.
-* [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the beginning of an array values.
-* [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or other characters) from the end of an array values.
+* [array_trim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the beginning and the end of an array values.
+* [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the beginning of an array values.
+* [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the end of an array values.
 * [explode_trim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and trim.
 * [explode_ltrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and ltrim.
 * [explode_rtrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and rtrim.
 * echo_nl - equivalent to ```echo 'some text' . PHP_EOL```.  i.e. adds the end of line symbol or the specified value.
 * echo_br - equivalent to ```echo 'some text' . "<br>"```.
 * [print_str()](./core/components/modhelpers/docs/en/print_str.md) - extends the print_r function. Convert a given value to the string format and print it.
-* [print_d()](./core/components/modhelpers/docs/en/print_d.md) - prints the value and dies. Convert a given value to the string format, prints it and ends the script.
+* [print_d()](./core/components/modhelpers/docs/en/print_d.md) - prints the value and dies. Convert a given value to the string format, prints it and stops the script execution.
 * [parse()](./core/components/modhelpers/docs/en/parse.md) - parses a string using an associative array of replacement variables. 
 * [str_between()](./core/components/modhelpers/docs/en/str_between.md) - gets a substring between two tags.
 * [str_limit()](./core/components/modhelpers/docs/en/str_limit.md) - limits the number of characters in a string. 

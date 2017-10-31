@@ -708,7 +708,7 @@ if (!function_exists('is_auth')) {
     function is_auth($ctx = '')
     {
         global $modx;
-        if (! trim($ctx)) $ctx = $modx->context->get('key');
+        if (!trim($ctx)) $ctx = $modx->context->get('key');
         return is_object($modx->user) ? $modx->user->isAuthenticated($ctx) : false;
     }
 }

@@ -11,5 +11,5 @@ login(4);
 $user = user(4); // ~ $modx->getObject('modUser', 4);
 login($user);
 // OR
-login([$_POST['email']);
+login(['email' => $_POST['email']);
 ```

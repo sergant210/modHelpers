@@ -528,7 +528,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      * @param  mixed  $default
      * @return UploadedFile|array|null
      */
-    public function file($key = null, $default = null)
+    public function file($key, $default = null)
     {
         $data = $this->allFiles();
         return default_if($data[$key], $default);
