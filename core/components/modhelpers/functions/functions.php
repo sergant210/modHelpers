@@ -125,8 +125,11 @@ if (!function_exists('session')) {
      */
     function session($key = null, $default = null, $flat = false)
     {
+        if (PHP_SESSION_ACTIVE !== session_status()) {
+            return null;
+        }
         if (is_null($key)) {
-            return $_SESSION ?: null;
+            return $_SESSION;
         }
         // Set the value
         if (is_array($key)) {
@@ -297,7 +300,7 @@ if (!function_exists('pls')) {
             /** @var bool $restore */
             return $modx->toPlaceholders($key, $prefix, $separator, $restore);
         } else {
-            return isset($modx->placeholders[$key]) ? $modx->placeholders[$key] : $default;
+            return default_if(@$modx->placeholders[$key], $default);
         }
     }
 }
@@ -1513,7 +1516,7 @@ if (!function_exists('print_str')) {
                     $output = str_replace("[[+{$tag}]]", $value, $template);
             }
         } else {
-            $template = config('modhelpers.print_template');
+            $template = config('modhelpers_print_template');
             $output = empty($template) ? $value : str_replace("[[+{$tag}]]", $value, $template);
         }
 
@@ -1922,6 +1925,44 @@ if (!function_exists('switch_context')) {
             return $modx->switchContext($ctx);
         }
         return false;
+    }
+}
+if (! function_exists('csrf_meta')) {
+    /**
+     * Generate a HTML meta tag with the CSRF token.
+     *
+     * @return string
+     */
+    function csrf_meta()
+    {
+        return '<meta name="csrf-token" content="' . csrf_token() . '">'."\n";
+    }
+}
+if (! function_exists('csrf_field')) {
+    /**
+     * Generate a CSRF token form field.
+     *
+     * @return string
+     */
+    function csrf_field()
+    {
+        return '<input type="hidden" name="csrf_token" value="'.csrf_token().'">';
+    }
+}
+if (! function_exists('csrf_token')) {
+    /**
+     * Get the CSRF token from the session.
+     *
+     * @param bool $regenerate
+     * @return string
+     */
+    function csrf_token($regenerate = false)
+    {
+        if ($regenerate || empty(session('csrf_token'))) {
+            session(['csrf_token' => str_random(40)]);
+        }
+
+        return session('csrf_token');
     }
 }
 

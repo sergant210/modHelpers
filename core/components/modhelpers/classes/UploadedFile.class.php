@@ -3,6 +3,7 @@ namespace modHelpers;
 
 use Symfony\Component\HttpFoundation\File\UploadedFile as SymfonyUploadedFile;
 use modMediaSource;
+use modFileMediaSource;
 
 class UploadedFile extends SymfonyUploadedFile
 {
@@ -37,7 +38,7 @@ class UploadedFile extends SymfonyUploadedFile
         $path = rtrim($path, '/') . '/';
         if ($source = $this->getSource($source)) {
             //$this->source->createContainer($path, '/');
-            if ($source instanceof \modFileMediaSource) {
+            if ($source instanceof modFileMediaSource) {
                 return $this->saveUploadedFile($path, $name);
             } else {
                 return $source->uploadObjectsToContainer($path, array($this->uploadInfo(['name' => $name])));
@@ -55,7 +56,7 @@ class UploadedFile extends SymfonyUploadedFile
      * @return boolean|string
      */
     public function saveUploadedFile($path, $name) {
-        /** @var \modFileMediaSource $source */
+        /** @var modFileMediaSource $source */
         if ( !$source = $this->getSource() ) {
             log_error($source->xpdo->lexicon('source_err_nf'));
             return false;

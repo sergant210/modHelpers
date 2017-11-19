@@ -57,4 +57,4 @@ print_str('The string wrapped by the div tag', 'div');
 # Template wrapper for one-time output
 print_str($stringVar, '<div style="color:red">[[+output]]</div>');
 ```
-Or you can define a template for every output - create the system setting "modhelpers.print_template" and put the template in it.
+Or you can define a template for every output - specify the template in the "modhelpers_print_template" system setting.

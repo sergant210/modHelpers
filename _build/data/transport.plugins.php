@@ -7,7 +7,7 @@ $tmp = array(
 		'file' => 'modhelpers',
 		'description' => '',
 		'events' => array(
-            'OnMODXInit' => array('priority' => -99),
+            'OnMODXInit' => array('priority' => -1000),
 		)
 	)
 );

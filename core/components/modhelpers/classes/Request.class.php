@@ -155,7 +155,15 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         return $this->getItem('headers', $key, $default);
     }
-
+    /**
+     * Get the request method.
+     *
+     * @return string
+     */
+    public function method()
+    {
+        return $this->getMethod();
+    }
     /**
      * Returns the client IP address.
      *
@@ -193,7 +201,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function isJson()
     {
-        return str_contains($_SERVER['CONTENT_TYPE'], ['/json', '+json']);
+        return str_contains($this->header('CONTENT_TYPE'), ['/json', '+json']);
     }
 
     /**
@@ -256,7 +264,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function input($key = null, $default = null)
     {
         $data = array_merge($this->getInputSource()->all(), $this->query->all());
-        return is_null($key) ? $data : default_if($data[$key], $default);
+        return is_null($key) ? $data : default_if(@$data[$key], $default);
     }
 
     /**
@@ -663,6 +671,49 @@ class Request extends SymfonyRequest implements ArrayAccess
             }
         }
         return $errors;
+    }
+    /**
+     * @return bool
+     */
+    public function isBot()
+    {
+        $bots = config('modhelpers_bot_user_agents');
+        if (!empty($bots)) {
+            $bots = explode_trim(',', $bots);
+            $bots = implode('|', $bots);
+            $userAgent = empty($this->server('HTTP_USER_AGENT')) ? 'empty' : $this->server('HTTP_USER_AGENT');
+            $pattern = "/($bots)/i";
+            if (preg_match($pattern, $userAgent)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Gets the CSRF token from the request.
+     * @return string|null
+     */
+    public function getCsrfToken()
+    {
+        return $this->input('csrf_token') ?: $this->header('X-CSRF-TOKEN');
+    }
+    /**
+     * Checks the CSRF token from the request with the token from the session.
+     * @return bool
+     */
+    public function checkCsrfToken()
+    {
+        $requestToken = $this->getCsrfToken();
+        return $requestToken ? hash_equals($this->getCsrfToken(), csrf_token()) : false;
+    }
+    /**
+     * Gets the session data.
+     *
+     * @return array|null The session data
+     * TODO Use the session manager
+     */
+    public function getSession()
+    {
+        return session();
     }
     /**
      * Get a parameter item from a given source.

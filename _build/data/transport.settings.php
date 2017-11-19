@@ -8,7 +8,11 @@ $tmp = array(
 		'value' => '',
 		'area' => 'modhelpers_main',
 	),
-
+    'bot_user_agents' => array(
+		'xtype' => 'textfield',
+		'value' => 'bot,spider,slurp,ia_archiver,siteexplorer,MegaIndex',
+		'area' => 'modhelpers_main',
+	),
 );
 
 foreach ($tmp as $k => $v) {
@@ -16,7 +20,7 @@ foreach ($tmp as $k => $v) {
 	$setting = $modx->newObject('modSystemSetting');
 	$setting->fromArray(array_merge(
 		array(
-			'key' => 'modhelpers.' . $k,
+			'key' => 'modhelpers_' . $k,
 			'namespace' => PKG_NAME_LOWER,
 		), $v
 	), '', true, true);

@@ -49,3 +49,5 @@ if ($request->hasFile('avatar')) {
     $request->file('avatar')->storeAs('assets', 'avatar.jpg', $mediaSource); // Specified the name of file.
 }
 ```
+
+Use the ```isBot``` method to check if the "owner" of the request is a bot. This method compares the request user agent with the ```modhelpers_bot_user_agents``` system setting.

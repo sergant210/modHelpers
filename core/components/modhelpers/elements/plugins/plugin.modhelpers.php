@@ -5,7 +5,6 @@ switch ($modx->event->name) {
         $file = $modx->getOption('modhelpers_core_path', null, MODX_CORE_PATH) . 'components/modhelpers/autoload.php';
         if (file_exists($file)) {
             require_once $file;
-//            if ($modx->context->key != 'mgr') $modx->setOption('modRequest.class', 'modHelpersRequest');
             app()->singleton('detector', 'Mobile_Detect');
             app()->instance('modx', $modx);
             app()->singleton('request', function() {
@@ -13,6 +12,7 @@ switch ($modx->event->name) {
                 $requestClass = config('modhelpers_requestClass', 'modHelpers\Request', true);
                 return $requestClass::capture();
             });
+            csrf_token();
         }
         break;
 }

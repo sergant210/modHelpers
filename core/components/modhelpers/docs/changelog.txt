@@ -1,3 +1,14 @@
+3.1.0-beta
+==============
+- Added method "getCsrfToken" to the Request class.
+- Added method "checkCsrfToken" to the Request class.
+- Added method "isBot" to the Request class.
+- Added "bot_user_agents" system setting.
+- Added a new function "csrf_token".
+- Added a new function "csrf_field".
+- Added a new function "csrf_meta".
+- Changed the priority of the library loading.
+
 3.0.1-beta
 ==============
 - Added a new function "echo_br".
@@ -8,7 +19,7 @@
 3.0.0-beta
 ==============
 - IMPORTANT! Added namespace "modHelpers" to the modHelpers' classes.
-- The requirement of the minimum PHP version is changed to 5.5.
+- Requirement of the minimum PHP version is changed to 5.5.
 - Added a new function "request".
 - Added a new function "switch_context".
 - Added a new method "object" to the Object class.
