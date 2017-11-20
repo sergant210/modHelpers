@@ -401,9 +401,9 @@ if (!function_exists('script')) {
      * @param string $src
      * @param bool|string $start Inject inside the HEAD tag of a resource.
      * @param bool|string $plaintext
-     * @param bool|string $attr async defer
+     * @param string|null $attr async defer
      */
-    function script($src, $start = false, $plaintext = false, $attr = false)
+    function script($src, $start = false, $plaintext = false, $attr = null)
     {
         global $modx;
 
@@ -1731,15 +1731,19 @@ if (! function_exists('str_random')) {
      */
     function str_random($length = 16)
     {
-        $string = '';
-        while (($len = strlen($string)) < $length) {
-            $size = $length - $len;
+        if (PHP_MAJOR_VERSION > 5) {
+            $string = '';
+            while (($len = strlen($string)) < $length) {
+                $size = $length - $len;
 
-            $bytes = random_bytes($size);
+                $bytes = random_bytes($size);
 
-            $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
+                $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
+            }
+        } else {
+            $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            $string = substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
         }
-
         return $string;
     }
 }

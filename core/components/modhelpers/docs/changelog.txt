@@ -1,3 +1,7 @@
+3.1.1-beta
+==============
+- Fixed broken compatibility with PHP 5.5.
+
 3.1.0-beta
 ==============
 - Added method "getCsrfToken" to the Request class.
