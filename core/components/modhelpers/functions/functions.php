@@ -1731,18 +1731,11 @@ if (! function_exists('str_random')) {
      */
     function str_random($length = 16)
     {
-        if (PHP_MAJOR_VERSION > 5) {
-            $string = '';
-            while (($len = strlen($string)) < $length) {
-                $size = $length - $len;
-
-                $bytes = random_bytes($size);
-
-                $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
-            }
-        } else {
-            $pool = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            $string = substr(str_shuffle(str_repeat($pool, $length)), 0, $length);
+        $string = '';
+        while (($len = strlen($string)) < $length) {
+            $size = $length - $len;
+            $bytes = random_bytes($size);
+            $string .= substr(str_replace(['/', '+', '='], '', base64_encode($bytes)), 0, $size);
         }
         return $string;
     }
