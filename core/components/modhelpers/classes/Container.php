@@ -11,21 +11,24 @@ class Container
      * @var static
      */
     protected static $instance;
-
     /**
      * The container's bindings.
      *
      * @var array
      */
     protected $bindings = array();
-
     /**
      * The container's shared instances.
      *
      * @var array
      */
     protected $instances = array();
-
+    /**
+     * The registered type aliases.
+     *
+     * @var array
+     */
+    protected $aliases = [];
 
     /**
      * Set the globally available instance of the container.

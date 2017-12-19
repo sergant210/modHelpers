@@ -10,4 +10,6 @@ Gets the specified chunk or file. Can be used instead of ```$modx->getChunk()```
 $output = chunk('myChunk', $params);
 # Get the file chunk
  $output = chunk(MODX_CORE_PATH . 'chunks/myChunk.tpl', $params);
+# Get the file chunk from the folder specified in the "modhelpers_chunks_path" system setting.
+ $output = chunk('/myChunk.tpl', $params);
 ```

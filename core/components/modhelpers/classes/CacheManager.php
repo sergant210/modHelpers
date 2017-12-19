@@ -9,7 +9,7 @@ use Closure;
 class CacheManager
 {
     protected static $instance;
-
+    /** @var modX $modx */
     protected $modx;
     /** @var modCacheManager $cacheManager */
     protected $cacheManager;

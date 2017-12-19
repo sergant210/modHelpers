@@ -89,18 +89,20 @@ Available functions:
 * [request()](./core/components/modhelpers/docs/en/request.md) - for HTTP request management.
 * [switch_context()](./core/components/modhelpers/docs/en/switch_context.md) - switches the context according to the conditions.
 * [CSRF protection](./core/components/modhelpers/docs/en/csrf_protection.md) - protection from cross-site request forgery attacks.
+* [response()](./core/components/modhelpers/docs/en/response.md) - for response management.
 
 ### System settings for extending
-- modhelpers_cacheManagerClass — new cache manager class.
-- modhelpers_collectionClass — new collection class.
-- modhelpers_containerClass — new container class.
-- modhelpers_loggerClass — new logger class.
-- modhelpers_mailerClass — new mailer class.
-- modhelpers_modelBuilderClass — new model builder class.
-- modhelpers_modelColumnClass — new model column class.
-- modhelpers_objectClass — new object class.
-- modhelpers_queryClass — new query class.
-- modhelpers_requestClass — new request class.
+- modhelpers_cacheManagerClass — a cache manager class.
+- modhelpers_collectionClass — a collection class.
+- modhelpers_containerClass — a container class.
+- modhelpers_loggerClass — a logger class.
+- modhelpers_mailerClass — a mailer class.
+- modhelpers_modelBuilderClass — a model builder class.
+- modhelpers_modelColumnClass — a model column class.
+- modhelpers_objectClass — a object class.
+- modhelpers_queryClass — a query class.
+- modhelpers_requestClass — a request class.
+- modhelpers_responseManager — a response manager class.
 
 ### Examples
 **Check the user exists**

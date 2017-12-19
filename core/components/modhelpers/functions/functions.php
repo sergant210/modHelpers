@@ -1,7 +1,10 @@
 <?php
-/***********************************************/
-/*              Functions                      */
-/***********************************************/
+/**
+ * Functions for MODX Revolution.
+ * @package modHelpers
+ * @version 3.2.0-beta
+ */
+
 if (!function_exists('url')) {
     /**
      * Формирует Url
@@ -102,7 +105,7 @@ if (!function_exists('config')) {
             if (is_array($key)) {
                 //if (!can('settings')) return false;
                 foreach ($key as $itemKey => $itemValue) {
-                    $modx->config[$itemKey] = $itemValue;
+                    if (!empty($itemKey)) $modx->config[$itemKey] = $itemValue;
                 }
                 return true;
             }
@@ -468,8 +471,12 @@ if (!function_exists('chunk')) {
         global $modx;
 //        $output = '';
         //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
+        $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
+        if ($chunkName[0] == '/') {
+            $chunkName = rtrim(config('modhelpers_chunks_path', MODX_CORE_PATH . 'elements/chunks'),'/') . $chunkName;
+        }
         if (strpos($chunkName, '/') !== false && file_exists($chunkName)) {
-            $content = file_get_contents($chunkName);
+            $content = @file_get_contents($chunkName);
             /** @var modChunk $chunk */
             $chunk = $modx->newObject('modChunk', array('name' => basename($chunkName)));
             $chunk->_cacheable = false;
@@ -499,7 +506,11 @@ if (!function_exists('snippet')) {
             return $result;
         }
         global $modx;
-        if (strpos($snippetName, '/') !== false && file_exists($snippetName)) {
+        $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
+        if ($snippetName[0] == '/') {
+            $snippetName = rtrim(config('modhelpers_snippets_path', MODX_CORE_PATH . '/elements/snippets'),'/') . $snippetName;
+        }
+        if (strpos($snippetName, '/') !== false && @file_exists($snippetName)) {
             ob_start();
             extract($scriptProperties, EXTR_SKIP);
             $result = include $snippetName;
@@ -1230,7 +1241,7 @@ if (!function_exists('login')) {
         if ($user instanceof modUser && !$user->hasSessionContext($modx->context->key)) {
             $modx->user = $user;
             $modx->user->addSessionContext($modx->context->key);
-            $modx->getUser();
+            $modx->getUser(context(), true);
         }
         return ($user instanceof modUser) ? true : false;
     }
@@ -1556,7 +1567,7 @@ if (! function_exists('parse')) {
      * @param string|bool $prefix Magic. The placeholder prefix or flag for complete parsing.
      * @param string|int $suffix Magic. The placeholder suffix (for simple mode) or
      * the maximum iterations to recursively process tags.
-     * @return string The processed string with the placeholders replaced.
+     * @return string The processed string with the replaced placeholders.
      */
     function parse($string, $data, $prefix = '[[+', $suffix = ']]')
     {
@@ -1564,6 +1575,12 @@ if (! function_exists('parse')) {
         if (!empty($string)) {
             if (is_array($data)) {
                 if (is_bool($prefix) && $prefix) {
+                    // NEEDTEST
+                    /** @var modChunk $chunk */
+                    /*$chunk = $this->modx->newObject('modChunk', array('name' => str_random(), 'content' => $string));
+                    $chunk->setCacheable(false);
+                    $string = $chunk->process($data);
+                    */
                     $parser = $modx->getParser();
                     $maxIterations = (is_numeric($suffix)) ? (int) $suffix : (int) $modx->getOption('parser_max_iterations', null, 10);
                     $scope = $modx->toPlaceholders($data, '', '.', true);
@@ -1867,7 +1884,9 @@ if (! function_exists('filter_data')) {
                                 break;
                             default:
                                 if (class_exists($type)) {
-                                    $_var = $modx->getObject($type, $_var);
+                                    if (!$_var = $modx->getObject($type, $_var)) {
+                                        $_var = $modx->newObject($type);
+                                    }
                                 }
                         }
                     }
@@ -1943,26 +1962,55 @@ if (! function_exists('csrf_field')) {
      */
     function csrf_field()
     {
-        return '<input type="hidden" name="csrf_token" value="'.csrf_token().'">';
+        return '<input type="hidden" name="csrf_token" value="'.csrf_token().'">' . "\n";
     }
 }
 if (! function_exists('csrf_token')) {
     /**
-     * Get the CSRF token from the session.
+     * Set and get the CSRF token from the session.
      *
      * @param bool $regenerate
      * @return string
      */
     function csrf_token($regenerate = false)
     {
-        if ($regenerate || empty(session('csrf_token'))) {
-            session(['csrf_token' => str_random(40)]);
+        $timeout = (int) config('modhelpers_token_ttl', 0);
+        if (!$regenerate && abs($timeout) > 0 && defined('MODX_API_MODE') && !MODX_API_MODE) {
+            if ( default_if(session('csrf_token.timestamp'), time()) < time() ) {
+                $regenerate = true;
+            }
         }
-
-        return session('csrf_token');
+        if ($regenerate || empty(session('csrf_token.value'))) {
+            session(['csrf_token' => [
+                        'value' => str_random(40),
+                        'timestamp' => time() + abs($timeout) * 60,
+                    ]
+            ]);
+        }
+        return session('csrf_token.value');
     }
 }
+if (! function_exists('response')) {
+    /**
+     * Return a new response from the application.
+     *
+     * @param  mixed  $content
+     * @param  int    $status
+     * @param  array  $headers
+     * @return \modHelpers\ResponseManager
+     */
+    function response($content = '', $status = 200, array $headers = [])
+    {
+        /** @var modHelpers\ResponseManager $manager */
+        $manager = app('response');
 
+        if (func_num_args() === 0) {
+            return $manager;
+        }
+
+        return $manager->make($content, $status, $headers);
+    }
+}
 
 /*if (!function_exists('queue')) {
     function queue()

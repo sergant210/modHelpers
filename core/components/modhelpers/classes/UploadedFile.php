@@ -11,6 +11,8 @@ class UploadedFile extends SymfonyUploadedFile
     protected $hashName = null;
     /** @var  modMediaSource */
     protected $source;
+    /** @var string */
+    protected $fileUrl;
 
 
     /**
@@ -65,18 +67,19 @@ class UploadedFile extends SymfonyUploadedFile
         $path = $bases['pathAbsolute'] . ltrim($path,'/');
         $name = ltrim($name,'/');
         if ( !$source->checkFiletype($file = $path . $name) ) {
+            $source->xpdo->lexicon->load('core:file');
             log_error($source->xpdo->lexicon('upf_err_filetype'));
             return false;
         }
         try {
-        	$this->move($path, $name);
+            $this->move($path, $name);
         } catch (\Exception $e) {
             log_error('Upload file error: ' . $e->getMessage());
             return false;
         }
 
-        $source->xpdo->logManagerAction('file_upload', '', $file);
-
+        $this->fileUrl = str_replace(MODX_BASE_PATH, '', $file);
+        $source->xpdo->logManagerAction('file_upload', '', $this->fileUrl);
         return $file;
     }
 
@@ -102,14 +105,14 @@ class UploadedFile extends SymfonyUploadedFile
      */
     public function getSource($source = null) {
         if (!is_null($this->source)) return $this->source;
-
+        if (is_object($source) && $source instanceof modMediaSource) {
+            return $this->source = $source;
+        }
         $modx = app('modx');
         if (!$source) {
             $source = $modx->getOption('default_media_source', null, 1);
         }
-        if (is_object($source) && $source instanceof modMediaSource) {
-            return $this->source = $source;
-        } elseif (is_numeric($source)) {
+        if (is_numeric($source)) {
             $criteria = array('id' => $source);
         } elseif (is_string($source)) {
             $criteria = array('name' => $source);
@@ -157,6 +160,18 @@ class UploadedFile extends SymfonyUploadedFile
     }
 
     /**
+     * Returns the original file name.
+     *
+     * It is extracted from the request from which the file has been uploaded.
+     * Then it should not be considered as a safe value.
+     *
+     * @return string|null The original name
+     */
+    public function originalName()
+    {
+        return $this->getClientOriginalName();
+    }
+    /**
      * Get the file's extension.
      *
      * @return string
@@ -195,5 +210,30 @@ class UploadedFile extends SymfonyUploadedFile
         }
 
         return $path . $this->hashName . '.' . $this->guessExtension();
+    }
+
+    /**
+     * Get the url of the uploaded file.
+     * @return string
+     */
+    public function getStoredFileUrl()
+    {
+        return $this->fileUrl;
+    }
+    /**
+     * Get the name of the uploaded file.
+     * @return string
+     */
+    public function getStoredFileName()
+    {
+        return basename($this->fileUrl);
+    }
+    /**
+     * Get the path of the uploaded file.
+     * @return string
+     */
+    public function getStoredFilePath()
+    {
+        return request()->root() . '/' . $this->fileUrl;
     }
 }

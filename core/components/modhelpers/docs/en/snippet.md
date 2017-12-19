@@ -11,6 +11,8 @@ Runs the specified snippet from DB or file. The result can be cached.
 $output = snippet('mySnippet', $params);
 # Run the file snippet
  $output = snippet(MODX_CORE_PATH . 'snippets/mySnippet.php', $params);
+# Run the file snippet from the folder specified in the "modhelpers_snippet_path" system setting.
+ $output = snippet('/mySnippet.php', $params);
 # Cache the snippet result for 60 seconds
 $output = snippet('mySnippet', $params, 60); // Usefull for heavy snippets
 ```

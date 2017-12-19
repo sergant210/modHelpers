@@ -13,6 +13,21 @@ $tmp = array(
 		'value' => 'bot,spider,slurp,ia_archiver,siteexplorer,MegaIndex',
 		'area' => 'modhelpers_main',
 	),
+    'token_ttl' => array(
+		'xtype' => 'numberfield',
+		'value' => 0,
+		'area' => 'modhelpers_main',
+	),
+    'chunks_path' => array(
+		'xtype' => 'textfield',
+		'value' => '{core_path}elements/chunks',
+		'area' => 'modhelpers_main',
+	),
+    'snippets_path' => array(
+		'xtype' => 'textfield',
+		'value' => '{core_path}elements/snippets',
+		'area' => 'modhelpers_main',
+	),
 );
 
 foreach ($tmp as $k => $v) {

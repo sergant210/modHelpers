@@ -251,7 +251,8 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function all()
     {
-        return array_replace_recursive($this->input(), $this->allFiles());
+        $input = $this->input() + $this->query();
+        return array_replace_recursive($input, $this->allFiles());
     }
 
     /**
@@ -263,8 +264,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function input($key = null, $default = null)
     {
-        $data = array_merge($this->getInputSource()->all(), $this->query->all());
-        return is_null($key) ? $data : default_if(@$data[$key], $default);
+        return $this->getItem('request', $key, $default);
     }
 
     /**
@@ -319,7 +319,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     }
 
     /**
-     * Get the resource.
+     * Get a resource.
      *
      * @return \modResource|null
      */
@@ -440,7 +440,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function offsetSet($offset, $value)
     {
-        $data = $this->getInputSource()->all();
+        $data = $this->all();
         $data[$offset] = $value;
     }
 
@@ -466,7 +466,6 @@ class Request extends SymfonyRequest implements ArrayAccess
         if ($this->isJson()) {
             return $this->json();
         }
-
         return $this->getMethod() == 'GET' ? $this->query : $this->request;
     }
 
@@ -539,7 +538,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function file($key, $default = null)
     {
         $data = $this->allFiles();
-        return default_if($data[$key], $default);
+        return default_if(@$data[$key], $default);
     }
 
     /**
@@ -659,18 +658,39 @@ class Request extends SymfonyRequest implements ArrayAccess
     /**
      * @param string $path
      * @param int|string $source
+     * @param bool $originalNames
      * @return array
      */
-    public function uploadFiles($path = '/', $source = null)
+    public function uploadFiles($path = '/', $source = null, $originalNames = false)
     {
         $errors = array();
-        foreach ($this->allFiles() as $file) {
-            /** @var UploadedFile $file */
-            if (!$file->store($path, $source)) {
-                $errors[] = $file->getClientOriginalName();
+        /** @var UploadedFile $file */
+        foreach ($this->allFiles() as $files) {
+            if (!is_array($files)) $files = [$files];
+            foreach ($files as $file) {
+                if (!is_object($source)) $source = $file->getSource($source);
+                if ($originalNames) {
+                    if (!$file->storeAs($path, $file->originalName(), $source)) {
+                        $errors[] = $file->originalName();
+                    }
+                } else {
+                    if (!$file->store($path, $source)) {
+                        $errors[] = $file->originalName();
+                        app('modx')->error->addError($file->originalName());
+                    }
+                }
             }
         }
         return $errors;
+    }
+    /**
+     * @param string $path
+     * @param int|string $source
+     * @return array
+     */
+    public function uploadFilesWithOriginalName($path = '/', $source = null)
+    {
+        return $this->uploadFiles($path, $source, true);
     }
     /**
      * @return bool
@@ -696,14 +716,23 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         return $this->input('csrf_token') ?: $this->header('X-CSRF-TOKEN');
     }
+
     /**
      * Checks the CSRF token from the request with the token from the session.
+     * @param mixed $methods Methods for which this check will work.
      * @return bool
      */
-    public function checkCsrfToken()
+    public function checkCsrfToken($methods = null)
     {
+        if (!empty($methods)) {
+            if (!is_array($methods)) $methods = func_get_args();
+            $methods = array_map('strtoupper', $methods);
+            if (!in_array($this->method(), $methods)) return 0;
+        }
         $requestToken = $this->getCsrfToken();
-        return $requestToken ? hash_equals($this->getCsrfToken(), csrf_token()) : false;
+        return  is_string($requestToken) &&
+            is_string(csrf_token()) &&
+            hash_equals($this->getCsrfToken(), csrf_token());
     }
     /**
      * Gets the session data.
@@ -755,5 +784,16 @@ class Request extends SymfonyRequest implements ArrayAccess
         }
 
         return null;
+    }
+
+    /**
+     * Set an input element.
+     *
+     * @param  string $key
+     * @param  mixed  $value
+     */
+    public function __set($key, $value)
+    {
+        $this->offsetSet($key, $value);
     }
 }

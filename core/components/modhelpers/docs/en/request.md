@@ -45,8 +45,13 @@ $request->uploadFiles($path, $mediaSource);
 if ($request->hasFile('file')) {
     $request->file('file')->store('assets', $mediaSource);  // File name will be hashed.
 }
+// Specify the file name
 if ($request->hasFile('avatar')) {
-    $request->file('avatar')->storeAs('assets', 'avatar.jpg', $mediaSource); // Specified the name of file.
+    $request->file('avatar')->storeAs('assets', 'avatar.jpg', $mediaSource);
+}
+// Leave the original name
+if ($request->hasFile('avatar')) {
+    $request->file('avatar')->storeAs('assets', $request->avatar->originalName(), $mediaSource);
 }
 ```
 

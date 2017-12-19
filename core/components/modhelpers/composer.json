@@ -19,6 +19,9 @@
     "autoload": {
         "files": [
             "functions/functions.php"
-        ]
+        ],
+        "psr-4": {
+            "modHelpers\\": "classes/"
+        }
     }
 }

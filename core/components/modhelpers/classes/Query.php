@@ -3,6 +3,7 @@ namespace modHelpers;
 
 use modX;
 use PDO;
+use xPDO;
 
 class Query
 {
@@ -13,7 +14,7 @@ class Query
     /** @var  array */
     protected $bindings;
 
-    public function __construct(\xPDO &$modx, $query)
+    public function __construct(xPDO &$modx, $query)
     {
         /** @var modX $modx */
         $this->modx =& $modx;
