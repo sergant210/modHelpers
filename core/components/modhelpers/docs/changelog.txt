@@ -1,3 +1,8 @@
+3.2.1-beta
+==============
+- Changed syntax for file elements with the relative path.
+- Fixed the filter method of the Request class.
+
 3.2.0-beta
 ==============
 - Added a new function "response".

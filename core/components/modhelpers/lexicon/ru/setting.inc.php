@@ -3,7 +3,7 @@
 $_lang['area_modhelpers_main'] = 'Основные';
 
 $_lang['setting_modhelpers_bot_user_agents'] = 'Юзер агенты ботов';
-$_lang['setting_modhelpers_bot_user_agents_desc'] = 'Разделённые запятой юзер агенты ботов.';
+$_lang['setting_modhelpers_bot_user_agents_desc'] = 'Разделённые запятой юзер-агенты ботов.';
 $_lang['setting_modhelpers_print_template'] = 'Шаблон сообщения';
 $_lang['setting_modhelpers_print_template_desc'] = 'Шаблон сообщения для функции print_str. Например, &lt;pre&gt;[[+output]]&lt;/pre&gt;';
 $_lang['setting_modhelpers_token_ttl'] = 'Время жизни CSRF токена';

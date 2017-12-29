@@ -384,7 +384,12 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function filter(array $rules, $intersect = false)
     {
         $filtered = filter_data($this->getInputSource()->all(), $rules, $intersect);
-        $this->replace($filtered);
+        // TODO Проверить
+        if ($intersect) {
+            $this->replace($filtered);
+        } else {
+            $this->merge($filtered);
+        }
         return $this;
     }
     /**

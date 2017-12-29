@@ -19,9 +19,11 @@ switch ($modx->event->name) {
             });
             csrf_token();
 
-            $file = $modx->getOption('modhelpers_core_path', null, MODX_CORE_PATH) . 'components/modhelpers/config/config.php';
-            if (file_exists($file)) $config = include_once $file;
-            if (array_notempty($config)) config($config);
+            $file = config('modhelpers_core_path',MODX_CORE_PATH) . 'components/modhelpers/config/config.php';
+            if (file_exists($file)) {
+                $config = include_once $file;
+                if (array_notempty($config)) config($config);
+            }
         }
         break;
 }

@@ -11,5 +11,5 @@ $output = chunk('myChunk', $params);
 # Get the file chunk
  $output = chunk(MODX_CORE_PATH . 'chunks/myChunk.tpl', $params);
 # Get the file chunk from the folder specified in the "modhelpers_chunks_path" system setting.
- $output = chunk('/myChunk.tpl', $params);
+ $output = chunk('./myChunk.tpl', $params);
 ```

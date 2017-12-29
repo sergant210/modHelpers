@@ -471,8 +471,8 @@ if (!function_exists('chunk')) {
         global $modx;
 //        $output = '';
         //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
-        $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
-        if ($chunkName[0] == '/') {
+        if ($chunkName[0] == '.') {
+            $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
             $chunkName = rtrim(config('modhelpers_chunks_path', MODX_CORE_PATH . 'elements/chunks'),'/') . $chunkName;
         }
         if (strpos($chunkName, '/') !== false && file_exists($chunkName)) {
@@ -506,15 +506,15 @@ if (!function_exists('snippet')) {
             return $result;
         }
         global $modx;
-        $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
-        if ($snippetName[0] == '/') {
+        if ($snippetName[0] == '.') {
+            $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
             $snippetName = rtrim(config('modhelpers_snippets_path', MODX_CORE_PATH . '/elements/snippets'),'/') . $snippetName;
         }
         if (strpos($snippetName, '/') !== false && @file_exists($snippetName)) {
             ob_start();
             extract($scriptProperties, EXTR_SKIP);
             $result = include $snippetName;
-            $result = ($result === null ? '' : $result);
+            $result = $result === null ? '' : $result;
             if (ob_get_length()) {
                 $result = ob_get_contents() . $result;
             }
@@ -1078,7 +1078,7 @@ if (!function_exists('context')) {
     function context($key = 'key')
     {
         global $modx;
-        return $modx->context->get($key);
+        return is_null($modx->context) ? null : $modx->context->get($key);
     }
 }
 if (!function_exists('query')) {
