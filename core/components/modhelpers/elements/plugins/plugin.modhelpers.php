@@ -2,7 +2,7 @@
 
 switch ($modx->event->name) {
     case 'OnMODXInit':
-        $loader = $modx->getOption('modhelpers_core_path', null, MODX_CORE_PATH) . 'components/modhelpers/vendor/autoload.php';
+        $loader = $modx->getOption('modhelpers_core_path', null, MODX_CORE_PATH) . 'components/modhelpers/autoload.php';
         if (file_exists($loader)) {
             require_once $loader;
             app()->singleton('detector', 'Mobile_Detect');
@@ -14,8 +14,13 @@ switch ($modx->event->name) {
             });
             app()->singleton('response', function() use ($modx) {
                 /** @var modHelpers\ResponseManager $manager */
-                $manager = config('modhelpers_responseManager', 'modHelpers\ResponseManager', true);
+                $manager = config('modhelpers_responseManagerClass', 'modHelpers\ResponseManager', true);
                 return new $manager($modx);
+            });
+            app()->singleton('session', function() {
+                /** @var modHelpers\Session $session */
+                $sessionClass = config('modhelpers_sessionClass', 'modHelpers\Session', true);
+                return new $sessionClass();
             });
             csrf_token();
 

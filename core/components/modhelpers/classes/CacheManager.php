@@ -87,15 +87,15 @@ class CacheManager
         if (is_callable($options)) {
             $callback = $options;
             $options = array();
-        } elseif (!is_string($options) || !is_array($options)) {
+        } elseif (!is_string($options) && !is_array($options)) {
             $options = array(
                 xPDO::OPT_CACHE_EXPIRES => (int) $options
             );
         }
         $value = $this->get($key, $options);
-        if (!is_null($value)) return $value;
-
-        $this->set($key, $value = $callback(), $options);
+        if (is_null($value)) {
+            $this->set($key, $value = $callback(), $options);
+        }
 
         return $value;
     }

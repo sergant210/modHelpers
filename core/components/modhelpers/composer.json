@@ -14,12 +14,10 @@
         "fzaninotto/Faker": "^1.7",
         "mobiledetect/mobiledetectlib": "^2.8",
         "symfony/http-foundation": "~3.2",
-        "paragonie/random_compat": "^1|^2"
+        "paragonie/random_compat": "^1|^2",
+        "symfony/var-dumper": "^3.4"
     },
     "autoload": {
-        "files": [
-            "functions/functions.php"
-        ],
         "psr-4": {
             "modHelpers\\": "classes/"
         }

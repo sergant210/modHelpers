@@ -13,6 +13,8 @@ class ResponseManager
     protected $response;
     /** @var bool $isSent True if the response is already sent */
     protected $isSent = false;
+    /** @var bool */
+    protected $isPrepared = false;
 
     protected $charsArray = [
         '0'    => ['°', '₀', '۰'],
@@ -146,13 +148,26 @@ class ResponseManager
     {
         return $this->response;
     }
+
+    /**
+     * Prepares the Response before it is sent to the client.
+     * @param Request $request
+     * @return ResponseManager
+     */
+    public function prepare(Request $request)
+    {
+        $this->response->prepare($request);
+        $this->isPrepared = true;
+        return $this;
+    }
     /**
      * Sends HTTP headers and content and terminate the current script.
+     * @param bool $needPrepare
      */
-    public function send()
+    public function send($needPrepare = true)
     {
         if ($this->response instanceof SymfonyResponse && !$this->isSent) {
-            $this->response->prepare(request());
+            if ($needPrepare && !$this->isPrepared) $this->prepare(request());
             $this->response->send();
         }
         $this->isSent = true;

@@ -2,7 +2,7 @@
 Works with a resource object.
 
 ```resource($criteria = null, $asObject = true)```
-- $criteria(string|integer|array) - Resource id or an array.
+- $criteria(integer|array|bool) - Resource id, an array or TRUE to get the current resource.
 - $asObject(bool) - True to return an object. Otherwise - as array.
 
 ```php
@@ -19,7 +19,7 @@ $resource = resource([
 ]);
 
 // The current resource
-$resourceObject = resource(res_id());
+$resourceObject = resource(true);
 ```
 
 ### Use the object manager

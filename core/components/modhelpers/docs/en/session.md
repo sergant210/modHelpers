@@ -2,9 +2,9 @@
 Manages the session using dot notation.
 
 ```session($key = null, $default = null, $flat = false)```
-- $key (string|array) - a key. Can be specified using the dot notation.
-- $default (mixed) - default value. When putting a value to the session it works as the $flat parameter.
-- $flat (bool) - don't parse the key.
+- $key (string|array) - a key. Can be specified using the dot notation. Optional.
+- $default (mixed) - default value. When putting a value to the session it works as the $flat parameter. Optional.
+- $flat (bool) - don't parse the key. Optional.
 #### To get data from the session
 ```php
 # Get data using the dot notation
@@ -33,3 +33,20 @@ $_SESSION['key1.key2'] = $value;
 ```php
 session(['key1.key2' => null]); // $_SESSION['key1']['key2'] = null.
 ```
+### Session manager
+The session manager is more powerful. It can be got by calling the function without arguments:
+```
+$session = session();
+```
+#### Methods
+- all() -  Gets all of the session attributes.
+- get($key, $default = null,  $flat = false) - Gets an item from the session.
+- set($key, $value = null, $flat = false) - Puts a key / value pair or array of key / value pairs in the session. If $key is an array, $value is used instead of $flat.
+- push($key, $value) - Push a value onto a session array.
+- pull($key) - Gest the value of a given key and then removes it.
+- remove($key) - Removes one or many items from the session.
+- clear()
+- exists($key) - Checks if a key exists.
+- has($key) - Checks if a key is present and not null.
+- flash($key, $value) - Stores a key / value pair in the session for only one request.
+- count() - Returns the number of attributes.

@@ -14,6 +14,8 @@ class Request extends SymfonyRequest implements ArrayAccess
     protected $convertedFiles;
     /** @var  \modResource */
     protected $resource;
+    /** @var bool $custom Set TRUE if the url is custom (not exists). */
+    public $custom = false;
 
     /**
      * Create a new HTTP request from server variables.
@@ -384,7 +386,6 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function filter(array $rules, $intersect = false)
     {
         $filtered = filter_data($this->getInputSource()->all(), $rules, $intersect);
-        // TODO Проверить
         if ($intersect) {
             $this->replace($filtered);
         } else {
@@ -742,8 +743,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     /**
      * Gets the session data.
      *
-     * @return array|null The session data
-     * TODO Use the session manager
+     * @return Session|null The session data
      */
     public function getSession()
     {

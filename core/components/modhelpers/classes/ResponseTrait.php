@@ -100,8 +100,8 @@ trait ResponseTrait
         if (is_string($cookie)) {
             list($name, $value, $expire, $path, $domain, $secure, $httpOnly) = func_get_args();
             $cookie = new Cookie($name, $value, $expire, $path, $domain, $secure, $httpOnly);
-            $this->headers->setCookie($cookie);
         }
+        if ($cookie instanceof Cookie) $this->headers->setCookie($cookie);
 
         return $this;
     }

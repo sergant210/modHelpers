@@ -90,8 +90,11 @@ Available functions:
 * [switch_context()](./core/components/modhelpers/docs/en/switch_context.md) - switches the context according to the conditions.
 * [CSRF protection](./core/components/modhelpers/docs/en/csrf_protection.md) - protection from cross-site request forgery attacks.
 * [response()](./core/components/modhelpers/docs/en/response.md) - for response management.
+* [has_parent()](./core/components/modhelpers/docs/en/has_parent.md) - checks the presence of the specified parent(s).
+* [dump()](./core/components/modhelpers/docs/en/dump.md) - dump the passed variables.
+* [dd()](./core/components/modhelpers/docs/en/dd.md) - dump the passed variables and end the script.
 
-### System settings for extending
+### System settings for class extending
 - modhelpers_cacheManagerClass — a cache manager class.
 - modhelpers_collectionClass — a collection class.
 - modhelpers_containerClass — a container class.
@@ -102,7 +105,8 @@ Available functions:
 - modhelpers_objectClass — a object class.
 - modhelpers_queryClass — a query class.
 - modhelpers_requestClass — a request class.
-- modhelpers_responseManager — a response manager class.
+- modhelpers_responseManagerClass — a response manager class.
+- modhelpers_varDumperClass — a class for the dump and dd functions.
 
 ### Examples
 **Check the user exists**

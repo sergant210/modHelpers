@@ -132,48 +132,16 @@ if (!function_exists('session')) {
             return null;
         }
         if (is_null($key)) {
-            return $_SESSION;
+            return app('session');
         }
         // Set the value
         if (is_array($key)) {
-            foreach ($key as $arrKey => $arrValue) {
-                // Flat mode
-                if ($default) {
-                    $_SESSION[$arrKey] = $arrValue;
-                    continue;
-                }
-                $keys = explode('.', $arrKey);
-                if (count($keys) == 1) {
-                    $_SESSION[array_shift($keys)] = $arrValue;
-                } else {
-                    $_key = array_shift($keys);
-                    if (!isset($_SESSION[$_key]) || !is_array($_SESSION[$_key])) {
-                        $_SESSION[$_key] = array();
-                    }
-                    $array =& $_SESSION[$_key];
-                    while (count($keys) > 1) {
-                        $_key = array_shift($keys);
-                        $array[$_key] = array();
-                        $array = &$array[$_key];
-                    }
-                    $array[array_shift($keys)] = $arrValue;
-                }
-            }
+            $flat = $default;
+            app('session')->set($key, $flat);
 //            return $_SESSION;
         } else {
             // Get the value
-            if ($flat) {
-                return $_SESSION[$key] ?: $default;
-            }
-            $array = $_SESSION;
-            foreach (explode('.', $key) as $segment) {
-                if (isset($array[$segment])) {
-                    $array = $array[$segment];
-                } else {
-                    return $default;
-                }
-            }
-            return $array;
+            return app('session')->get($key, $default, $flat);
         }
     }
 
@@ -182,33 +150,13 @@ if (!function_exists('session_pull')) {
     /**
      * Get the value of a given key and then unset it.
      * @param string $key Use the dot notation.
+     * @param string $default Default value.
      * @param bool $flat Don't use the dot notation.
      * @return mixed
      */
-    function session_pull($key, $flat = false)
+    function session_pull($key, $default = '', $flat = false)
     {
-        if (empty($key)) {
-            return $_SESSION ?: null;
-        }
-        if ($flat) {
-            $output = $_SESSION[$key];
-            unset($_SESSION[$key]);
-        } else {
-            $array =& $_SESSION;
-            $parts = explode('.', $key);
-            while (count($parts) > 1) {
-                $part = array_shift($parts);
-                if (isset($array[$part]) && is_array($array[$part])) {
-                    $array =& $array[$part];
-                } else {
-                    return null;
-                }
-            }
-            $part = array_shift($parts);
-            $output = $array[$part];
-            unset($array[$part]);
-        }
-        return $output;
+        return !empty($key) ? app('session')->pull($key, $default, $flat) : app('session');
     }
 }
 if (!function_exists('cache')) {
@@ -469,22 +417,23 @@ if (!function_exists('chunk')) {
     function chunk($chunkName, array $properties= array ())
     {
         global $modx;
-//        $output = '';
+        $output = '';
         //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
         if ($chunkName[0] == '.') {
             $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
             $chunkName = rtrim(config('modhelpers_chunks_path', MODX_CORE_PATH . 'elements/chunks'),'/') . $chunkName;
         }
-        if (strpos($chunkName, '/') !== false && file_exists($chunkName)) {
-            $content = @file_get_contents($chunkName);
-            /** @var modChunk $chunk */
-            $chunk = $modx->newObject('modChunk', array('name' => basename($chunkName)));
-            $chunk->_cacheable = false;
-            $chunk->_processed = false;
-            $chunk->_content = '';
-            $output = $chunk->process($properties, $content);
-/*        } elseif ($pdo = pdotools()) {
-            $output = $pdo->getChunk($chunkName, $properties);*/
+        if (strpos($chunkName, '/') !== false) {
+            $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
+            if (file_exists($chunkName)) {
+                $content = @file_get_contents($chunkName);
+                /** @var modChunk $chunk */
+                $chunk = $modx->newObject('modChunk', array('name' => basename($chunkName)));
+                $chunk->_cacheable = false;
+                $chunk->_processed = false;
+                $chunk->_content = '';
+                $output = $chunk->process($properties, $content);
+            }
         } else {
             $output = $modx->getChunk($chunkName, $properties);
         }
@@ -499,9 +448,9 @@ if (!function_exists('snippet')) {
      * @param int|string|array $cacheOptions
      * @return string
      */
-    function snippet($snippetName, array $scriptProperties = array (), $cacheOptions = array())
+    function snippet($snippetName, array $scriptProperties = array (), $cacheOptions = null)
     {
-        $result = cache($snippetName);
+        $result = cache($snippetName, $cacheOptions);
         if (isset($result)) {
             return $result;
         }
@@ -510,17 +459,18 @@ if (!function_exists('snippet')) {
             $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
             $snippetName = rtrim(config('modhelpers_snippets_path', MODX_CORE_PATH . '/elements/snippets'),'/') . $snippetName;
         }
-        if (strpos($snippetName, '/') !== false && @file_exists($snippetName)) {
-            ob_start();
-            extract($scriptProperties, EXTR_SKIP);
-            $result = include $snippetName;
-            $result = $result === null ? '' : $result;
-            if (ob_get_length()) {
-                $result = ob_get_contents() . $result;
+        if (strpos($snippetName, '/') !== false) {
+            $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
+            if (file_exists($snippetName)) {
+                ob_start();
+                extract($scriptProperties, EXTR_SKIP);
+                $result = include $snippetName;
+                $result = $result === null ? '' : $result;
+                if (ob_get_length()) {
+                    $result = ob_get_contents() . $result;
+                }
+                ob_end_clean();
             }
-            ob_end_clean();
-/*        } elseif ($pdo = pdotools()) {
-            $result =  $pdo->runSnippet($snippetName, $scriptProperties);*/
         } else {
             $result = $modx->runSnippet($snippetName, $scriptProperties);
         }
@@ -594,14 +544,17 @@ if (!function_exists('collection')) {
 if (!function_exists('resource')) {
     /**
      * Get a resource object/array.
-     * @param int|array $criteria Resource id or array with criteria.
+     * @param int|array|bool $criteria Resource id, array with criterias or true to get the current resource.
      * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modResource|bool|modHelpers\Object
      */
     function resource($criteria = null, $asObject = true)
     {
+        global $modx;
         /** @var modHelpers\Object $resourceManager */
-        if (is_numeric($criteria)) {
+        if (is_bool($criteria) && $criteria) {
+            return $asObject ? $modx->resource : $modx->resource->toArray();
+        } elseif (is_numeric($criteria)) {
             $criteria = array('id' => (int) $criteria);
         }
         $resourceManager = object('modResource', $criteria);
@@ -647,7 +600,7 @@ if (!function_exists('resources')) {
             }
             if ($where) $collection->where($where);
         }
-        if (!isset($criteria)) return $collection;
+//        if (!isset($criteria)) return $collection;
 
         return $asObject ? $collection->get() : $collection->toArray();
     }
@@ -656,14 +609,17 @@ if (!function_exists('resources')) {
 if (!function_exists('user')) {
     /**
      * Get a user object or an array of user's data.
-     * @param int|string|array $criteria User id, username or array.
+     * @param int|string|array|bool $criteria User id, username, an array or true to get the current user.
      * @param bool $asObject True to return an object. Otherwise - an array.
      * @return array|modUser
      */
     function user($criteria = null, $asObject = true)
     {
+        global $modx;
         /** @var modHelpers\Object $userManager */
-        if (is_numeric($criteria)) {
+        if (is_bool($criteria) && $criteria) {
+            return $asObject ? $modx->user : $modx->user->toArray();
+        } elseif (is_numeric($criteria)) {
             $criteria = array('id' => (int) $criteria);
         } elseif (is_string($criteria)) {
             $criteria = array('username' => $criteria);
@@ -1317,8 +1273,7 @@ if (!function_exists('is_mobile')) {
      */
     function is_mobile()
     {
-        $detector = app('detector');
-        return $detector->isMobile();
+        return app('detector')->isMobile();
     }
 }
 if (!function_exists('is_tablet')) {
@@ -1329,8 +1284,7 @@ if (!function_exists('is_tablet')) {
      */
     function is_tablet()
     {
-        $detector = app('detector');
-        return $detector->isTablet();
+        return app('detector')->isTablet();
     }
 }
 if (!function_exists('is_desktop')) {
@@ -2009,6 +1963,82 @@ if (! function_exists('response')) {
         }
 
         return $manager->make($content, $status, $headers);
+    }
+}
+if (! function_exists('has_parent')) {
+    /**
+     * Check the presence of the specified parent.
+     *
+     * @param  int|array $parent
+     * @param bool $all
+     * @return bool
+     */
+    function has_parent($parent, $all = false)
+    {
+        if (func_num_args() >= 3) {
+            list($resource, $parent, $all) = func_get_args();
+        } elseif (func_num_args() == 2) {
+            if (is_numeric(func_get_arg(1)) || is_array(func_get_arg(1))) {
+                list($resource, $parent) = func_get_args();
+                $all = false;
+            }
+        }
+        $resource = default_if($resource, res_id());
+        $parent = (array) $parent;
+        if (!$resource) return false;
+        $hasParent = false;
+        $parents = parents($resource);
+        if (empty($parents)) return false;
+        foreach ($parent as $id) {
+            if ($all && !in_array($id, $parents)) return false;
+            if (in_array($id, $parents)) $hasParent = true;
+        }
+
+        return $hasParent;
+    }
+}
+if (!function_exists('dump')) {
+    /**
+     * Dump the passed variables.
+     */
+    function dump($var)
+    {
+        /** @var modHelpers\varDumper $class */
+        $class = config('modhelpers_varDumperClass', 'modHelpers\VarDumper', true);
+        $useFenom = config('pdotools_fenom_default');
+        if ($useFenom) {
+            echo '{ignore}';
+            config(['modhelpers_debug' => true]);
+        }
+        foreach (func_get_args() as $var) {
+            $class::dump($var);
+        }
+        if ($useFenom) {
+            echo '{/ignore}';
+        }
+        if (1 < func_num_args()) {
+            return func_get_args();
+        }
+
+        return $var;
+    }
+}
+if (! function_exists('dd')) {
+    /**
+     * Dump the passed variables and end the script.
+     *
+     * @param  mixed
+     * @return void
+     */
+    function dd()
+    {
+        /** @var modHelpers\varDumper $class */
+        $class = config('modhelpers_varDumperClass', 'modHelpers\VarDumper', true);
+        foreach (func_get_args() as $var) {
+            $class::dump($var);
+        }
+
+        exit(1);
     }
 }
 

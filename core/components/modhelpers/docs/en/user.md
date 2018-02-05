@@ -2,8 +2,8 @@
 Works with a user object.
 
 ```user($criteria = null, $asObject = true)```
-- $criteria(string|integer|array) - User id, username or an array.
-- $asObject(bool) - True to return an object. Otherwise - as array.
+- $criteria(string|integer|array|bool) - User id, username, an array or TRUE to get the current user.
+- $asObject(bool) - True to return an object. Otherwise - an array.
 
 ```php
 $userID = 1;
@@ -21,8 +21,9 @@ $username = user($userID, false)['username'];
 $user = user([
             'username:LIKE' => 'Admin',
 ]);
-// Current user
-$username = user(user_id())->username;
+
+// The current user
+$username = user(true)->username;
 
 $user = user(['Profile.email' => 'user@mail.org']);
 

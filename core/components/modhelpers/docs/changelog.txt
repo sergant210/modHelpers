@@ -1,3 +1,16 @@
+3.3.0-beta
+==============
+- Added the session manager.
+- The "session" function called without arguments returns the session manager instead of $_SESSION.
+- Added new function "dump".
+- Added new function "dd".
+- Added new function "has_parent".
+- Calling "user(true)" returns the current user.
+- Calling "resource(true)" returns the current resource.
+- Fixed a bug with caching in the "snippet" function.
+- Updated composer libraries.
+- Renamed the system setting "modhelpers_responseManager" to "modhelpers_responseManagerClass".
+
 3.2.1-beta
 ==============
 - Changed syntax for file elements with the relative path.
@@ -5,7 +18,7 @@
 
 3.2.0-beta
 ==============
-- Added a new function "response".
+- Added new function "response".
 - Renamed files of the classes.
 - In the functions chunk() and snippet() you can specify the name with a relative path (if you use file elements).
 - Added file "config/config.php" to add custom system settings. Can be helpful in testing mode.

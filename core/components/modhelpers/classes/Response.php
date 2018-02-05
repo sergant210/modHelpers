@@ -11,6 +11,7 @@ class Response extends SymfonyResponse
 
     /** @var array $data Data for the chunk */
     public $data = [];
+
     /**
      * Set the content on the response.
      *

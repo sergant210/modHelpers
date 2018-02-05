@@ -38,3 +38,7 @@ response()->file('/path/to/file')->send();
 ```php
 response()->download('/path/to/file')->send(); 
 ```
+#### Download a file and delete it
+```php
+response()->download('/path/to/file')->deleteFile()->send(); 
+```

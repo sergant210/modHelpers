@@ -7,17 +7,16 @@ use xPDO;
 
 class Query
 {
-    /** @var  modX $modx */
+    /** @var  xPDO $modx */
     protected $modx;
     /** @var  string */
     protected $query;
     /** @var  array */
     protected $bindings;
 
-    public function __construct(xPDO &$modx, $query)
+    public function __construct(xPDO $modx, $query)
     {
-        /** @var modX $modx */
-        $this->modx =& $modx;
+        $this->modx = $modx;
         $this->query = $query;
 
     }
