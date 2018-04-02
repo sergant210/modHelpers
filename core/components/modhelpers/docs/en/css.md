@@ -8,5 +8,6 @@ Register CSS to be injected inside the HEAD tag of a resource.
 ```php
 css('assets/css/styles.css'); 
 # Set the attributes.
-css('/path/to/styles.css', ['media' => 'print']); // <css src="/path/to/styles.css"></script>
+css('/path/to/styles.css', ['media' => 'print']); // <css src="/path/to/styles.css" media="print" rel="stylesheet"></script>
+css('/path/to/styles.css', ['media' => 'print', 'rel' => 'alternate']); // <css src="/path/to/styles.css" media="print" rel="alternate"></script>
 ```
