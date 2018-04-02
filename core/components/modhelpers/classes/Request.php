@@ -736,9 +736,10 @@ class Request extends SymfonyRequest implements ArrayAccess
             if (!in_array($this->method(), $methods)) return 0;
         }
         $requestToken = $this->getCsrfToken();
+
         return  is_string($requestToken) &&
-            is_string(csrf_token()) &&
-            hash_equals($this->getCsrfToken(), csrf_token());
+                is_string(csrf_token())  &&
+                hash_equals($this->getCsrfToken(), csrf_token());
     }
     /**
      * Gets the session data.

@@ -26,5 +26,4 @@ $user = user([
 $username = user(true)->username;
 
 $user = user(['Profile.email' => 'user@mail.org']);
-
 ```

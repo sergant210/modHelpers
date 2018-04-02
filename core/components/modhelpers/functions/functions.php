@@ -338,12 +338,21 @@ if (!function_exists('css')) {
     /**
      * Register CSS to be injected inside the HEAD tag of a resource.
      * @param string $src
-     * @param string $media
+     * @param string|array|null $attr
      */
-    function css($src, $media = null)
+    function css($src, $attr = null)
     {
         global $modx;
-        $modx->regClientCSS($src, $media);
+        // For backward compatibility
+        if ($attr) {
+            if (is_string($attr) && in_array($attr, explode(',','all,braille,handheld,print,screen,speech,projection,tty,tv'))) {
+                $attr = ['media' => $attr];
+            }
+            if (!is_array($attr)) $attr = [$attr];
+            if (!isset($attr['rel'])) $attr['rel'] = 'stylesheet';
+            $src = '<link href="' . $src . '" ' . html_attributes($attr) . '>';
+        }
+        $modx->regClientCSS($src);
     }
 }
 if (!function_exists('script')) {
@@ -352,28 +361,28 @@ if (!function_exists('script')) {
      * @param string $src
      * @param bool|string $start Inject inside the HEAD tag of a resource.
      * @param bool|string $plaintext
-     * @param string|null $attr async defer
+     * @param string|array|null $attr async defer
      */
     function script($src, $start = false, $plaintext = false, $attr = null)
     {
         global $modx;
 
         switch (true) {
-            case is_string($start):
+            case is_string($start) || is_array($start):
                 $attr = $start;
                 $start = false;
                 $plaintext = true;
                 break;
-            case is_string($plaintext):
+            case is_string($plaintext) || is_array($plaintext):
                 $attr = $plaintext;
                 $plaintext = true;
                 break;
-            case is_string($attr):
+            case is_string($attr) || is_array($attr):
                 $plaintext = true;
                 break;
         }
-        if ($attr) $src = '<script '. $attr .' type="text/javascript" src="' . $src . '"></script>';
 
+        if ($attr) $src = '<script '. html_attributes($attr) .' src="' . $src . '"></script>';
         if ($start) {
             $modx->regClientStartupScript($src, $plaintext);
         } else {
@@ -475,7 +484,7 @@ if (!function_exists('snippet')) {
             $result = $modx->runSnippet($snippetName, $scriptProperties);
         }
         if (!empty($cacheOptions)) {
-            cache(array($snippetName => $result), $cacheOptions);
+            cache(array(basename($snippetName) => $result), $cacheOptions);
         }
         return $result;
     }
@@ -2005,7 +2014,7 @@ if (!function_exists('dump')) {
     {
         /** @var modHelpers\varDumper $class */
         $class = config('modhelpers_varDumperClass', 'modHelpers\VarDumper', true);
-        $useFenom = config('pdotools_fenom_default');
+        $useFenom = config('pdotools_fenom_default') && context() != 'mgr';
         if ($useFenom) {
             echo '{ignore}';
             config(['modhelpers_debug' => true]);
@@ -2042,6 +2051,58 @@ if (! function_exists('dd')) {
     }
 }
 
+if (!function_exists('html_attributes')) {
+    /**
+     * Prepare the HTML attributes to output.
+     *
+     * @param  array|string
+     * @return string
+     */
+    function html_attributes($attributes)
+    {
+        $prepared = [];
+        if (is_string($attributes)) {
+            $prepared[] = $attributes;
+        } elseif (is_array($attributes)) {
+            $prepared = [];
+            foreach ($attributes as $key => $value) {
+                if (is_numeric($key)) {
+                    $prepared[] = $value;
+                } else {
+                    $prepared[] = sprintf('%s="%s"', $key, htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+                }
+            }
+        }
+        return count($prepared) > 0 ? implode(' ', $prepared) : '';
+    };
+}
+
+if (!function_exists('first')) {
+    /**
+     * Return the first not null parameter of the passed ones.
+     *
+     * @return mixed
+     */
+    function first()
+    {
+        foreach (func_get_args() as $param) {
+            if (!is_null($param)) return $param;
+        }
+    };
+}
+
+if (! function_exists('optional')) {
+    /**
+     * Provide access to optional objects.
+     *
+     * @param  mixed  $value
+     * @return mixed
+     */
+    function optional($value = null)
+    {
+        return new modHelpers\Optional($value);
+    }
+}
 /*if (!function_exists('queue')) {
     function queue()
     {

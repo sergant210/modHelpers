@@ -1,3 +1,12 @@
+Changelog for modHelpers.
+
+3.4.0-beta
+==============
+- Added new function "first".
+- Added new function "optional".
+- Added new function "html_attributes".
+- Improved the functions css() and script().
+
 3.3.0-beta
 ==============
 - Added the session manager.

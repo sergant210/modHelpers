@@ -43,9 +43,9 @@ $session = session();
 - get($key, $default = null,  $flat = false) - Gets an item from the session.
 - set($key, $value = null, $flat = false) - Puts a key / value pair or array of key / value pairs in the session. If $key is an array, $value is used instead of $flat.
 - push($key, $value) - Push a value onto a session array.
-- pull($key) - Gest the value of a given key and then removes it.
+- pull($key) - Gets the value of a given key and then removes it.
 - remove($key) - Removes one or many items from the session.
-- clear()
+- clear() - Removes all of the items from the session.
 - exists($key) - Checks if a key exists.
 - has($key) - Checks if a key is present and not null.
 - flash($key, $value) - Stores a key / value pair in the session for only one request.
