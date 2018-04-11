@@ -284,7 +284,7 @@ if (!function_exists('email')) {
         /** @var modHelpers\Mailer $class */
         $class = config('modhelpers_mailerClass', 'modHelpers\Mailer', true);
         /** @var modHelpers\Mailer $mailer */
-        $mailer = $class::getInstance($modx); // new $class($modx);
+        $mailer = new $class($modx);
         if (func_num_args() == 0) return $mailer;
         if (is_array($subject)) {
             $options = $subject;
@@ -1140,13 +1140,7 @@ if (!function_exists('img')) {
      */
     function img($src, $attrs = array())
     {
-        $attributes = '';
-        if (!empty($attrs) && is_array($attrs)) {
-            foreach ($attrs as $k => $v) {
-                $attributes .= $k . '="' . $v . '" ';
-            }
-        }
-        return '<img src="'. $src.'" ' . $attributes . '>';
+        return '<img src="'. $src.'" ' . html_attributes($attrs) . '>';
     }
 }
 
@@ -1687,10 +1681,10 @@ if (! function_exists('str_limit')) {
      *
      * @param  string $string
      * @param  int $limit
-     * @param  string $end
+     * @param  string $ending
      * @return string
      */
-    function str_limit($string, $limit = 100, $end = '...')
+    function str_limit($string, $limit = 100, $ending = '...')
     {
         $lfunc = function_exists('mb_strwidth') ? 'mb_strwidth' : 'strlen';
         if ($lfunc($string, 'UTF-8') <= $limit) {
@@ -1698,8 +1692,8 @@ if (! function_exists('str_limit')) {
         }
 
         return function_exists('mb_strimwidth')
-                            ? rtrim(mb_strimwidth($string, 0, $limit, $end, 'UTF-8'))
-                            : rtrim(substr($string, 0, $limit)) . $end;
+                            ? rtrim(mb_strimwidth($string, 0, $limit, $ending, 'UTF-8'))
+                            : rtrim(substr($string, 0, $limit)) . $ending;
     }
 }
 if (! function_exists('str_random')) {
@@ -2098,11 +2092,48 @@ if (! function_exists('optional')) {
      * @param  mixed  $value
      * @return mixed
      */
-    function optional($value = null)
+    function optional($value)
     {
-        return new modHelpers\Optional($value);
+        /** @var modHelpers\Optional $class */
+        $class = config('modhelpers_optionalClass', 'modHelpers\Optional', true);
+        return new $class($value);
     }
 }
+
+if (!function_exists('str_concat')) {
+    /**
+     * Concatenate passed arguments.
+     *
+     * @return string
+     */
+    function str_concat()
+    {
+        $output = '';
+        foreach (func_get_args() as $arg) {
+            if (is_scalar($arg)) {
+                $output .= $arg;
+            } elseif (is_object($arg) && method_exists($arg, '__toString')) {
+                $output .= $arg->__toString();
+            }
+        }
+        return $output;
+    }
+}
+
+if (!function_exists('string')) {
+    /**
+     *
+     * @param string $string
+     * @return modHelpers\Str
+     */
+    function string($string = '')
+    {
+        /** @var modHelpers\Str $class */
+        $class = config('modhelpers_stringClass', 'modHelpers\Str', true);
+        return new $class($string);
+    }
+}
+
 /*if (!function_exists('queue')) {
     function queue()
     {

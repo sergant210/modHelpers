@@ -8,7 +8,6 @@ use modMail;
 
 class Mailer
 {
-    protected static $instance;
     /** @var modX */
     protected $modx;
     /** @var modPHPMailer $mailer */
@@ -20,7 +19,7 @@ class Mailer
     protected $initialized = false;
 
 
-    private function __construct($modx)
+    public function __construct($modx)
     {
         /** @var  modX $modx */
         $this->modx = $modx;
@@ -29,23 +28,6 @@ class Mailer
         $this->attributes['from'] = $this->modx->getOption('emailsender');
         $this->attributes['fromName'] = $this->modx->getOption('site_name');
         $this->attributes['setHTML'] = true;
-    }
-
-    private function __clone(){}
-
-    /**
-     * Set the globally available instance of the mailer.
-     *
-     * @param modX $modx
-     * @return static
-     */
-    public static function getInstance(modX $modx)
-    {
-        if (is_null(static::$instance)) {
-            static::$instance = new static($modx);
-        }
-
-        return static::$instance;
     }
 
     protected function getUserRepository()

@@ -58,22 +58,24 @@ class Session extends SymfonySession
      * Checks if a key exists.
      *
      * @param  string $key
+     * @param bool $flat
      * @return bool
      */
-    public function exists($key)
+    public function exists($key, $flat = false)
     {
-        return !is_null($this->get($key));
+        return !is_null($this->get($key, null, $flat));
     }
 
     /**
      * Checks if a key is present and not null.
      *
      * @param  string $key
+     * @param bool $flat
      * @return bool
      */
-    public function has($key)
+    public function has($key, $flat = false)
     {
-        return !empty($this->get($key));
+        return !empty($this->get($key, null, $flat));
     }
     /**
      * Get an item from the session.

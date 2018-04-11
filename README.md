@@ -84,10 +84,12 @@ Available functions:
 * [str_between()](./core/components/modhelpers/docs/en/str_between.md) - gets a substring between two tags.
 * [str_clean()](./core/components/modhelpers/docs/en/str_clean.md) - sanitizes the string. Strips HTML tags and removes the specified characters. It's like the ```modX::sanitizeString()``` method.
 * [str_contains()](./core/components/modhelpers/docs/en/str_contains.md) - determines if a given string contains a given substring.
+* [str_concat()](./core/components/modhelpers/docs/en/str_concat.md) - concatenates passed string arguments.
 * [str_ends()](./core/components/modhelpers/docs/en/str_ends.md) - determines if a given string ends with a given substring.
 * [str_limit()](./core/components/modhelpers/docs/en/str_limit.md) - limits the number of characters in a string. 
 * [str_match()](./core/components/modhelpers/docs/en/str_match.md) - determines if a given string matches a given pattern.
 * [str_starts()](./core/components/modhelpers/docs/en/str_starts.md) - determines if a given string starts with a given substring.
+* [string()](./core/components/modhelpers/docs/en/string.md) - wraps the string for further manipulation.
 * [switch_context()](./core/components/modhelpers/docs/en/switch_context.md) - switches the context according to the conditions.
 * table_name() - gets the table name of the specified class. Can be used instead of ```xPDO::getTableName()```.
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.
@@ -99,18 +101,20 @@ Available functions:
 
 
 ### System settings for class extending
-- modhelpers_cacheManagerClass — a cache manager class.
-- modhelpers_collectionClass — a collection class.
-- modhelpers_containerClass — a container class.
-- modhelpers_loggerClass — a logger class.
-- modhelpers_mailerClass — a mailer class.
-- modhelpers_modelBuilderClass — a model builder class.
-- modhelpers_modelColumnClass — a model column class.
-- modhelpers_objectClass — a object class.
-- modhelpers_queryClass — a query class.
-- modhelpers_requestClass — a request class.
-- modhelpers_responseManagerClass — a response manager class.
-- modhelpers_varDumperClass — a class for the dump and dd functions.
+- modhelpers_cacheManagerClass — custom cache manager class.
+- modhelpers_collectionClass — custom collection class.
+- modhelpers_containerClass — custom container class.
+- modhelpers_loggerClass — custom logger class.
+- modhelpers_mailerClass — custom mailer class.
+- modhelpers_modelBuilderClass — custom model builder class.
+- modhelpers_modelColumnClass — custom model column class.
+- modhelpers_objectClass — custom object class.
+- modhelpers_queryClass — custom query class.
+- modhelpers_requestClass — custom request class.
+- modhelpers_responseManagerClass — name of the response manager class.
+- modhelpers_varDumperClass — class name for the dump and dd functions.
+- modhelpers_optionalClass —  name of the custom Optional class.
+- modhelpers_stringClass —  custom String class.
 
 ### Examples
 **Check the user exists**
@@ -128,7 +132,7 @@ $value = cache('key', 'my_data');
 $value = cache()->get('key', 'my_data');
 ```
 
-**Send an email**
+**Send email**
 ```php
 email('pussycat@mail.ru', 'Subject','Email content');
 // To the user

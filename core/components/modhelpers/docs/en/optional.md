@@ -5,8 +5,8 @@ Provide access to optional objects.
 
 ```php
 $nullObj = null;
-// Error
-$nullObj->property;  // trying to get property of non-object
+// Fatal error
+$nullObj->method();  // Call to a member function method() on null
 // Using the optional function prevent this error
-optional($nullObj)->property; // null
+optional($nullObj)->method(); // null
 ```
