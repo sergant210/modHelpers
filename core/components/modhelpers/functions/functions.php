@@ -508,13 +508,13 @@ if (!function_exists('object')) {
      * Get an object of the specified class.
      * @param string $class
      * @param integer|array|xPDOCriteria $criteria A valid xPDO criteria expression.
-     * @return modHelpers\Object
+     * @return modHelpers\xObject
      */
     function object($class, $criteria = null)
     {
         global $modx;
-        $objectClass = config('modhelpers_objectClass', 'modHelpers\Object', true);
-        /** @var modHelpers\Object $object */
+        $objectClass = config('modhelpers_objectClass', 'modHelpers\xObject', true);
+        /** @var modHelpers\xObject $object */
         $object = new $objectClass($modx, $class);
         if (isset($criteria)) {
             if (is_scalar($criteria)) {
@@ -555,12 +555,12 @@ if (!function_exists('resource')) {
      * Get a resource object/array.
      * @param int|array|bool $criteria Resource id, array with criterias or true to get the current resource.
      * @param bool $asObject True to return an object. Otherwise - an array.
-     * @return array|modResource|bool|modHelpers\Object
+     * @return array|modResource|bool|modHelpers\xObject
      */
     function resource($criteria = null, $asObject = true)
     {
         global $modx;
-        /** @var modHelpers\Object $resourceManager */
+        /** @var modHelpers\xObject $resourceManager */
         if (is_bool($criteria) && $criteria) {
             return $asObject ? $modx->resource : $modx->resource->toArray();
         } elseif (is_numeric($criteria)) {
@@ -625,7 +625,7 @@ if (!function_exists('user')) {
     function user($criteria = null, $asObject = true)
     {
         global $modx;
-        /** @var modHelpers\Object $userManager */
+        /** @var modHelpers\xObject $userManager */
         if (is_bool($criteria) && $criteria) {
             return $asObject ? $modx->user : $modx->user->toArray();
         } elseif (is_numeric($criteria)) {

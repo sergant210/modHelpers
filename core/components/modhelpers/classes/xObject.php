@@ -8,7 +8,7 @@ use xPDOObject;
 use modTemplateVar;
 use modResource;
 
-class Object
+class xObject
 {
     /** @var  modX $modx */
     protected $modx;
@@ -143,7 +143,7 @@ class Object
 
     /**
      * Add the Profile fields for the modUser class.
-     * @return \modHelpers\Object
+     * @return \modHelpers\xObject
      */
     public function withProfile()
     {
@@ -156,7 +156,7 @@ class Object
 
     /**
      *
-     * @return \modHelpers\Object
+     * @return \modHelpers\xObject
      */
     public function limit()
     {

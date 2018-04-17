@@ -1,5 +1,9 @@
 Changelog for modHelpers.
 
+3.5.1-beta
+==============
+- Improved compatibility with PHP 7.2.
+
 3.5.0-beta
 ==============
 - New function "string".
