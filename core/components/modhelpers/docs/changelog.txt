@@ -1,5 +1,16 @@
 Changelog for modHelpers.
 
+3.6.0-beta
+==============
+- Added new function tag_encode.
+- Added new function tag_decode.
+- Added new function array_is_assoc.
+- Added new function is_odd.
+- Added new function is_even.
+- Added some methods to the Str class (used in the "string" function).
+- Added dd() and dump() methods to the Collection class.
+- Updated all composer dependencies.
+
 3.5.1-beta
 ==============
 - Improved compatibility with PHP 7.2.
@@ -15,7 +26,7 @@ Changelog for modHelpers.
 - Added new function "first".
 - Added new function "optional".
 - Added new function "html_attributes".
-- Improved the functions css() and script().
+- Improved the css() and script() functions.
 
 3.3.0-beta
 ==============

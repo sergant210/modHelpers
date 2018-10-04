@@ -14,7 +14,8 @@ $string = string('Some String')
                                ->undo()                    // Some String
                                ->wrap('<div>','</div>')    // <div>Some String</div>
                                ->erase(0, 5)               // Some String</div>
-                               ->length();                 // 17
+                               ->special_encode()		   // Some String&lt;\/div&gt;
+                               ->length();                 // 23
 							
 echo $string->origin(); // Some String
 echo $string;           // Some String</div>

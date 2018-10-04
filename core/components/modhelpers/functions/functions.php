@@ -429,7 +429,7 @@ if (!function_exists('chunk')) {
         $output = '';
         //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
         if ($chunkName[0] == '.') {
-            $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
+            $chunkName = preg_replace('#\.+[\/|\\\]#', '/', $chunkName);
             $chunkName = rtrim(config('modhelpers_chunks_path', MODX_CORE_PATH . 'elements/chunks'),'/') . $chunkName;
         }
         if (strpos($chunkName, '/') !== false) {
@@ -465,7 +465,7 @@ if (!function_exists('snippet')) {
         }
         global $modx;
         if ($snippetName[0] == '.') {
-            $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
+            $snippetName = preg_replace('#\.+[\/|\\\]#', '/', $snippetName);
             $snippetName = rtrim(config('modhelpers_snippets_path', MODX_CORE_PATH . '/elements/snippets'),'/') . $snippetName;
         }
         if (strpos($snippetName, '/') !== false) {
@@ -519,13 +519,9 @@ if (!function_exists('object')) {
         if (isset($criteria)) {
             if (is_scalar($criteria)) {
                 $pk = $modx->getPK($class);
-                $where = array($pk => $criteria);
-            } else {
-                $where = $criteria;
+                $criteria = array($pk => $criteria);
             }
-            if (isset($where)) {
-                $object->where($where);
-            }
+            $object->where($criteria);
         }
         return $object;
     }
@@ -752,13 +748,9 @@ if (!function_exists('object_exists')) {
      */
     function object_exists($className, $criteria = null)
     {
-        global $modx;
-        if (is_scalar($criteria)) {
-            $pk = $modx->getPK($className);
-            $criteria = array($pk => $criteria);
-        }
+        $object = object($className, $criteria)->object();
 
-        return $modx->getCount($className, $criteria) ? true : false;
+        return is_object($object) && $object instanceof $className;
     }
 }
 if (!function_exists('resource_exists')) {
@@ -774,34 +766,28 @@ if (!function_exists('resource_exists')) {
 }
 if (!function_exists('user_exists')) {
     /**
-     * Checks the user existence.
+     * Checks the user existence by simple conditions.
      * @param array $criteria
+     * @param string $userTableAlias
+     * @param string $profileTableAlias
      * @return bool
      */
-    function user_exists($criteria = null)
+    function user_exists($criteria = null, $userTableAlias = 'modUser', $profileTableAlias = 'Profile')
     {
-        function trimFields ($value) {
-            return trim($value,' `');
-        }
-        function prepareUserFields ($value) {
-            return 'modUser.' . $value;
-        }
-        function prepareProfileFields ($value) {
-            return 'Profile.' . $value;
-        }
         global $modx;
-        $userFields = explode(',', $modx->getSelectColumns('modUser'));
-        $userFields = array_map('trimFields',$userFields);
-        $fullUserFields = array_map('prepareUserFields',$userFields);
-
-        $profileFields = explode(',', $modx->getSelectColumns('modUserProfile','','',array('id'),true));
-        $profileFields = array_map('trimFields',$profileFields);
-        $fullProfileFields = array_map('prepareProfileFields',$profileFields);
-
-        $fields = array_merge($userFields, $profileFields);
-        $fullFields = array_merge($fullUserFields, $fullProfileFields);
+        $userFields = (new modUser($modx))->toArray();
+        $profileFields = (new modUserProfile($modx))->toArray();
+        $fields = [];
+        foreach ($userFields as $key => $userField) {
+            $fields[$key] = $userTableAlias . "." . $key;
+        }
+        foreach ($profileFields as $key => $profileField) {
+            if ($key == 'id') continue;
+            $fields[$key] = $profileTableAlias . "." . $key;
+        }
         $query = $modx->newQuery('modUser');
-        $query->innerJoin('modUserProfile', 'Profile');
+        $query->setClassAlias($userTableAlias);
+        $query->innerJoin('modUserProfile', $profileTableAlias);
         if (is_numeric($criteria)) {
             $criteria = array('id' => $criteria);
         } elseif (is_string($criteria)) {
@@ -810,16 +796,34 @@ if (!function_exists('user_exists')) {
         if (is_array($criteria)) {
             $where = array();
             foreach ($criteria as $key => $value) {
-                $key = str_replace($fields,$fullFields, $key);
+                if (strpos($key, '.') === false) {
+                    $parts = explode(':', $key);
+                    switch (count($parts)) {
+                    	case 2:
+                    	    if ($parts[0] == 'OR') {
+                                $parts[1] = $fields[$parts[1]];
+                                $parts[2] = '=';
+                            } else {
+                                $parts[0] = $fields[$parts[0]];
+                            }
+                    		break;
+                    	case 3:
+                            $parts[1] = $fields[$parts[1]];
+                    		break;
+                        default:
+                            $parts[0] = $fields[$parts[0]];
+                    }
+                    $key = implode(':', $parts);
+                }
                 $where[$key] = $value;
             }
             $query->where($where);
         }
-        $rowCount = null;
+        $rowCount = 0;
         if ($query->prepare() && $query->stmt->execute()) {
             $rowCount = $query->stmt->rowCount();
         }
-        return isset($rowCount) ? $rowCount > 0 : false;
+        return $rowCount > 0;
     }
 }
 if (!function_exists('user_id')) {
@@ -943,7 +947,7 @@ if (!function_exists('is_email')) {
      */
     function is_email($string)
     {
-        return preg_match('/^[a-zA-Z0-9_.+-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/',$string);
+        return preg_match('/^[a-zA-Z0-9_.+-]+@[a-z0-9_-]+(\.[a-z0-9_-]+)*\.[a-z]{2,6}$/', $string);
     }
 }
 if (!function_exists('is_url')) {
@@ -955,7 +959,7 @@ if (!function_exists('is_url')) {
      */
     function is_url($string)
     {
-        return preg_match('/^((https|http):\/\/)?([a-z0-9]{1})([\w\.]+)\.([a-z]{2,6}\.?)(\/[\w\.]*)*\/?$/',$string);
+        return preg_match('/^((https|http):\/\/)?([a-z0-9]{1})([\w\.]+)\.([a-z]{2,6}\.?)(\/[\w\.]*)*\/?$/', $string);
     }
 }
 if (!function_exists('log_error')) {
@@ -1281,7 +1285,7 @@ if (!function_exists('is_mobile')) {
 }
 if (!function_exists('is_tablet')) {
     /**
-     * Mobile detector.
+     * Tablet detector.
      * @return bool
      * @see http://mobiledetect.net/
      */
@@ -1292,7 +1296,7 @@ if (!function_exists('is_tablet')) {
 }
 if (!function_exists('is_desktop')) {
     /**
-     * Mobile detector.
+     * Desktop detector.
      * @return bool
      * @see http://mobiledetect.net/
      */
@@ -2134,6 +2138,80 @@ if (!function_exists('string')) {
     }
 }
 
+if (!function_exists('is_odd')) {
+    /**
+     * Check whether a variable is odd.
+     * @param int $val
+     * @return bool
+     */
+    function is_odd($val)
+    {
+        return is_int($val) && $val % 2 > 0;
+    }
+}
+
+if (!function_exists('is_even')) {
+    /**
+     * Check whether a variable is even.
+     * @param int $val
+     * @return bool
+     */
+    function is_even($val)
+    {
+        return is_int($val) && $val % 2 == 0;
+    }
+}
+
+if (!function_exists('array_is_assoc')) {
+    /**
+     * Check whether a variable is an associative array.
+     * @param array $array
+     * @return bool
+     */
+    function array_is_assoc($array)
+    {
+        if (is_array($array)) {
+            foreach (array_keys($array) as $key) {
+                if (!is_numeric($key)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
+if (!function_exists('tag_encode')) {
+    /**
+     * Convert MODX tag chars to corresponding HTML codes.
+     * @param string $string
+     * @param array $chars Chars to encode.
+     * @return string
+     */
+    function tag_encode($string, array $chars = array ("[", "]", "{" , "}" , "`"))
+    {
+        $codes = array_map(function($char) {
+            return '&#'.ord($char); // array("&#91;", "&#93;", "&#123;", "&#125;", "&#96;")
+        }, $chars);
+        return str_replace($chars, $codes, $string);
+    }
+}
+
+if (!function_exists('tag_decode')) {
+    /**
+     * Decode codes back to MODX tag chars.
+     * @param string $string
+     * @param array $chars Chars to decode.
+     * @return string
+     */
+    function tag_decode($string, array $chars = array ("[", "]", "{" , "}" , "`"))
+    {
+        $codes = array_map(function($char) {
+            return '&#'.ord($char);
+        }, $chars);
+        return str_replace($codes, $chars, $string);
+    }
+}
 /*if (!function_exists('queue')) {
     function queue()
     {

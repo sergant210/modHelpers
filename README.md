@@ -7,6 +7,7 @@ Available functions:
 * [app()](./core/components/modhelpers/docs/en/app.md) - gets the available container instance.
 * array_empty() - checks whether a variable is an empty array.
 * array_notempty() - checks whether a variable is an array and not empty.
+* array_is_assoc() - checks whether a variable is an associative array.
 * [array_trim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the beginning and the end of an array values.
 * [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the beginning of an array values.
 * [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the end of an array values.
@@ -45,6 +46,8 @@ Available functions:
 * is_desktop() - desktop detection.
 * is_email() - validates the email. Can be used to validate the form data.
 * is_guest() - determines if the user is a guest. Checks equality ```$modx->user->id == 0```
+* is_even() - checks whether a variable is even.
+* is_odd() - checks whether a variable is odd.
 * is_mobile() - mobile detection.
 * is_tablet() - tablet detection.
 * is_url() - validates the url.
@@ -93,8 +96,10 @@ Available functions:
 * [switch_context()](./core/components/modhelpers/docs/en/switch_context.md) - switches the context according to the conditions.
 * table_name() - gets the table name of the specified class. Can be used instead of ```xPDO::getTableName()```.
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.
+* [tag_encode()](./core/components/modhelpers/docs/en/tag_encode.md) - converts MODX tag chars to corresponding HTML codes.
+* [tag_decode()](./core/components/modhelpers/docs/en/tag_decode.md) - decodes HTML codes back to MODX tag chars.
 * tv() - gets the specified TV of the current resource. 
-* [user()](./core/components/modhelpers/docs/en/user.md) - works with a user object.
+* [user()](./core/components/modhelpers/docs/en/user.md) - gets a user object or an array of user's data.
 * [user_exists()](./core/components/modhelpers/docs/en/user_exists.md) - checks the specified user exists.
 * user_id() - gets the id of the current user. Returns the value of ```$modx->user->id```.
 * users() - works with a user collection.

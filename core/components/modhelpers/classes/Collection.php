@@ -13,18 +13,29 @@ class Collection
     protected $modx;
     /** @var  xPDOQuery $query */
     protected $query;
-    /** @var string class */
+    /** @var string $class Class name */
     protected $class;
+    /** @var string $alias Class alias*/
     protected $alias;
+    /** @var int $rows */
     protected $rows = 0;
+    /** @var bool $arrayCollection Flag - array collection or class collection. */
     protected $arrayCollection = false;
-
+    /** @var array $where */
     protected $where = array();
+    /** @var array $tvSelects */
     protected $tvSelects = array();
+    /** @var array $tvJoins */
     protected $tvJoins = array();
+    /** @var array $unions */
     protected $unions = array();
 
-    public function __construct(modX $modx, $class='')
+    /**
+     * Collection constructor.
+     * @param modX $modx
+     * @param string $class
+     */
+    public function __construct(modX $modx, $class = '')
     {
         $this->modx = $modx;
         if (empty($class) || is_numeric($class)) {
@@ -36,13 +47,7 @@ class Collection
 
             $this->alias = $this->class;
             $this->query = $this->modx->newQuery($this->class);
-            /*if ($class == 'modUser') {
-                $this->alias = 'User';
-            }*/
             $this->query->setClassAlias($this->alias);
-            $this->query->limit(100);
-
-         //   if (empty($class)) $this->query->query['from']['tables'] = array();
         }
     }
 
@@ -78,8 +83,6 @@ class Collection
     {
         if (preg_match('/^select/i', $table)) $table = '(' . $table . ')';
         $this->query->query['from']['tables'][] = array('table'=>$table, 'alias' => $alias);
-//DEBUGGING
-//log_error($this->query->query, 'HTML');
         return $this;
     }
 
@@ -330,6 +333,7 @@ class Collection
             foreach ($this->tvSelects as $select) {
                 $this->query->select($select);
             }
+            $this->tvSelects = array();
         }
         if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
     }
@@ -341,6 +345,7 @@ class Collection
             foreach ($this->where as $where) {
                 $query->where($where['where'], $where['conjunction']);
             }
+            $this->where = array();
         }
     }
 
@@ -354,6 +359,7 @@ class Collection
                     $this->query->leftJoin($class, $alias, $v['on']);
                 }
             }
+            $this->tvJoins = array();
         }
     }
 
@@ -375,6 +381,7 @@ class Collection
                     $unions[] = $union;
                 }
             }
+            $this->unions = array();
         }
         return $unions;
     }
@@ -504,6 +511,7 @@ class Collection
                     $query = $alias.'`id` IN (SELECT `groupMember`.`member` FROM ' . table_name('modUserGroupMember') . ' as `groupMember`' .
                         ' JOIN ' . table_name('modUserGroup') . ' as `Groups` ON `Groups`.`id` = `groupMember`.`user_group`' .
                         " WHERE `Groups`.`name` LIKE " . $this->modx->quote($group) . ")";
+                    // TODO-sergant: Add to the where array instead of the query instance
                     $this->query->where($query);
                     break;
             }
@@ -549,7 +557,38 @@ class Collection
         }
         return $this;
     }
+    /**
+     * Dump the collection and end the script.
+     *
+     * @return void
+     */
+    public function dd()
+    {
+        http_response_code(500);
 
+        $this->dump();
+
+        die(1);
+    }
+
+    /**
+     * Dump the collection.
+     *
+     * @return $this
+     */
+    public function dump()
+    {
+        $collection = clone $this;
+        $collection->modx = null;
+        dump($collection);
+
+        return $this;
+    }
+
+    function __clone()
+    {
+        $this->query = clone $this->query;
+    }
     /**
      * Call xPDOQuery methods.
      * @param  string $method

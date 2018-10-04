@@ -1,5 +1,5 @@
 ## user()
-Works with a user object.
+Gets a user object or an array of user's data.
 
 ```user($criteria = null, $asObject = true)```
 - $criteria(string|integer|array|bool) - User id, username, an array or TRUE to get the current user.
@@ -22,8 +22,10 @@ $user = user([
             'username:LIKE' => 'Admin',
 ]);
 
-// The current user
-$username = user(true)->username;
-
 $user = user(['Profile.email' => 'user@mail.org']);
+```
+Get the current user
+```php
+$user = user(true);
+$username = $user->username;
 ```

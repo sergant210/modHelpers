@@ -254,7 +254,7 @@ class Str
     public function encode()
     {
         $arguments = ['string' => $this->string] + func_get_args();
-        $this->string = call_user_func_array('htmlentities', array_filter($arguments));
+        $this->string = call_user_func_array('htmlentities', $arguments);
 
         return $this;
     }
@@ -266,7 +266,7 @@ class Str
     public function decode()
     {
         $arguments = ['string' => $this->string] + func_get_args();
-        $this->string = call_user_func_array('html_entity_decode', array_filter($arguments));
+        $this->string = call_user_func_array('html_entity_decode', $arguments);
 
         return $this;
     }
@@ -326,7 +326,7 @@ class Str
     public function sha1($length = 0)
     {
         $this->string = sha1($this->string);
-        if ($length) $this->first($length);
+        if (is_numeric($length) && intval($length)) $this->first(intval($length));
 
         return $this;
     }
@@ -338,7 +338,7 @@ class Str
     public function md5($length = 0)
     {
         $this->string = md5($this->string);
-        if ($length) $this->first($length);
+        if (is_numeric($length) && intval($length)) $this->first(intval($length));
 
         return $this;
     }
@@ -367,6 +367,11 @@ class Str
         return $this;
     }
 
+    /**
+     * Call a specified function.
+     * @param callable $func
+     * @return $this
+     */
     public function map(callable $func)
     {
         $result = call_user_func($func, $this->string);
@@ -374,6 +379,57 @@ class Str
 
         return $this;
     }
+
+    /**
+     * Convert MODX tag chars to corresponding HTML codes.
+     * @param array $chars Chars to encode.
+     * @return $this
+     */
+    public function tag_encode(array $chars = array ("[", "]", "{" , "}" , "`"))
+    {
+        $this->string = tag_encode($this->string, $chars);
+
+        return $this;
+    }
+
+    /**
+     * Decode MODX tag chars.
+     * @param array $chars
+     * @return $this
+     */
+    public function tag_decode(array $chars = array ("[", "]", "{" , "}" , "`"))
+    {
+
+        $this->string = tag_decode($this->string, $chars);
+
+        return $this;
+    }
+
+    /**
+     * Convert special characters to HTML entities.
+     * @see http://php.net/manual/en/function.htmlspecialchars.php
+     * @return $this
+     */
+    public function special_encode()
+    {
+        $arguments = ['string' => $this->string] + func_get_args();
+        $this->string = call_user_func_array('htmlspecialchars', $arguments);
+        return $this;
+    }
+
+    /**
+     * Convert special HTML entities back to characters.
+     * @see http://php.net/manual/en/function.htmlspecialchars-decode.php
+     * @return $this
+     */
+    public function special_decode()
+    {
+        $arguments = ['string' => $this->string] + func_get_args();
+        $this->string = call_user_func_array('htmlspecialchars_decode', $arguments);
+
+        return $this;
+    }
+
     /**
      * @return string
      */

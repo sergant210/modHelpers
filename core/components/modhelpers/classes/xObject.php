@@ -143,13 +143,14 @@ class xObject
 
     /**
      * Add the Profile fields for the modUser class.
+     * @param string $alias
      * @return \modHelpers\xObject
      */
-    public function withProfile()
+    public function withProfile($alias = 'Profile')
     {
         if ($this->class == 'modUser') {
-            $this->query->innerJoin('modUserProfile', 'Profile');
-            $this->query->select($this->modx->getSelectColumns('modUser', 'modUser') . ',' . $this->modx->getSelectColumns('modUserProfile', 'Profile', '', array('id'), true));
+            $this->query->innerJoin('modUserProfile', $alias);
+            $this->query->select($this->modx->getSelectColumns('modUser', 'modUser') . ',' . $this->modx->getSelectColumns('modUserProfile', $alias, '', array('id'), true));
         }
         return $this;
     }
@@ -208,6 +209,7 @@ class xObject
     }
 
     /**
+     * Get object.
      * @return xPDOObject|object
      */
     public function object()
