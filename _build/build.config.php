@@ -4,7 +4,7 @@
 define('PKG_NAME', 'modHelpers');
 define('PKG_NAME_LOWER', strtolower(PKG_NAME));
 
-define('PKG_VERSION', '3.6.0');
+define('PKG_VERSION', '3.7.0');
 define('PKG_RELEASE', 'beta');
 define('PKG_AUTO_INSTALL', false);
 define('PKG_NAMESPACE_PATH', '{core_path}components/' . PKG_NAME_LOWER . '/');

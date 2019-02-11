@@ -30,6 +30,7 @@ Available functions:
 * [email()](./core/components/modhelpers/docs/en/email.md) - sends an email.
 * [email_user()](./core/components/modhelpers/docs/en/email_user.md) - sends an email to the specified user.
 * escape() - escapes the provided string using the platform-specific escape character.
+* [exec_bg_script()](./core/components/modhelpers/docs/en/exec_bg_script.md) - executes php script in the background on both Windows and Unix.
 * [explode_ltrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and ltrim.
 * [explode_rtrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and rtrim.
 * [explode_trim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and trim.
@@ -98,6 +99,7 @@ Available functions:
 * template_id() - gets the template id of the current resource. Returns the value of $modx->resource->template.
 * [tag_encode()](./core/components/modhelpers/docs/en/tag_encode.md) - converts MODX tag chars to corresponding HTML codes.
 * [tag_decode()](./core/components/modhelpers/docs/en/tag_decode.md) - decodes HTML codes back to MODX tag chars.
+* [timer](./core/components/modhelpers/docs/en/timer.md) - time logger.
 * tv() - gets the specified TV of the current resource. 
 * [user()](./core/components/modhelpers/docs/en/user.md) - gets a user object or an array of user's data.
 * [user_exists()](./core/components/modhelpers/docs/en/user_exists.md) - checks the specified user exists.
@@ -114,12 +116,13 @@ Available functions:
 - modhelpers_modelBuilderClass — custom model builder class.
 - modhelpers_modelColumnClass — custom model column class.
 - modhelpers_objectClass — custom object class.
+- modhelpers_optionalClass —  name of the custom Optional class.
 - modhelpers_queryClass — custom query class.
 - modhelpers_requestClass — custom request class.
 - modhelpers_responseManagerClass — name of the response manager class.
-- modhelpers_varDumperClass — class name for the dump and dd functions.
-- modhelpers_optionalClass —  name of the custom Optional class.
 - modhelpers_stringClass —  custom String class.
+- modhelpers_timerClass —  custom Timer class.
+- modhelpers_varDumperClass — class name for the dump and dd functions.
 
 ### Examples
 **Check the user exists**

@@ -1118,7 +1118,7 @@ if (!function_exists('faker')) {
             });
         }
         $faker = app('faker');
-        if (func_num_args() == 0) return $faker;
+        if (func_num_args() == 0 || empty($property)) return $faker;
 
         try {
             if (is_array($property)) {
@@ -1315,7 +1315,7 @@ if (!function_exists('array_empty')) {
      */
     function array_empty($array)
     {
-        return empty($array) && is_array($array);
+        return is_array($array) && empty($array);
     }
 }
 if (!function_exists('array_notempty')) {
@@ -1327,7 +1327,7 @@ if (!function_exists('array_notempty')) {
      */
     function array_notempty($array)
     {
-        return !empty($array) && is_array($array);
+        return is_array($array) && !empty($array);
     }
 }
 
@@ -2191,7 +2191,7 @@ if (!function_exists('tag_encode')) {
     function tag_encode($string, array $chars = array ("[", "]", "{" , "}" , "`"))
     {
         $codes = array_map(function($char) {
-            return '&#'.ord($char); // array("&#91;", "&#93;", "&#123;", "&#125;", "&#96;")
+            return '&#'.ord($char).';'; // array("&#91;", "&#93;", "&#123;", "&#125;", "&#96;")
         }, $chars);
         return str_replace($chars, $codes, $string);
     }
@@ -2207,11 +2207,57 @@ if (!function_exists('tag_decode')) {
     function tag_decode($string, array $chars = array ("[", "]", "{" , "}" , "`"))
     {
         $codes = array_map(function($char) {
-            return '&#'.ord($char);
+            return '&#'.ord($char).';';
         }, $chars);
         return str_replace($codes, $chars, $string);
     }
 }
+if (!function_exists('exec_bg_script')) {
+    /**
+     * Execute script in the background.
+     * @param string $script
+     * @param array $args
+     * @param bool $escape
+     * @return null|bool
+     */
+    function exec_bg_script($script, array $args = [], $escape = true)
+    {
+        $script = str_replace('..', '', $script);
+        $script = (strpos($script, MODX_BASE_PATH) === false) ? MODX_BASE_PATH . $script : $script;
+        if (($file = realpath($script)) === false) {
+            log_error('[exec_bg_script] File ' . $script . ' not found!');
+            return false;
+        }
+        array_walk($args, function(&$value, $key) use($escape) {
+            $value = $escape ? $key . '=' . escapeshellarg($value) : $key . '=' . $value;
+        });
+
+        $command = sprintf('php %s %s', $file, implode(' ', $args));
+        if (substr(php_uname(), 0, 7) == "Windows") {
+            pclose(popen("start /B " . $command, "r"));
+        } else {
+            exec($command . " > /dev/null &");
+        }
+    }
+}
+
+if (!function_exists('timer')) {
+    /**
+     * Timer.
+     * @param string $timer
+     * @return string
+     */
+    function timer($timer = 'Default')
+    {
+        static $timers = [];
+        if (!isset($timers[$timer])) {
+            $class = config('modhelpers_timerClass', 'modHelpers\Timer', true);
+            $timers[$timer] = new $class;
+        }
+        return $timers[$timer];
+    }
+}
+
 /*if (!function_exists('queue')) {
     function queue()
     {

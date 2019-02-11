@@ -14,8 +14,22 @@ class Request extends SymfonyRequest implements ArrayAccess
     protected $convertedFiles;
     /** @var  \modResource */
     protected $resource;
-    /** @var bool $custom Set TRUE if the url is custom (not exists). */
-    public $custom = false;
+    /** @var bool $custom TRUE if the url is custom (No resources for this URL). */
+    protected $custom = false;
+
+    /**
+     * Set a type of request.
+     * @param bool $value
+     */
+    public function setCustom($value = true)
+    {
+        $this->custom = (bool) $value;
+    }
+
+    public function isCustom()
+    {
+        return $this->custom;
+    }
 
     /**
      * Create a new HTTP request from server variables.
@@ -628,7 +642,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function segment($index, $default = null)
     {
         $segments = $this->segments();
-        return default_if($segments[$index - 1], $default);
+        return default_if(@$segments[intval($index) - 1], $default);
     }
 
     /**
@@ -659,6 +673,38 @@ class Request extends SymfonyRequest implements ArrayAccess
         }
 
         return false;
+    }
+
+    /**
+     * Returns the host name.
+     *
+     * @param bool $withSchema
+     * @return string
+     */
+    public function getHost($withSchema = false)
+    {
+        return ($withSchema ? $this->getScheme().'://' : '') . parent::getHost();
+    }
+
+    /**
+     * Returns the specified sub domain (1 based index).
+     * @param  int $index
+     * @param  string $default
+     * @return string
+     */
+    public function subDomain($index, $default = null)
+    {
+        $subDomains = $this->subDomains();
+        return default_if(@$subDomains[intval($index)-1], $default);
+    }
+
+    /**
+     * Returns the sub domains.
+     * @return array
+     */
+    public function subDomains()
+    {
+        return array_slice(array_reverse(explode('.', $this->getHost())), 2);
     }
 
     /**

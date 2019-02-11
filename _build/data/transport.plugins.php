@@ -8,6 +8,7 @@ $tmp = array(
 		'description' => '',
 		'events' => array(
             'OnMODXInit' => array('priority' => -1000),
+            'OnPageNotFound' => array('priority' => -1000),
 		)
 	)
 );

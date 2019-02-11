@@ -16,6 +16,18 @@ class UploadedFile extends SymfonyUploadedFile
 
 
     /**
+     * Store the uploaded file with the original name.
+     *
+     * @param  string  $path
+     * @param  string|int|modMediaSource  $source
+     * @return string|false
+     */
+    public function storeAsOriginal($path, $source = null)
+    {
+        return $this->storeAs($path, $this->originalName(), $source);
+    }
+
+    /**
      * Store the uploaded file.
      *
      * @param  string  $path
@@ -28,7 +40,7 @@ class UploadedFile extends SymfonyUploadedFile
     }
 
     /**
-     * Store the uploaded file.
+     * Store the uploaded file with a given name.
      *
      * @param  string  $path
      * @param  string  $name

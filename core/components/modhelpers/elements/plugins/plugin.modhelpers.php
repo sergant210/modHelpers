@@ -31,4 +31,7 @@ switch ($modx->event->name) {
             }
         }
         break;
+    case 'OnPageNotFound':
+        request()->setCustom(true);
+        break;
 }

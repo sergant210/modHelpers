@@ -1,14 +1,21 @@
 Changelog for modHelpers.
 
+3.7.0-beta
+==============
+- Added new function "exec_bg_script".
+- Added new function "timer".
+- Added "subDomain" and "subDomains" methods to the Request class.
+- Added "storeAsOriginal" method to the UploadedFile class.
+
 3.6.0-beta
 ==============
-- Added new function tag_encode.
-- Added new function tag_decode.
-- Added new function array_is_assoc.
-- Added new function is_odd.
-- Added new function is_even.
+- Added new function "tag_encode".
+- Added new function "tag_decode".
+- Added new function "array_is_assoc".
+- Added new function "is_odd".
+- Added new function "is_even".
 - Added some methods to the Str class (used in the "string" function).
-- Added dd() and dump() methods to the Collection class.
+- Added "dd" and "dump" methods to the Collection class.
 - Updated all composer dependencies.
 
 3.5.1-beta

@@ -66,7 +66,7 @@ class Collection
             $this->alias = $alias ?: $name;
             $this->query = $this->modx->newQuery($name);
             $this->query->setClassAlias($this->alias);
-            $this->query->limit(100);
+            //$this->query->limit(100);
             $this->arrayCollection = false;
         }
         return $this;
@@ -580,7 +580,6 @@ class Collection
     {
         $collection = clone $this;
         $collection->modx = null;
-        dump($collection);
 
         return $this;
     }

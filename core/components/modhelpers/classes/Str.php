@@ -24,6 +24,15 @@ class Str
     }
 
     /**
+     * Get the string.
+     * @return string
+     */
+    public function get()
+    {
+        return $this->string;
+    }
+
+    /**
      * Cancel all manipulation with the string.
      * @return $this
      */
@@ -47,6 +56,7 @@ class Str
     }
 
     /**
+     * Replace one entry.
      * @param string $search
      * @param string $replace
      * @param bool $caseIgnoring
@@ -427,6 +437,20 @@ class Str
         $arguments = ['string' => $this->string] + func_get_args();
         $this->string = call_user_func_array('htmlspecialchars_decode', $arguments);
 
+        return $this;
+    }
+
+    /**
+     * Get only the string.
+     *
+     * @param  string  $string
+     * @return string|Str
+     */
+    public function __get($string)
+    {
+        if ($string == 'string') {
+            return $this->string;
+        }
         return $this;
     }
 

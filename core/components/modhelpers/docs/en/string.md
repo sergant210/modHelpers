@@ -18,6 +18,8 @@ $string = string('Some String')
                                ->length();                 // 23
 							
 echo $string->origin(); // Some String
+echo $string->get();    // Some String</div>
+// OR
 echo $string;           // Some String</div>
 ```
 To know about all methods see the [Str](https://github.com/sergant210/modHelpers/blob/master/core/components/modhelpers/classes/Str.php) class.

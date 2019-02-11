@@ -136,6 +136,6 @@ class CacheManager
      */
     public function __call($method, $parameters)
     {
-        return call_user_func_array(array($this->cacheManager, $method), $parameters);
+        return method_exists($this->cacheManager, $method) ? call_user_func_array(array($this->cacheManager, $method), $parameters) : null;
     }
 }
