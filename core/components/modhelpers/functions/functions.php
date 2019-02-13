@@ -2240,7 +2240,21 @@ if (!function_exists('exec_bg_script')) {
         }
     }
 }
-
+if (!function_exists('get_exec_args')) {
+    /**
+     * Prepare exec function arguments.
+     * @return array
+     */
+    function get_exec_args()
+    {
+        $args = [];
+        if (isset($GLOBALS['argv']) && count($GLOBALS['argv']) > 1) {
+            $query = implode('&', array_slice($GLOBALS['argv'], 1));
+            parse_str($query, $args);
+        }
+        return $args;
+    }
+}
 if (!function_exists('timer')) {
     /**
      * Timer.

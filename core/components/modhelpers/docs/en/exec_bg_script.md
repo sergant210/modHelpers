@@ -9,7 +9,6 @@ Execute a php script in the background.
 
 ### Examples
 #### Call the function from snippet, plugin or class.
-
 ```php
 exec_bg_script('action.php', ['task' => 'email', 'param' => 'value']);
 ```
@@ -27,9 +26,8 @@ define('MODX_API_MODE', true);
 require_once __DIR__.'/index.php';
 $modx->getService('error','error.modError');
 
-// Parse parameters
-$query = implode('&', array_slice($argv ,1));
-parse_str($query, $_REQUEST);
+// Get CLI parameters as an array.
+$_REQUEST = get_exec_args();
 
 // Process tasks
 switch ($_REQUEST['task']) {
