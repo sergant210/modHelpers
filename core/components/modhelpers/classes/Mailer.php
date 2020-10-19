@@ -273,7 +273,7 @@ class Mailer
             if (isset($this->attributes['setHTML'])) $this->mailer->setHTML($this->attributes['setHTML']);
             if (!empty($this->attributes['attach'])) {
                 foreach ($this->attributes['attach'] as $data) {
-                    list($file, $name, $encoding, $type) = $data;
+                    list($file, $name, $encoding, $type) = array_values($data);
                     $this->mailer->attach($file, $name, $encoding, $type);
                 }
             }
