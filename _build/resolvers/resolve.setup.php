@@ -15,7 +15,7 @@ if ($object->xpdo) {
 		case xPDOTransport::ACTION_INSTALL:
 		case xPDOTransport::ACTION_UPGRADE:
             $file = MODX_CORE_PATH . 'components/modhelpers/config/config.php';
-            $source = MODX_CORE_PATH . 'components/modhelpers/example.config.php';
+            $source = MODX_CORE_PATH . 'components/modhelpers/config/example.config.php';
             if (!file_exists($file)) {
                 copy($source, $file);
             }

@@ -2,3 +2,4 @@
 /core/components/modhelpers/vendor/
 .phpunit.result.cache
 composer.lock
+tests/

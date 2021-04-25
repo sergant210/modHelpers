@@ -48,6 +48,6 @@ define('BUILD_PLUGIN_UPDATE', true);
 //define('BUILD_SNIPPET_STATIC', false);
 define('BUILD_PLUGIN_STATIC', false);
 
-$BUILD_RESOLVERS = array(
-	'setup',
-);
+$BUILD_RESOLVERS = [
+    'setup',
+];
