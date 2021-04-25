@@ -12,3 +12,5 @@ $_lang['setting_modhelpers_snippets_path'] = 'Path to snippets';
 $_lang['setting_modhelpers_snippets_path_desc'] = 'Path to snippet\'s files.';
 $_lang['setting_modhelpers_chunks_path'] = 'Path to chunks.';
 $_lang['setting_modhelpers_chunks_path_desc'] = 'Path to chunk\'s files.';
+$_lang['setting_modhelpers_cache_model'] = 'Cache the model scheme';
+$_lang['setting_modhelpers_cache_model_desc'] = 'Caches the model scheme.';

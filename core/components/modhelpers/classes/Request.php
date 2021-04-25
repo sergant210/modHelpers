@@ -122,7 +122,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function hasCookie($key)
     {
-        return ! is_null($this->cookie($key));
+        return !is_null($this->cookie($key));
     }
 
     /**
@@ -207,7 +207,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function isAjax()
     {
-        return parent::isXmlHttpRequest();
+        return $this->isXmlHttpRequest();
     }
 
     /**
@@ -345,7 +345,7 @@ class Request extends SymfonyRequest implements ArrayAccess
         $modx = app('modx');
         if (is_null($modx->resource)) {
             $method = $modx->request->getResourceMethod();
-            if ($method == 'alias') {
+            if ($method === 'alias') {
                 $resourceIdentifier = $modx->request->getResourceIdentifier($method);
                 $resourceIdentifier = $modx->request->_cleanResourceIdentifier($resourceIdentifier);
                 $this->resource = $modx->request->getResource($method, $resourceIdentifier);
@@ -486,7 +486,7 @@ class Request extends SymfonyRequest implements ArrayAccess
         if ($this->isJson()) {
             return $this->json();
         }
-        return $this->getMethod() == 'GET' ? $this->query : $this->request;
+        return $this->getMethod() === 'GET' ? $this->query : $this->request;
     }
 
     /**
@@ -497,9 +497,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function allFiles()
     {
         $files = $this->files->all();
-        return $this->convertedFiles
-            ? $this->convertedFiles
-            : $this->convertedFiles = $this->convertUploadedFiles($files);
+        return $this->convertedFiles ?: $this->convertedFiles = $this->convertUploadedFiles($files);
     }
 
     /**
@@ -545,7 +543,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     protected function isValidFile($file)
     {
-        return $file instanceof SplFileInfo && $file->getRealPath() != '';
+        return $file instanceof SplFileInfo && $file->getRealPath() !== '';
     }
 
     /**
@@ -590,7 +588,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $query = $this->getQueryString();
 
-        $question = $this->getBaseUrl() . $this->getPathInfo() == '/' ? '/?' : '?';
+        $question = $this->getBaseUrl() . $this->getPathInfo() === '/' ? '/?' : '?';
 
         return $query ? $this->url() . $question . $query : $this->url();
     }
@@ -603,7 +601,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function fullUrlWithQuery(array $query)
     {
-        $question = $this->getBaseUrl() . $this->getPathInfo() == '/' ? '/?' : '?';
+        $question = $this->getBaseUrl() . $this->getPathInfo() === '/' ? '/?' : '?';
 
         return count($this->query()) > 0
             ? $this->url() . $question . http_build_query(array_merge($this->query(), $query))
@@ -619,7 +617,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         $pattern = trim($this->getPathInfo(), '/');
 
-        return $pattern == '' ? '/' : $pattern;
+        return $pattern === '' ? '/' : $pattern;
     }
 
     /**
@@ -642,7 +640,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function segment($index, $default = null)
     {
         $segments = $this->segments();
-        return default_if(@$segments[intval($index) - 1], $default);
+        return default_if(@$segments[(int)$index - 1], $default);
     }
 
     /**
@@ -655,7 +653,7 @@ class Request extends SymfonyRequest implements ArrayAccess
         $segments = explode('/', $this->decodedPath());
 
         return array_values(array_filter($segments, function ($v) {
-            return $v != '';
+            return $v !== '';
         }));
     }
 
@@ -695,7 +693,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function subDomain($index, $default = null)
     {
         $subDomains = $this->subDomains();
-        return default_if(@$subDomains[intval($index)-1], $default);
+        return default_if(@$subDomains[(int)$index-1], $default);
     }
 
     /**
@@ -709,7 +707,7 @@ class Request extends SymfonyRequest implements ArrayAccess
 
     /**
      * @param string $path
-     * @param int|string $source
+     * @param int|string|\modMediaSource $source
      * @param bool $originalNames
      * @return array
      */
@@ -718,9 +716,13 @@ class Request extends SymfonyRequest implements ArrayAccess
         $errors = array();
         /** @var UploadedFile $file */
         foreach ($this->allFiles() as $files) {
-            if (!is_array($files)) $files = [$files];
+            if (!is_array($files)) {
+                $files = [$files];
+            }
             foreach ($files as $file) {
-                if (!is_object($source)) $source = $file->getSource($source);
+                if (!is_object($source)) {
+                    $source = $file->getSource($source);
+                }
                 if ($originalNames) {
                     if (!$file->storeAs($path, $file->originalName(), $source)) {
                         $errors[] = $file->originalName();
@@ -735,6 +737,7 @@ class Request extends SymfonyRequest implements ArrayAccess
         }
         return $errors;
     }
+
     /**
      * @param string $path
      * @param int|string $source
@@ -744,6 +747,7 @@ class Request extends SymfonyRequest implements ArrayAccess
     {
         return $this->uploadFiles($path, $source, true);
     }
+
     /**
      * @return bool
      */
@@ -755,7 +759,9 @@ class Request extends SymfonyRequest implements ArrayAccess
             $bots = implode('|', $bots);
             $userAgent = empty($this->server('HTTP_USER_AGENT')) ? 'empty' : $this->server('HTTP_USER_AGENT');
             $pattern = "/($bots)/i";
-            if (preg_match($pattern, $userAgent)) return true;
+            if (preg_match($pattern, $userAgent)) {
+                return true;
+            }
         }
         return false;
     }
@@ -777,9 +783,13 @@ class Request extends SymfonyRequest implements ArrayAccess
     public function checkCsrfToken($methods = null)
     {
         if (!empty($methods)) {
-            if (!is_array($methods)) $methods = func_get_args();
+            if (!is_array($methods)) {
+                $methods = func_get_args();
+            }
             $methods = array_map('strtoupper', $methods);
-            if (!in_array($this->method(), $methods)) return 0;
+            if (!in_array($this->method(), $methods)) {
+                return 0;
+            }
         }
         $requestToken = $this->getCsrfToken();
 
@@ -814,13 +824,13 @@ class Request extends SymfonyRequest implements ArrayAccess
     }
     /**
      * Check if an input element is set on the request.
-     *\
+     *
      * @param  string  $key
      * @return bool
      */
     public function __isset($key)
     {
-        return ! is_null($this->__get($key));
+        return !is_null($this->__get($key));
     }
 
     /**

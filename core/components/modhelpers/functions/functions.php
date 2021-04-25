@@ -2,7 +2,7 @@
 /**
  * Functions for MODX Revolution.
  * @package modHelpers
- * @version 3.2.0-beta
+ * @version 3.8.0-pl
  */
 
 if (!function_exists('url')) {
@@ -24,7 +24,7 @@ if (!function_exists('url')) {
      * @param array $options Option
      * @return string
      */
-    function url($id, $context = '', $arg = array(), $scheme = -1, array $options = array())
+    function url($id, $context = '', $arg = [], $scheme = -1, array $options = [])
     {
         global $modx;
         return $modx->makeUrl($id, $context, $arg, $scheme, $options);
@@ -47,7 +47,9 @@ if (!function_exists('redirect')) {
             }
             $url = url($url, $ctx);
         }
-        if (!empty($url)) $modx->sendRedirect($url, $options);
+        if (!empty($url)) {
+            $modx->sendRedirect($url, $options);
+        }
     }
 }
 if (!function_exists('forward')) {
@@ -61,7 +63,9 @@ if (!function_exists('forward')) {
     {
         global $modx;
 
-        if (!empty($id)) $modx->sendForward($id, $options);
+        if (!empty($id)) {
+            $modx->sendForward($id, $options);
+        }
     }
 }
 if (!function_exists('abort')) {
@@ -72,7 +76,7 @@ if (!function_exists('abort')) {
     function abort($options = null)
     {
         global $modx;
-        if (!is_array($options) && is_numeric($options)) {
+        if (is_numeric($options)) {
             $error_type = (int) $options;
         } elseif (is_array($options) && isset($options['error_type'])) {
             $error_type = $options['error_type'];
@@ -103,25 +107,22 @@ if (!function_exists('config')) {
         global $modx;
         if (!empty($key)) {
             if (is_array($key)) {
-                //if (!can('settings')) return false;
-                foreach ($key as $itemKey => $itemValue) {
-                    if (!empty($itemKey)) $modx->config[$itemKey] = $itemValue;
-                }
+                $modx->config = array_merge($modx->config, $key);
                 return true;
             }
-            return $skipEmpty
-                            ? (!empty($modx->config[$key]) ? $modx->config[$key] : $default)
-                            : (isset($modx->config[$key]) ? $modx->config[$key] : $default);
-
-        } else {
-            return $modx->config;
+            if ($skipEmpty) {
+                return !empty($modx->config[$key]) ? $modx->config[$key] : $default;
+            }
+            return isset($modx->config[$key]) ? $modx->config[$key] : $default;
         }
+
+        return $modx->config;
     }
 }
 if (!function_exists('session')) {
     /**
      * Manages the session.
-     * @param string $key Use the dot notation.
+     * @param string|array $key Use the dot notation.
      * @param string|bool $default In getting mode - default value. If setting - don't use the dot notation.
      * @param bool $flat Don't use the dot notation
      * @return mixed|null
@@ -138,7 +139,6 @@ if (!function_exists('session')) {
         if (is_array($key)) {
             $flat = $default;
             app('session')->set($key, $flat);
-//            return $_SESSION;
         } else {
             // Get the value
             return app('session')->get($key, $default, $flat);
@@ -171,23 +171,21 @@ if (!function_exists('cache')) {
     {
         global $modx;
         /** @var modHelpers\CacheManager $class */
-        $class = config('modhelpers_cacheManagerClass', 'modHelpers\CacheManager', true);
-        /** @var modHelpers\CacheManager $cacheManager */
+        $class = config('modhelpers_cacheManagerClass', modHelpers\CacheManager::class, true);
         $cacheManager = $class::getInstance($modx);
-        if (func_num_args() == 0) {
+        if (func_num_args() === 0) {
             return $cacheManager;
         }
         if (is_string($options)) {
-            $options = array(xPDO::OPT_CACHE_KEY => $options);
+            $options = [xPDO::OPT_CACHE_KEY => $options];
         } elseif (is_numeric($options)) {
-            $options = array(xPDO::OPT_CACHE_EXPIRES => (int) $options);
+            $options = [xPDO::OPT_CACHE_EXPIRES => (int)$options];
         }
         if (is_array($key)) {
             foreach ($key as $itemKey => $itemValue) {
                 $lifetime = isset($options[xPDO::OPT_CACHE_EXPIRES]) ? $options[xPDO::OPT_CACHE_EXPIRES] : 0;
                 $cacheManager->set($itemKey, $itemValue, $lifetime, $options);
             }
-//            return $cacheManager ?: null;
         } else {
             return $cacheManager->get($key, $options);
         }
@@ -201,7 +199,7 @@ if (!function_exists('parents')) {
      * @param array $options
      * @return array
      */
-    function parents($id = null, $height = 10,array $options = array())
+    function parents($id = null, $height = 10,array $options = [])
     {
         global $modx;
         return $modx->getParentIds($id, $height, $options);
@@ -215,7 +213,7 @@ if (!function_exists('children')) {
      * @param array $options
      * @return array
      */
-    function children($id = null, $depth = 10,array $options = array())
+    function children($id = null, $depth = 10,array $options = [])
     {
         global $modx;
         return $modx->getChildIds($id, $depth, $options);
@@ -225,8 +223,8 @@ if (!function_exists('children')) {
 if (!function_exists('pls')) {
     /**
      * Gets/sets placeholders
-     * @param string|array $key String to get a placeholder, array ('key'=>'value') - to set one/ones.
-     * @param string $default Default value (if getting) or the options (if setting).
+     * @param string|array $key String to get a placeholder, ['key'=>'value'] - to set one/ones.
+     * @param string|array $default Default value (if getting) or the options (if setting).
      * @return mixed
      */
     function pls($key = '', $default = '')
@@ -237,22 +235,22 @@ if (!function_exists('pls')) {
             return $modx->placeholders;
         }
         if (is_array($key)) {
-            $options = array(
+            $options = [
                 'prefix' => '',
                 'separator' => '.',
                 'restore' => false,
-            );
+            ];
             if (is_array($default)) {
                 $options = array_merge($options, $default);
             }
-            extract($options);
+            extract($options, EXTR_OVERWRITE);
             /** @var string $prefix */
             /** @var string $separator */
             /** @var bool $restore */
             return $modx->toPlaceholders($key, $prefix, $separator, $restore);
-        } else {
-            return default_if(@$modx->placeholders[$key], $default);
         }
+
+        return default_if(@$modx->placeholders[$key], $default);
     }
 }
 if (!function_exists('pls_delete')) {
@@ -278,28 +276,43 @@ if (!function_exists('email')) {
      * @param string $content
      * @return bool|modHelpers\Mailer
      */
-    function email($email='', $subject='', $content = '')
+    function email($email = '', $subject = '', $content = '')
     {
         global $modx;
+
+        if (empty($email)) {
+            return false;
+        }
+
         /** @var modHelpers\Mailer $class */
-        $class = config('modhelpers_mailerClass', 'modHelpers\Mailer', true);
+        $class = config('modhelpers_mailerClass', modHelpers\Mailer::class, true);
         /** @var modHelpers\Mailer $mailer */
+        if (!class_exists($class)) {
+            log_error("[modHelpers] Class '{$class}' does not exist!");
+            return false;
+        }
         $mailer = new $class($modx);
-        if (func_num_args() == 0) return $mailer;
+        if (func_num_args() === 0) {
+            return $mailer;
+        }
         if (is_array($subject)) {
             $options = $subject;
         } else {
-            $options = compact('subject','content');
+            $options = compact('subject', 'content');
         }
-        if (empty($email)) return false;
+
         $mailer->to($email);
-        foreach (array('sender','from','fromName','subject','content','cc','bcc','replyTo','tpl') as $prop) {
-            if (!empty($options[$prop])) $mailer->$prop($options[$prop]);
+        foreach (['sender', 'from', 'fromName', 'subject', 'content', 'cc', 'bcc', 'replyTo', 'tpl'] as $prop) {
+            if (!empty($options[$prop])) {
+                $mailer->$prop($options[$prop]);
+            }
         }
         if (!empty($options['attach'])) {
             if (is_array($options['attach'])) {
                 foreach ($options['attach'] as $name => $file) {
-                    if (!is_string($name)) $name = '';
+                    if (!is_string($name)) {
+                        $name = '';
+                    }
                     $mailer->attach($file, $name);
                 }
             } else {
@@ -312,7 +325,7 @@ if (!function_exists('email')) {
 if (!function_exists('email_user')) {
     /**
      * Sends email to the specified user.
-     * @param int|string|modUser $user User id or username or user object.
+     * @param int|string|array|modUser $user User id or username or user object.
      * @param string|array $subject Magic. Subject or an array of options. Required option keys - subject, content. Optional - sender, from, fromName.
      * @param string $content
      * @return bool
@@ -320,15 +333,19 @@ if (!function_exists('email_user')) {
     function email_user($user, $subject, $content = '')
     {
         global $modx;
-        if (!is_array($user)) $user = compact('user');
-        $email = array();
-        foreach ($user as $usr) {
-            if (is_numeric($usr)) {
-                $usr = $modx->getObject('modUser', array('id' => (int)$usr));
-            } elseif (is_string($usr)) {
-                $usr = $modx->getObject('modUser', array('username' => $usr));
+        if (!is_array($user)) {
+            $user = [$user];
+        }
+        $email = [];
+        foreach ($user as $_user) {
+            if (is_numeric($_user)) {
+                $_user = $modx->getObject('modUser', ['id' => (int)$_user]);
+            } elseif (is_string($_user)) {
+                $_user = $modx->getObject('modUser', ['username' => $_user]);
             }
-            if ($usr instanceof modUser && $eml = $usr->Profile->get('email')) $email[] = $eml;
+            if ($_user instanceof modUser && $eml = $_user->Profile->get('email')) {
+                $email[] = $eml;
+            }
         }
         return !empty($email) ? email($email, $subject, $content) : false;
     }
@@ -348,8 +365,12 @@ if (!function_exists('css')) {
             if (is_string($attr) && in_array($attr, explode(',','all,braille,handheld,print,screen,speech,projection,tty,tv'))) {
                 $attr = ['media' => $attr];
             }
-            if (!is_array($attr)) $attr = [$attr];
-            if (!isset($attr['rel'])) $attr['rel'] = 'stylesheet';
+            if (!is_array($attr)) {
+                $attr = [$attr];
+            }
+            if (!isset($attr['rel'])) {
+                $attr['rel'] = 'stylesheet';
+            }
             $src = '<link href="' . $src . '" ' . html_attributes($attr) . '>';
         }
         $modx->regClientCSS($src);
@@ -359,8 +380,8 @@ if (!function_exists('script')) {
     /**
      * Register JavaScript.
      * @param string $src
-     * @param bool|string $start Inject inside the HEAD tag of a resource.
-     * @param bool|string $plaintext
+     * @param bool|string|array $start Inject inside the HEAD tag of a resource.
+     * @param bool|string|array $plaintext
      * @param string|array|null $attr async defer
      */
     function script($src, $start = false, $plaintext = false, $attr = null)
@@ -382,7 +403,9 @@ if (!function_exists('script')) {
                 break;
         }
 
-        if ($attr) $src = '<script '. html_attributes($attr) .' src="' . $src . '"></script>';
+        if ($attr) {
+            $src = '<script '. html_attributes($attr) .' src="' . $src . '"></script>';
+        }
         if ($start) {
             $modx->regClientStartupScript($src, $plaintext);
         } else {
@@ -410,7 +433,7 @@ if (!function_exists('lang')) {
      * @param string $language
      * @return null|string
      */
-    function lang($key, $params = array(), $language = '')
+    function lang($key, $params = [], $language = '')
     {
         global $modx;
         return $modx->lexicon($key, $params, $language);
@@ -423,26 +446,31 @@ if (!function_exists('chunk')) {
      * @param array $properties
      * @return string
      */
-    function chunk($chunkName, array $properties= array ())
+    function chunk($chunkName, array $properties= [])
     {
         global $modx;
-        $output = '';
-        //$store = isset($modx->getCacheManager()->store) ? $modx->getCacheManager()->store : array('modChunk'=>array());
-        if ($chunkName[0] == '.') {
-            $chunkName = preg_replace('#\.+[\/|\\\]#', '/', $chunkName);
-            $chunkName = rtrim(config('modhelpers_chunks_path', MODX_CORE_PATH . 'elements/chunks'),'/') . $chunkName;
+
+        $isFile = false;
+        if (strpos($chunkName, './') === 0) {
+            $chunkName = config('modhelpers_chunks_path', MODX_CORE_PATH . 'elements/chunks') . $chunkName;
         }
-        if (strpos($chunkName, '/') !== false) {
-            $chunkName = preg_replace('#(\.)+\/#', '/', $chunkName);
-            if (file_exists($chunkName)) {
-                $content = @file_get_contents($chunkName);
-                /** @var modChunk $chunk */
-                $chunk = $modx->newObject('modChunk', array('name' => basename($chunkName)));
-                $chunk->_cacheable = false;
-                $chunk->_processed = false;
-                $chunk->_content = '';
-                $output = $chunk->process($properties, $content);
-            }
+        $chunkName = sanitize_path($chunkName);
+        $nameHash = md5($chunkName);
+        if (app('store')->has("chunks.{$nameHash}")) {
+            $content = app('store')->get("chunks.{$nameHash}");
+            $isFile = true;
+        } elseif (file_exists($chunkName)) {
+            $content = file_get_contents($chunkName);
+            app('store')->set("chunks.{$nameHash}", $content);
+            $isFile = true;
+        }
+        if ($isFile) {
+            /** @var modChunk $chunk */
+            $chunk = $modx->newObject('modChunk', ['name' => $nameHash]);
+            $chunk->_cacheable = false;
+            $chunk->_processed = false;
+            $chunk->_content = $content;
+            $output = $chunk->process($properties);
         } else {
             $output = $modx->getChunk($chunkName, $properties);
         }
@@ -457,34 +485,33 @@ if (!function_exists('snippet')) {
      * @param int|string|array $cacheOptions
      * @return string
      */
-    function snippet($snippetName, array $scriptProperties = array (), $cacheOptions = null)
+    function snippet($snippetName, array $scriptProperties = [], $cacheOptions = null)
     {
         $result = cache($snippetName, $cacheOptions);
         if (isset($result)) {
             return $result;
         }
         global $modx;
-        if ($snippetName[0] == '.') {
-            $snippetName = preg_replace('#\.+[\/|\\\]#', '/', $snippetName);
-            $snippetName = rtrim(config('modhelpers_snippets_path', MODX_CORE_PATH . '/elements/snippets'),'/') . $snippetName;
+        // Relational path
+        if (strpos($snippetName, './') === 0) {
+            $snippetName = config('modhelpers_snippets_path', MODX_CORE_PATH . '/elements/snippets') . $snippetName;
         }
-        if (strpos($snippetName, '/') !== false) {
-            $snippetName = preg_replace('#(\.)+\/#', '/', $snippetName);
-            if (file_exists($snippetName)) {
-                ob_start();
-                extract($scriptProperties, EXTR_SKIP);
-                $result = include $snippetName;
-                $result = $result === null ? '' : $result;
-                if (ob_get_length()) {
-                    $result = ob_get_contents() . $result;
-                }
-                ob_end_clean();
+        // File snippet
+        $snippetName = sanitize_path($snippetName);
+        if (pathinfo($snippetName, PATHINFO_EXTENSION) === 'php' && file_exists($snippetName)) {
+            ob_start();
+            extract($scriptProperties, EXTR_SKIP);
+            $result = include $snippetName;
+            $result = $result === null ? '' : $result;
+            if (ob_get_length()) {
+                $result = ob_get_contents() . $result;
             }
+            ob_end_clean();
         } else {
             $result = $modx->runSnippet($snippetName, $scriptProperties);
         }
         if (!empty($cacheOptions)) {
-            cache(array(basename($snippetName) => $result), $cacheOptions);
+            cache([basename($snippetName) => $result], $cacheOptions);
         }
         return $result;
     }
@@ -497,7 +524,7 @@ if (!function_exists('processor')) {
      * @param array $options
      * @return mixed
      */
-    function processor($action = '',$scriptProperties = array(),$options = array())
+    function processor($action = '', $scriptProperties = [], $options = [])
     {
         global $modx;
         return $modx->runProcessor($action, $scriptProperties, $options);
@@ -513,13 +540,13 @@ if (!function_exists('object')) {
     function object($class, $criteria = null)
     {
         global $modx;
-        $objectClass = config('modhelpers_objectClass', 'modHelpers\xObject', true);
+        $objectClass = config('modhelpers_objectClass', modHelpers\xObject::class, true);
         /** @var modHelpers\xObject $object */
         $object = new $objectClass($modx, $class);
         if (isset($criteria)) {
             if (is_scalar($criteria)) {
                 $pk = $modx->getPK($class);
-                $criteria = array($pk => $criteria);
+                $criteria = [$pk => $criteria];
             }
             $object->where($criteria);
         }
@@ -537,7 +564,7 @@ if (!function_exists('collection')) {
     {
         global $modx;
 
-        $collectionClass = config('modhelpers_collectionClass', 'modHelpers\Collection', true);
+        $collectionClass = config('modhelpers_collectionClass', modHelpers\Collection::class, true);
         /** @var modHelpers\Collection $collection */
         $collection = new $collectionClass($modx, $class);
         if (!empty($criteria)) {
@@ -560,10 +587,12 @@ if (!function_exists('resource')) {
         if (is_bool($criteria) && $criteria) {
             return $asObject ? $modx->resource : $modx->resource->toArray();
         } elseif (is_numeric($criteria)) {
-            $criteria = array('id' => (int) $criteria);
+            $criteria = ['id' => (int)$criteria];
         }
         $resourceManager = object('modResource', $criteria);
-        if (!isset($criteria)) return $resourceManager;
+        if (!isset($criteria)) {
+            return $resourceManager;
+        }
 
         return $asObject ? $resourceManager->get() : $resourceManager->toArray();
     }
@@ -578,7 +607,6 @@ if (!function_exists('resources')) {
     function resources($criteria = null, $asObject = false)
     {
         global $modx;
-        /** @var modHelpers\Collection $collection */
         $collection = collection('modResource');
 
         if (!isset($criteria)) {
@@ -603,9 +631,10 @@ if (!function_exists('resources')) {
             } else {
                 $where = $criteria;
             }
-            if ($where) $collection->where($where);
+            if ($where) {
+                $collection->where($where);
+            }
         }
-//        if (!isset($criteria)) return $collection;
 
         return $asObject ? $collection->get() : $collection->toArray();
     }
@@ -616,18 +645,19 @@ if (!function_exists('user')) {
      * Get a user object or an array of user's data.
      * @param int|string|array|bool $criteria User id, username, an array or true to get the current user.
      * @param bool $asObject True to return an object. Otherwise - an array.
-     * @return array|modUser
+     * @return modUser|array|null
      */
     function user($criteria = null, $asObject = true)
     {
         global $modx;
+
         /** @var modHelpers\xObject $userManager */
         if (is_bool($criteria) && $criteria) {
             return $asObject ? $modx->user : $modx->user->toArray();
         } elseif (is_numeric($criteria)) {
-            $criteria = array('id' => (int) $criteria);
+            $criteria = ['id' => (int)$criteria];
         } elseif (is_string($criteria)) {
-            $criteria = array('username' => $criteria);
+            $criteria = ['username' => $criteria];
         }
         $userManager = object('modUser', $criteria)->withProfile();
 
@@ -644,7 +674,6 @@ if (!function_exists('users')) {
     function users($criteria = null, $asObject = false)
     {
         global $modx;
-        /** @var modHelpers\Collection $collection */
         $collection = collection('modUser');
 
         if (!isset($criteria)) {
@@ -669,7 +698,9 @@ if (!function_exists('users')) {
             } else {
                 $where = $criteria;
             }
-            if ($where) $collection->where($where);
+            if ($where) {
+                $collection->where($where);
+            }
         }
         return $asObject ? $collection->get() : $collection->toArray();
     }
@@ -683,8 +714,10 @@ if (!function_exists('is_auth')) {
     function is_auth($ctx = '')
     {
         global $modx;
-        if (!trim($ctx)) $ctx = $modx->context->get('key');
-        return is_object($modx->user) ? $modx->user->isAuthenticated($ctx) : false;
+        if (!trim($ctx)) {
+            $ctx = $modx->context->get('key');
+        }
+        return is_object($modx->user) && $modx->user->isAuthenticated($ctx);
     }
 }
 if (!function_exists('is_guest')) {
@@ -695,7 +728,8 @@ if (!function_exists('is_guest')) {
     function is_guest()
     {
         global $modx;
-        return $modx->user->id == 0;
+
+        return $modx->user->id === 0;
     }
 }
 if (!function_exists('can')) {
@@ -767,7 +801,7 @@ if (!function_exists('resource_exists')) {
 if (!function_exists('user_exists')) {
     /**
      * Checks the user existence by simple conditions.
-     * @param array $criteria
+     * @param array|int|string $criteria
      * @param string $userTableAlias
      * @param string $profileTableAlias
      * @return bool
@@ -782,19 +816,19 @@ if (!function_exists('user_exists')) {
             $fields[$key] = $userTableAlias . "." . $key;
         }
         foreach ($profileFields as $key => $profileField) {
-            if ($key == 'id') continue;
+            if ($key === 'id') continue;
             $fields[$key] = $profileTableAlias . "." . $key;
         }
         $query = $modx->newQuery('modUser');
         $query->setClassAlias($userTableAlias);
         $query->innerJoin('modUserProfile', $profileTableAlias);
         if (is_numeric($criteria)) {
-            $criteria = array('id' => $criteria);
+            $criteria = ['id' => $criteria];
         } elseif (is_string($criteria)) {
-            $criteria = array('username' => $criteria);
+            $criteria = ['username' => $criteria];
         }
         if (is_array($criteria)) {
-            $where = array();
+            $where = [];
             foreach ($criteria as $key => $value) {
                 if (strpos($key, '.') === false) {
                     $parts = explode(':', $key);
@@ -893,7 +927,7 @@ if (!function_exists('str_clean')) {
      * @param array $allowedTags Allowed tags.
      * @return string
      */
-    function str_clean($str, $chars = '/\'"();><', $allowedTags = array())
+    function str_clean($str, $chars = '/\'"();><', $allowedTags = [])
     {
         if (is_string($chars)) {
             $chars = str_split($chars);
@@ -901,7 +935,9 @@ if (!function_exists('str_clean')) {
             $allowedTags = implode('', $chars);
             $chars = str_split('/\'"();><');
         }
-        if (!empty($allowedTags) && is_array($allowedTags)) $allowedTags = implode('', $allowedTags);
+        if (!empty($allowedTags) && is_array($allowedTags)) {
+            $allowedTags = implode('', $allowedTags);
+        }
 
         return str_replace($chars, '', strip_tags($str, $allowedTags));
     }
@@ -932,7 +968,7 @@ if (!function_exists('columns')) {
      * @param bool $exclude
      * @return string Колонки.
      */
-    function columns($className, $tableAlias = '', $columnPrefix = '', $columns = array (), $exclude= false)
+    function columns($className, $tableAlias = '', $columnPrefix = '', $columns = [], $exclude= false)
     {
         global $modx;
         return $modx->getSelectColumns($className, $tableAlias, $columnPrefix, $columns, $exclude);
@@ -968,16 +1004,16 @@ if (!function_exists('log_error')) {
      *
      * @param string|array $message
      * @param bool $changeLevel Change log level
-     * @param string $target
-     * @param string $def
-     * @param string $file
-     * @param string $line
+     * @param string $target HTML, FILE or ECHO
+     * @param string $def Some description for better understanging. For example, the name of the class.
+     * @param string $file Script name.
+     * @param string $line Line number.
      */
     function log_error($message, $changeLevel = false, $target = '', $def = '', $file = '', $line = '')
     {
         global $modx;
         /** @var modHelpers\Logger $class */
-        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class = config('modhelpers_loggerClass', modHelpers\Logger::class, true);
         $class::getInstance($modx)->error($message, $changeLevel, $target, $def, $file, $line);
     }
 }
@@ -996,7 +1032,7 @@ if (!function_exists('log_warn')) {
     {
         global $modx;
         /** @var modHelpers\Logger $class */
-        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class = config('modhelpers_loggerClass', modHelpers\Logger::class, true);
         $class::getInstance($modx)->warn($message, $changeLevel, $target, $def, $file, $line);
     }
 }
@@ -1015,7 +1051,7 @@ if (!function_exists('log_info')) {
     {
         global $modx;
         /** @var modHelpers\Logger $class */
-        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class = config('modhelpers_loggerClass', modHelpers\Logger::class, true);
         $class::getInstance($modx)->info($message, $changeLevel, $target, $def, $file, $line);
     }
 }
@@ -1034,7 +1070,7 @@ if (!function_exists('log_debug')) {
     {
         global $modx;
         /** @var modHelpers\Logger $class */
-        $class = config('modhelpers_loggerClass', 'modHelpers\Logger', true);
+        $class = config('modhelpers_loggerClass', modHelpers\Logger::class, true);
         $class::getInstance($modx)->debug($message, $changeLevel, $target, $def, $file, $line);
     }
 }
@@ -1047,7 +1083,7 @@ if (!function_exists('context')) {
     function context($key = 'key')
     {
         global $modx;
-        return is_null($modx->context) ? null : $modx->context->get($key);
+        return is_object($modx->context) ? $modx->context->get($key) : null;
     }
 }
 if (!function_exists('query')) {
@@ -1059,7 +1095,8 @@ if (!function_exists('query')) {
     function query($query)
     {
         global $modx;
-        $queryClass = config('modhelpers_queryClass', 'modHelpers\Query', true);
+
+        $queryClass = config('modhelpers_queryClass', modHelpers\Query::class, true);
         return new $queryClass($modx, $query);
     }
 }
@@ -1086,55 +1123,7 @@ if (!function_exists('memory')) {
         return $value;
     }
 }
-if (!function_exists('faker')) {
-    /**
-     * Makes fake data
-     * @see https://github.com/fzaninotto/Faker
-     * @param string|array $property
-     * @param string $locale
-     * @return mixed
-     */
-    function faker($property = '', $locale = '')
-    {
-        if (!app()->bound('faker')) {
-            app()->singleton('faker', function() use ($locale) {
-                if (empty($locale)) {
-                    $lang = config('cultureKey');
-                    switch ($lang) {
-                        case 'ru':
-                            $locale = 'ru_RU';
-                            break;
-                        case 'de':
-                            $locale = 'de_DE';
-                            break;
-                        case 'fr':
-                            $locale = 'fr_FR';
-                            break;
-                        default:
-                            $locale = 'en_US';
-                    }
-                }
-                return \Faker\Factory::create($locale);
-            });
-        }
-        $faker = app('faker');
-        if (func_num_args() == 0 || empty($property)) return $faker;
 
-        try {
-            if (is_array($property)) {
-                $func = key($property);
-                $params = current($property);
-                $output = call_user_func_array(array($faker, $func), $params);
-            } else {
-                $output = $faker->$property;
-            }
-        } catch (Exception $e) {
-            log_error($e->getMessage());
-            $output = '';
-        }
-        return  $output;
-    }
-}
 if (!function_exists('img')) {
     /**
      * Returns the HTML tag "img".
@@ -1142,7 +1131,7 @@ if (!function_exists('img')) {
      * @param array $attrs
      * @return string
      */
-    function img($src, $attrs = array())
+    function img($src, $attrs = [])
     {
         return '<img src="'. $src.'" ' . html_attributes($attrs) . '>';
     }
@@ -1159,12 +1148,12 @@ if (!function_exists('load_model')) {
     function load_model($class, $table, $callback = NULL)
     {
         global $modx;
-        if (func_num_args() == 2 && is_callable($table)) {
+        if (is_callable($table) && func_num_args() === 2) {
             $callback = $table;
             $table = '';
         }
         $key = strtolower($class) . '_map';
-        if (config('modHelpers_cache_model', true) && $map = cache($key)) {
+        if (config('modhelpers_cache_model', true) && $map = cache($key)) {
             if (!empty($table)) {
                 $modx->map[$class] = $map;
             } else {
@@ -1172,7 +1161,7 @@ if (!function_exists('load_model')) {
             }
             return true;
         }
-        $builderClass = config('modhelpers_modelBuilderClass', 'modHelpers\ModelBuilder', true);
+        $builderClass = config('modhelpers_modelBuilderClass', modHelpers\ModelBuilder::class, true);
         /** @var modHelpers\ModelBuilder $model */
         $model = new $builderClass($table);
         if (is_callable($callback)) {
@@ -1184,7 +1173,9 @@ if (!function_exists('load_model')) {
                 } else {
                     $modx->map[$class] = array_merge_recursive($modx->map[$class], $map);
                 }
-                if (config('modHelpers_cache_model', true)) cache()->set($key, $map);
+                if (config('modhelpers_cache_model', true)) {
+                    cache()->set($key, $map);
+                }
                 return true;
             }
         }
@@ -1195,32 +1186,47 @@ if (!function_exists('login')) {
     /**
      * Logs in the specified user.
      * @param mixed $user
+     * @param string|null $ctx
      * @return bool
      */
-    function login($user)
+    function login($user, $ctx = null)
     {
         global $modx;
-        if (is_scalar($user) || is_array($user)) $user = user($user);
-        if ($user instanceof modUser && !$user->hasSessionContext($modx->context->key)) {
-            $modx->user = $user;
-            $modx->user->addSessionContext($modx->context->key);
-            $modx->getUser(context(), true);
+
+        if (is_scalar($user) || is_array($user)) {
+            $user = user($user);
         }
-        return ($user instanceof modUser) ? true : false;
+        $ctx = empty($ctx) ? $modx->context->key : $ctx;
+        if ($user instanceof modUser) {
+            $modx->user = $user;
+            $modx->user->addSessionContext($ctx);
+            $modx->getUser($ctx, true);
+
+            return $user->isAuthenticated($ctx);
+        }
+        return false;
     }
 }
 if (!function_exists('logout')) {
     /**
      * Logs out the current user.
-     * @param bool $redirect True to redirect to the unauthorized page.
-     * @param int $code Response code
+     * @param bool|string $redirect True to redirect to the unauthorized page or context key.
+     * @param int $code Response code.
      * @param bool $relogin Only logout or login as admin (if the user is authenticated in the mgr context).
+     * @param string|null $ctx Context key
      * @return bool
      */
-    function logout($redirect = false, $code = 401, $relogin = true)
+    function logout($redirect = false, $code = 401, $relogin = true, $ctx = null)
     {
         global $modx;
-        $response = $modx->runProcessor('security/logout');
+
+        if (is_string($redirect)) {
+            list($ctx, $redirect) = [$redirect, false];
+        }
+        if (empty($ctx)) {
+            $ctx = context();
+        }
+        $response = $modx->runProcessor('security/logout', ['login_context' => $ctx]);
         if ($response->isError()) {
             $modx->log(modX::LOG_LEVEL_ERROR, 'Logout error of the user: '.$modx->user->get('username').' ('.$modx->user->get('id').'). Response: ' . $response->getMessage());
             return false;
@@ -1230,14 +1236,16 @@ if (!function_exists('logout')) {
             $modx->getUser();
         } else {
             $modx->user = $modx->newObject('modUser');
-            $modx->user->fromArray(array(
+            $modx->user->fromArray([
                 'id' => 0,
                 'username' => $modx->getOption('default_username', '', '(anonymous)', true)
-            ), '', true);
-            $modx->toPlaceholders($modx->user->get(array('id','username')),'modx.user');
+            ], '', true);
+            $modx->toPlaceholders($modx->user->get(['id', 'username']), 'modx.user');
 
         }
-        if ($redirect) abort($code);
+        if ($redirect) {
+            abort($code);
+        }
         return true;
     }
 }
@@ -1248,7 +1256,7 @@ if (!function_exists('is_ajax')) {
      */
     function is_ajax()
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
     }
 }
 if (! function_exists('app')) {
@@ -1259,10 +1267,10 @@ if (! function_exists('app')) {
      * @param  array   $parameters
      * @return mixed|modHelpers\Container
      */
-    function app($abstract = null, array $parameters = array())
+    function app($abstract = null, array $parameters = [])
     {
         /** @var modHelpers\Container $class */
-        $class = config('modhelpers_containerClass', 'modHelpers\Container', true);
+        $class = config('modhelpers_containerClass', modHelpers\Container::class, true);
         if (is_null($abstract)) {
             return $class::getInstance();
         }
@@ -1434,7 +1442,8 @@ if (!function_exists('echo_nl')) {
     {
         echo $string . $nl;
     }
-}if (!function_exists('echo_br')) {
+}
+if (!function_exists('echo_br')) {
     /**
      * Add a tag to the end of the string and output the result.
      *
@@ -1448,7 +1457,7 @@ if (!function_exists('echo_nl')) {
 }
 if (!function_exists('print_str')) {
     /**
-     * Convert the specified variable to the string type and print or print it.
+     * Convert the specified variable to the string type and print or return it.
      *
      * @param mixed $value The input value
      * @param bool $return If true the value will be returned. Otherwise it will be printed.
@@ -1530,29 +1539,31 @@ if (! function_exists('parse')) {
      * the maximum iterations to recursively process tags.
      * @return string The processed string with the replaced placeholders.
      */
-    function parse($string, $data, $prefix = '[[+', $suffix = ']]')
+    function parse($string, $data = [], $prefix = '[[+', $suffix = ']]')
     {
         global $modx;
-        if (!empty($string)) {
-            if (is_array($data)) {
-                if (is_bool($prefix) && $prefix) {
-                    // NEEDTEST
-                    /** @var modChunk $chunk */
-                    /*$chunk = $this->modx->newObject('modChunk', array('name' => str_random(), 'content' => $string));
-                    $chunk->setCacheable(false);
-                    $string = $chunk->process($data);
-                    */
-                    $parser = $modx->getParser();
-                    $maxIterations = (is_numeric($suffix)) ? (int) $suffix : (int) $modx->getOption('parser_max_iterations', null, 10);
-                    $scope = $modx->toPlaceholders($data, '', '.', true);
-                    $parser->processElementTags('', $string, false, false, '[[', ']]', array(), $maxIterations);
-                    $parser->processElementTags('', $string, true, true, '[[', ']]', array(), $maxIterations);
-                    if (isset($scope['keys'])) $modx->unsetPlaceholders($scope['keys']);
-                    if (isset($scope['restore'])) $modx->toPlaceholders($scope['restore']);
-                } else {
-                    foreach ($data as $key => $value) {
-                        $string = str_replace($prefix . $key . $suffix, $value, $string);
-                    }
+        if (!empty($string) && is_array($data)) {
+            if (is_bool($prefix) && $prefix) {
+                // NEEDTEST
+                /** @var modChunk $chunk */
+                /*$chunk = $this->modx->newObject('modChunk', array('name' => str_random(), 'content' => $string));
+                $chunk->setCacheable(false);
+                $string = $chunk->process($data);
+                */
+                $parser = $modx->getParser();
+                $maxIterations = (is_numeric($suffix)) ? (int) $suffix : (int) $modx->getOption('parser_max_iterations', null, 10);
+                $scope = $modx->toPlaceholders($data, '', '.', true);
+                $parser->processElementTags('', $string, false, false, '[[', ']]', [], $maxIterations);
+                $parser->processElementTags('', $string, true, true, '[[', ']]', [], $maxIterations);
+                if (isset($scope['keys'])) {
+                    $modx->unsetPlaceholders($scope['keys']);
+                }
+                if (isset($scope['restore'])) {
+                    $modx->toPlaceholders($scope['restore']);
+                }
+            } else {
+                foreach ($data as $key => $value) {
+                    $string = str_replace($prefix . $key . $suffix, $value, $string);
                 }
             }
         }
@@ -1571,17 +1582,28 @@ if (! function_exists('str_starts')) {
      */
     function str_starts($haystack, $needles, $case = false)
     {
+        $isMbStringLoaded = extension_loaded('mbstring');
         if (!$case) {
-            $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack) : strtolower($haystack);
+            $haystack = $isMbStringLoaded ? mb_strtolower($haystack) : strtolower($haystack);
         }
-        foreach ((array) $needles as $needle) {
-            if (!$case) $needle = function_exists('mb_strtolower') ? mb_strtolower($needle) : strtolower($needle);
-            if ($needle != '' && substr($haystack, 0, strlen($needle)) === (string) $needle) {
+        $result = false;
+        foreach ((array)$needles as $needle) {
+            if (trim($needle) === '') {
+                break;
+            }
+            if (!$case) {
+                $needle = $isMbStringLoaded ? mb_strtolower($needle) : strtolower($needle);
+            }
+
+            $result = $isMbStringLoaded
+                                ? mb_strpos($haystack, (string)$needle) === 0
+                                : strpos($haystack, (string)$needle) === 0;
+            if ($result) {
                 return true;
             }
         }
 
-        return false;
+        return $result;
     }
 }
 if (! function_exists('str_ends')) {
@@ -1596,18 +1618,24 @@ if (! function_exists('str_ends')) {
      */
     function str_ends($haystack, $needles, $case = false)
     {
+        $isMbStringLoaded = extension_loaded('mbstring');
         if (!$case) {
-            $haystack = function_exists('mb_strtolower') ? mb_strtolower($haystack) : strtolower($haystack);
+            $haystack = $isMbStringLoaded ? mb_strtolower($haystack) : strtolower($haystack);
         }
-
+        $result = false;
         foreach ((array) $needles as $needle) {
-            if (!$case) $needle = function_exists('mb_strtolower') ? mb_strtolower($needle) : strtolower($needle);
-            if (substr($haystack, -strlen($needle)) === (string) $needle) {
+            if (!$case) {
+                $needle = $isMbStringLoaded ? mb_strtolower($needle) : strtolower($needle);
+            }
+            $result = $isMbStringLoaded
+                ? mb_substr($haystack, -mb_strlen($needle)) === (string)$needle
+                : substr($haystack, -strlen($needle)) === (string)$needle;
+            if ($result) {
                 return true;
             }
         }
 
-        return false;
+        return $result;
     }
 }
 if (! function_exists('str_contains')) {
@@ -1628,7 +1656,7 @@ if (! function_exists('str_contains')) {
             $func = function_exists('mb_stripos') ? 'mb_stripos' : 'stripos';
         }
         foreach ((array) $needles as $needle) {
-            if ($needle != '' && $func($haystack, $needle) !== false) {
+            if ($needle !== '' && $func($haystack, $needle) !== false) {
                 return true;
             }
         }
@@ -1675,7 +1703,7 @@ if (! function_exists('str_between')) {
     function str_between($string, $start, $end, $greedy = true)
     {
         $mask = $greedy ? '(.*)' : '(.*?)';
-        preg_match('#'.preg_quote($start).$mask.preg_quote($end).'#is', $string, $match);
+        preg_match('#' . preg_quote($start, '/') . $mask . preg_quote($end, '/') . '#is', $string, $match);
         return $match[1];
     }
 }
@@ -1690,12 +1718,12 @@ if (! function_exists('str_limit')) {
      */
     function str_limit($string, $limit = 100, $ending = '...')
     {
-        $lfunc = function_exists('mb_strwidth') ? 'mb_strwidth' : 'strlen';
+        $lfunc = function_exists('mb_strlen') ? 'mb_strlen' : 'strlen';
         if ($lfunc($string, 'UTF-8') <= $limit) {
             return $string;
         }
 
-        return function_exists('mb_strimwidth')
+        return function_exists('mb_strlen')
                             ? rtrim(mb_strimwidth($string, 0, $limit, $ending, 'UTF-8'))
                             : rtrim(substr($string, 0, $limit)) . $ending;
     }
@@ -1704,8 +1732,9 @@ if (! function_exists('str_random')) {
     /**
      * Generate a more truly "random" alpha-numeric string.
      *
-     * @param  int  $length
+     * @param int $length
      * @return string
+     * @throws \Exception
      */
     function str_random($length = 16)
     {
@@ -1724,17 +1753,26 @@ if (! function_exists('default_if')) {
      *
      * @param  mixed $value
      * @param  mixed $default
-     * @param null $compared
+     * @param mixed $compared
      * @return mixed
      */
     function default_if($value, $default = '', $compared = null)
     {
-        if (isset($compared)) {
-            $value = $value === $compared ? $default : $value;
-        } elseif (is_null($value)) {
-            $value = $default;
-        }
-        return $value;
+        return $value === $compared ? $default : $value;
+    }
+}
+if (! function_exists('value')) {
+    /**
+     * Return the default value of a given value or a Closure.
+     *
+     * @param mixed $value
+     * @param mixed $default
+     * @return mixed
+     */
+    function value($value, $default = null)
+    {
+        $result = $value instanceof Closure ? $value() : $value;
+        return is_null($result) ? $default : $result;
     }
 }
 if (! function_exists('null_if')) {
@@ -1762,20 +1800,26 @@ if (! function_exists('filter_data')) {
     function filter_data(array $data, array $rules, $intersect = false)
     {
         global $modx;
-        $filtered = array();
+
+        $filtered = [];
         foreach ($rules as $key => $types) {
-            $types = is_callable($types) ? array('func'=>$types) : explode('|', $types);
+            $types = is_callable($types) ? ['func' => $types] : explode('|', $types);
             $_var = $data[$key];
             foreach ($types as $type) {
                 $options = null;
                 if (!is_callable($type) && strpos($type, ':') !== false) {
                     list($type, $options) = explode(':', $type);
                 }
-                if (isset($_var) || in_array($type, array('bool', 'boolean', 'default')) || is_callable($type)) {
-                    if (is_callable($type) && !in_array($type, array('implode','explode','trim','email','url'))) {
-                        if ($options == 'true') $options = true;
-                        if ($options == 'false') $options = false;
-                        if (isset($_var)) $_var = isset($options) ? $type($_var, $options) : $type($_var);
+                if (isset($_var) || in_array($type, ['bool', 'boolean', 'default']) || is_callable($type)) {
+                    if (is_callable($type) && !in_array($type, ['implode', 'explode', 'trim', 'email', 'url', 'string'])) {
+                        if ($options === 'true') {
+                            $options = true;
+                        } elseif ($options === 'false') {
+                            $options = false;
+                        }
+                        if (isset($_var)) {
+                            $_var = isset($options) ? $type($_var, $options) : $type($_var);
+                        }
                     } else {
                         switch ($type) {
                             case 'int':
@@ -1789,7 +1833,9 @@ if (! function_exists('filter_data')) {
                                 $_var = (float) $_var;
                                 break;
                             case 'array':
-                                $_var = is_array($_var) ? $_var : (!empty($_var) ? array($_var) : array());
+                                if (!is_array($_var)) {
+                                    $_var = !empty($_var) ? [$_var] : [];
+                                }
                                 break;
                             case 'bool':
                             case 'boolean':
@@ -1802,7 +1848,7 @@ if (! function_exists('filter_data')) {
                                 $_var = preg_replace('/[^[:alnum:]]/', '', $_var);
                                 break;
                             case 'num':
-                                $_var = str_replace(array('-', '+'), '', filter_var($_var, FILTER_SANITIZE_NUMBER_INT));
+                                $_var = str_replace(['-', '+'], '', filter_var($_var, FILTER_SANITIZE_NUMBER_INT));
                                 break;
                             case 'email':
                                 $_var = filter_var($_var, FILTER_SANITIZE_EMAIL);
@@ -1811,8 +1857,10 @@ if (! function_exists('filter_data')) {
                                 $_var = filter_var($_var, FILTER_SANITIZE_URL);
                                 break;
                             case 'limit':
-                                $options = !empty($options) ? explode(',', $options) : array(100, '...');
-                                if (!isset($options[1])) $options[1] = '...';
+                                $options = !empty($options) ? explode(',', $options) : [100, '...'];
+                                if (!isset($options[1])) {
+                                    $options[1] = '...';
+                                }
                                 $_var = str_limit($_var, $options[0], $options[1]);
                                 break;
                             case 'implode':
@@ -1830,7 +1878,7 @@ if (! function_exists('filter_data')) {
                                 if (is_array($_var)) {
                                     $_var = array_trim($_var, $chars);
                                 } elseif (is_string($_var)) {
-                                    trim($_var, $chars);
+                                    $_var = trim($_var, $chars);
                                 }
                                 break;
                             case 'fromJSON':
@@ -1844,16 +1892,16 @@ if (! function_exists('filter_data')) {
                                 $_var = default_if($_var, $options);
                                 break;
                             default:
-                                if (class_exists($type)) {
-                                    if (!$_var = $modx->getObject($type, $_var)) {
-                                        $_var = $modx->newObject($type);
-                                    }
+                                if (class_exists($type) && !($_var = $modx->getObject($type, $_var))) {
+                                    $_var = $modx->newObject($type);
                                 }
                         }
                     }
                 }
             }
-            if (isset($_var)) $filtered[$key] = $_var;
+            if (isset($_var)) {
+                $filtered[$key] = $_var;
+            }
         }
         return $intersect ? $filtered : array_merge($data, $filtered);
     }
@@ -1863,12 +1911,14 @@ if (!function_exists('request')) {
      * Returns a modHelpers\Request object or an input item from the request.
      * @param string $key
      * @param mixed $default
-     * @return mixed|\modHelpers\Request
+     * @return mixed|modHelpers\Request
      */
     function request($key = null, $default = null)
     {
         $request = app('request');
-        if (func_num_args() == 0) return $request;
+        if (func_num_args() === 0) {
+            return $request;
+        }
         return $request->input($key, $default);
     }
 }
@@ -1879,22 +1929,25 @@ if (!function_exists('switch_context')) {
      * @param array $excluded
      * @return bool
      */
-    function switch_context($key, $excluded = array())
+    function switch_context($key, $excluded = [])
     {
         global $modx;
+
         if (is_string($key)) {
             return $modx->switchContext($key);
         } elseif (is_array($key)) {
             reset($key);
             $attribute = key($key);
             $value = current($key);
-            if (empty($attribute) || empty($value)) return false;
+            if (empty($attribute) || empty($value)) {
+                return false;
+            }
             $query = query('SELECT `context_key` FROM ' . table_name('modContextSetting') . ' WHERE `key` = ? AND TRIM(BOTH \'/\' FROM `value`) = ?')->bind($attribute, $value)->first();
             $ctx = $query['context_key'];
             if (!empty($ctx) && !in_array($ctx, $excluded)) {
-                if ($attribute == 'base_url' && $modx->getOption('friendly_urls')) {
-                    $alias = $modx->getOption('request_param_alias', null, 'alias', true);
-                    $_REQUEST[$alias] = preg_replace('/^' . $value . '\//', '', $_REQUEST[$alias]);
+                if ($attribute === 'base_url' && $modx->getOption('friendly_urls')) {
+                    $alias = config('request_param_alias', 'q', true);
+                    $_GET[$alias] = $_REQUEST[$alias] = preg_replace('|^' . $value . '/|', '', $_REQUEST[$alias]);
                 }
                 return $modx->switchContext($ctx);
             }
@@ -1909,6 +1962,7 @@ if (! function_exists('csrf_meta')) {
      * Generate a HTML meta tag with the CSRF token.
      *
      * @return string
+     * @throws \Exception
      */
     function csrf_meta()
     {
@@ -1920,10 +1974,11 @@ if (! function_exists('csrf_field')) {
      * Generate a CSRF token form field.
      *
      * @return string
+     * @throws \Exception
      */
     function csrf_field()
     {
-        return '<input type="hidden" name="csrf_token" value="'.csrf_token().'">' . "\n";
+        return '<input type="hidden" name="csrf_token" value="' . csrf_token() . '">' . "\n";
     }
 }
 if (! function_exists('csrf_token')) {
@@ -1932,21 +1987,21 @@ if (! function_exists('csrf_token')) {
      *
      * @param bool $regenerate
      * @return string
+     * @throws \Exception
      */
     function csrf_token($regenerate = false)
     {
-        $timeout = (int) config('modhelpers_token_ttl', 0);
-        if (!$regenerate && abs($timeout) > 0 && defined('MODX_API_MODE') && !MODX_API_MODE) {
-            if ( default_if(session('csrf_token.timestamp'), time()) < time() ) {
-                $regenerate = true;
-            }
+        $timeout = (int)config('modhelpers_token_ttl', 0);
+        if (!$regenerate
+            && abs($timeout) > 0
+            && defined('MODX_API_MODE')
+            && !MODX_API_MODE
+            && default_if(session('csrf_token.timestamp'), time()) < time())
+        {
+            $regenerate = true;
         }
         if ($regenerate || empty(session('csrf_token.value'))) {
-            session(['csrf_token' => [
-                        'value' => str_random(40),
-                        'timestamp' => time() + abs($timeout) * 60,
-                    ]
-            ]);
+            session(['csrf_token' => ['value' => str_random(40), 'timestamp' => time() + abs($timeout) * 60]]);
         }
         return session('csrf_token.value');
     }
@@ -1992,13 +2047,21 @@ if (! function_exists('has_parent')) {
         }
         $resource = default_if($resource, res_id());
         $parent = (array) $parent;
-        if (!$resource) return false;
+        if (!$resource) {
+            return false;
+        }
         $hasParent = false;
         $parents = parents($resource);
-        if (empty($parents)) return false;
+        if (empty($parents)) {
+            return false;
+        }
         foreach ($parent as $id) {
-            if ($all && !in_array($id, $parents)) return false;
-            if (in_array($id, $parents)) $hasParent = true;
+            if ($all && !in_array($id, $parents)) {
+                return false;
+            }
+            if (in_array($id, $parents)) {
+                $hasParent = true;
+            }
         }
 
         return $hasParent;
@@ -2007,22 +2070,17 @@ if (! function_exists('has_parent')) {
 if (!function_exists('dump')) {
     /**
      * Dump the passed variables.
+     * @return array
      */
-    function dump($var)
+    function dump()
     {
         /** @var modHelpers\varDumper $class */
-        $class = config('modhelpers_varDumperClass', 'modHelpers\VarDumper', true);
-        $useFenom = config('pdotools_fenom_default') && context() != 'mgr';
-        if ($useFenom) {
-            echo '{ignore}';
-            config(['modhelpers_debug' => true]);
-        }
-        foreach (func_get_args() as $var) {
+        $class = config('modhelpers_varDumperClass', modHelpers\VarDumper::class, true);
+
+        foreach(func_get_args() as $var) {
             $class::dump($var);
         }
-        if ($useFenom) {
-            echo '{/ignore}';
-        }
+
         if (1 < func_num_args()) {
             return func_get_args();
         }
@@ -2040,7 +2098,7 @@ if (! function_exists('dd')) {
     function dd()
     {
         /** @var modHelpers\varDumper $class */
-        $class = config('modhelpers_varDumperClass', 'modHelpers\VarDumper', true);
+        $class = config('modhelpers_varDumperClass', modHelpers\VarDumper::class, true);
         foreach (func_get_args() as $var) {
             $class::dump($var);
         }
@@ -2071,8 +2129,8 @@ if (!function_exists('html_attributes')) {
                 }
             }
         }
-        return count($prepared) > 0 ? implode(' ', $prepared) : '';
-    };
+        return !empty($prepared) ? implode(' ', $prepared) : '';
+    }
 }
 
 if (!function_exists('first')) {
@@ -2084,9 +2142,11 @@ if (!function_exists('first')) {
     function first()
     {
         foreach (func_get_args() as $param) {
-            if (!is_null($param)) return $param;
+            if (!is_null($param)) {
+                return $param;
+            }
         }
-    };
+    }
 }
 
 if (! function_exists('optional')) {
@@ -2099,8 +2159,8 @@ if (! function_exists('optional')) {
     function optional($value)
     {
         /** @var modHelpers\Optional $class */
-        $class = config('modhelpers_optionalClass', 'modHelpers\Optional', true);
-        return new $class($value);
+        $class = config('modhelpers_optionalClass', modHelpers\Optional::class, true);
+        return ($class && class_exists($class)) ? new $class($value) : null;
     }
 }
 
@@ -2126,15 +2186,15 @@ if (!function_exists('str_concat')) {
 
 if (!function_exists('string')) {
     /**
-     *
+     * Wraps the string for further manipulation.
      * @param string $string
      * @return modHelpers\Str
      */
     function string($string = '')
     {
         /** @var modHelpers\Str $class */
-        $class = config('modhelpers_stringClass', 'modHelpers\Str', true);
-        return new $class($string);
+        $class = config('modhelpers_stringClass', modHelpers\Str::class, true);
+        return ($class && class_exists($class)) ? new $class($string) : null;
     }
 }
 
@@ -2171,8 +2231,8 @@ if (!function_exists('array_is_assoc')) {
     function array_is_assoc($array)
     {
         if (is_array($array)) {
-            foreach (array_keys($array) as $key) {
-                if (!is_numeric($key)) {
+            foreach (array_keys($array) as $k => $v) {
+                if ($k !== $v) {
                     return true;
                 }
             }
@@ -2188,7 +2248,7 @@ if (!function_exists('tag_encode')) {
      * @param array $chars Chars to encode.
      * @return string
      */
-    function tag_encode($string, array $chars = array ("[", "]", "{" , "}" , "`"))
+    function tag_encode($string, array $chars = ["[", "]", "{", "}", "`"])
     {
         $codes = array_map(function($char) {
             return '&#'.ord($char).';'; // array("&#91;", "&#93;", "&#123;", "&#125;", "&#96;")
@@ -2204,7 +2264,7 @@ if (!function_exists('tag_decode')) {
      * @param array $chars Chars to decode.
      * @return string
      */
-    function tag_decode($string, array $chars = array ("[", "]", "{" , "}" , "`"))
+    function tag_decode($string, array $chars = ["[", "]", "{", "}", "`"])
     {
         $codes = array_map(function($char) {
             return '&#'.ord($char).';';
@@ -2222,22 +2282,23 @@ if (!function_exists('exec_bg_script')) {
      */
     function exec_bg_script($script, array $args = [], $escape = true)
     {
-        $script = str_replace('..', '', $script);
+        $script = sanitize_path($script);
         $script = (strpos($script, MODX_BASE_PATH) === false) ? MODX_BASE_PATH . $script : $script;
         if (($file = realpath($script)) === false) {
             log_error('[exec_bg_script] File ' . $script . ' not found!');
             return false;
         }
-        array_walk($args, function(&$value, $key) use($escape) {
-            $value = $escape ? $key . '=' . escapeshellarg($value) : $key . '=' . $value;
+        array_walk($args, static function(&$value, $key) use($escape) {
+            $value = $escape ? escapeshellarg($key) . '=' . escapeshellarg($value) : $key . '=' . $value;
         });
 
         $command = sprintf('php %s %s', $file, implode(' ', $args));
-        if (substr(php_uname(), 0, 7) == "Windows") {
+        if (strpos(php_uname(), "Windows") === 0) {
             pclose(popen("start /B " . $command, "r"));
         } else {
-            exec($command . " > /dev/null &");
+            exec($command . " > /dev/null 2>&1 &");
         }
+        return true;
     }
 }
 if (!function_exists('get_exec_args')) {
@@ -2265,16 +2326,99 @@ if (!function_exists('timer')) {
     {
         static $timers = [];
         if (!isset($timers[$timer])) {
-            $class = config('modhelpers_timerClass', 'modHelpers\Timer', true);
+            $class = config('modhelpers_timerClass', modHelpers\Timer::class, true);
             $timers[$timer] = new $class;
         }
         return $timers[$timer];
     }
 }
+if (!function_exists('reading_time')) {
+    /**
+     * Estimated time to read.
+     *
+     * @param string $content Content
+     * @param int $wpm Words per minute.
+     * @return int
+     */
+    function reading_time($content, $wpm = 200) {
+        $words = str_word_count(strip_tags($content));
+        $wpm = (int) $wpm;
+        $min = floor($words / ($wpm ?: 200));
 
-/*if (!function_exists('queue')) {
+        return  $min ?: 1;
+    }
+}
+if (! function_exists('sanitize_path')) {
+    /**
+     * Sanitize path.
+     * @see https://github.com/modxcms/revolution/commit/10248d06ebb7c933d33129272623d0a64d528a82#diff-9ec30f895e27297f4307c80efb483bb8
+     *
+     * @param string $path Path to sanitize.
+     * @return string Path without "../".
+     */
+    function sanitize_path($path)
+    {
+        return preg_replace(["/\.*[\/|\\\]/i", "/[\/|\\\]+/i"], ['/', '/'], $path);
+    }
+}
+if (!function_exists('build_tree')) {
+    /**
+     * Build a tree of resources.
+     * @param array $data
+     * @param int $parent
+     * @param int $level
+     * @param array $options
+     * @return array
+     */
+    function build_tree(array $data, $parent = 0, $level = 10, array $options = [])
+    {
+        if ((int)$level < 1) {
+            return [];
+        }
+        $options = array_merge(['idField' => 'id', 'parentField' => 'parent'], $options);
+        $idField = $options['idField'];
+        $parentField = $options['parentField'];
+
+        $rows = $tree = [];
+
+        foreach ($data as $row) {
+            if (!isset($row[$idField])) {
+                continue;
+            }
+            if (isset($row[$parentField])) {
+                $rows[$row[$parentField]][$row[$idField]] = $row;
+            } else {
+                $rows[0][$row[$idField]] = $row;
+            }
+        }
+
+        if (isset($rows[$parent])) {
+            foreach ($rows[$parent] as $id => $row) {
+                $tree[$id] = $row;
+                if (isset($rows[$id]) && $children = build_tree($data, $id, $level - 1, $options)) {
+                    $tree[$id]['children'] = $children;
+                }
+            }
+        }
+
+        return $tree;
+    }
+}
+/*
+if (!function_exists('messages')) {
+    function messages()
+    {
+        $class = config('modhelpers_messagesClass', modHelpers\Messages::class, true);
+
+        return ($class && class_exists($class)) ? new $class : null;
+    }
+}
+
+ if (!function_exists('queue')) {
     function queue()
     {
-        return new modHelpers\Queue;
+        $class = config('modhelpers_queueClass', modHelpers\Queue::class, true);
+
+        return ($class && class_exists($class)) ? new $class : null;
     }
 }*/

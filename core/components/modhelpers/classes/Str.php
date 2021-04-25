@@ -50,7 +50,7 @@ class Str
     public function substr()
     {
         $arguments = ['string' => $this->string] + func_get_args();
-        $this->string = call_user_func_array('mb_substr', array_filter($arguments));
+        $this->string = mb_substr(...array_filter($arguments));
 
         return $this;
     }
@@ -97,7 +97,7 @@ class Str
     public function insert($string, $position)
     {
         if (!empty($string)) {
-            $position = (int) $position > mb_strlen($this->string) ? mb_strlen($this->string) : $position - 1;
+            $position = (int)$position > mb_strlen($this->string) ? mb_strlen($this->string) : $position - 1;
             $this->string = str_concat(mb_substr($this->string, 0, $position), $string, mb_substr($this->string, $position));
         }
         return $this;
@@ -122,6 +122,7 @@ class Str
 
         return $this;
     }
+
     /**
      * @see http://php.net/manual/en/function.mb-strtolower.php
      * @return $this
@@ -132,6 +133,7 @@ class Str
 
         return $this;
     }
+
     /**
      * @see http://php.net/manual/en/function.mb-convert-case.php
      * @param string $encoding
@@ -139,7 +141,7 @@ class Str
      */
     public function ucWords($encoding = 'UTF-8')
     {
-        $this->string =  mb_convert_case($this->string, MB_CASE_TITLE, $encoding);
+        $this->string = mb_convert_case($this->string, MB_CASE_TITLE, $encoding);
 
         return $this;
     }
@@ -150,7 +152,7 @@ class Str
      */
     public function ucFirst()
     {
-        $this->string =  mb_strtoupper(mb_substr($this->string, 0, 1)) . mb_substr($this->string, 1);
+        $this->string = mb_strtoupper(mb_substr($this->string, 0, 1)) . mb_substr($this->string, 1);
 
         return $this;
     }
@@ -190,11 +192,12 @@ class Str
      */
     public function first($length)
     {
-        $length = (int) $length;
+        $length = (int)$length;
         $this->string = mb_substr($this->string, 0, $length);
 
         return $this;
     }
+
     /**
      * Get the specified last symbols.
      * @param $length
@@ -202,7 +205,7 @@ class Str
      */
     public function last($length)
     {
-        $length = (int) $length;
+        $length = (int)$length;
         $this->string = mb_substr($this->string, $length * -1);
 
         return $this;
@@ -293,6 +296,7 @@ class Str
     {
         return str_match($this->string, $pattern, $case);
     }
+
     /**
      * @see http://php.net/manual/en/function.trim.php
      * @param string $character_mask
@@ -336,7 +340,9 @@ class Str
     public function sha1($length = 0)
     {
         $this->string = sha1($this->string);
-        if (is_numeric($length) && intval($length)) $this->first(intval($length));
+        if (is_numeric($length) && (int)$length) {
+            $this->first((int)$length);
+        }
 
         return $this;
     }
@@ -348,7 +354,9 @@ class Str
     public function md5($length = 0)
     {
         $this->string = md5($this->string);
-        if (is_numeric($length) && intval($length)) $this->first(intval($length));
+        if (is_numeric($length) && (int)$length) {
+            $this->first((int)$length);
+        }
 
         return $this;
     }
@@ -358,7 +366,7 @@ class Str
      * @param bool $is_xhtml
      * @return $this
      */
-    public function nl2br($is_xhtml = TRUE)
+    public function nl2br($is_xhtml = true)
     {
         $this->string = nl2br($this->string, $is_xhtml);
 
@@ -370,7 +378,7 @@ class Str
      * @param bool $is_xhtml
      * @return $this
      */
-    public function br($is_xhtml = TRUE)
+    public function br($is_xhtml = true)
     {
         $this->string .= ($is_xhtml ? "<br />" : "<br>");
 
@@ -385,7 +393,9 @@ class Str
     public function map(callable $func)
     {
         $result = call_user_func($func, $this->string);
-        if (is_string($result)) $this->string = $result;
+        if (is_string($result)) {
+            $this->string = $result;
+        }
 
         return $this;
     }
@@ -395,7 +405,7 @@ class Str
      * @param array $chars Chars to encode.
      * @return $this
      */
-    public function tag_encode(array $chars = array ("[", "]", "{" , "}" , "`"))
+    public function tag_encode(array $chars = ["[", "]", "{", "}", "`"])
     {
         $this->string = tag_encode($this->string, $chars);
 
@@ -407,7 +417,7 @@ class Str
      * @param array $chars
      * @return $this
      */
-    public function tag_decode(array $chars = array ("[", "]", "{" , "}" , "`"))
+    public function tag_decode(array $chars = ["[", "]", "{", "}", "`"])
     {
 
         $this->string = tag_decode($this->string, $chars);
@@ -443,7 +453,7 @@ class Str
     /**
      * Get only the string.
      *
-     * @param  string  $string
+     * @param string $string
      * @return string|Str
      */
     public function __get($string)

@@ -55,7 +55,7 @@ class CacheManager
      * Store an item in the cache.
      * @param string $key
      * @param mixed $value
-     * @param int $lifetime Magic. Can be a number of seconds, partition name or cache options.
+     * @param int|string|array $lifetime Magic. Can be a number of seconds, partition name or cache options.
      * @param array $options Cache options.
      * @return bool
      */

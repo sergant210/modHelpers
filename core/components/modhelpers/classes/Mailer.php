@@ -50,7 +50,9 @@ class Mailer
     {
         if (is_array($email)) {
             foreach ($email as $recipient) {
-                $this->attributes['to'][] = $recipient;
+                if (is_email($recipient)) {
+                    $this->attributes['to'][] = $recipient;
+                }
             }
         } else {
             $this->attributes['to'][] = $email;
@@ -72,14 +74,14 @@ class Mailer
             }
         } else {
             if (is_numeric($user)) {
-                $email = $this->userRepository[intval($user)]['email'];
+                $email = $this->userRepository[(int)$user]['email'];
             } elseif (is_string($user)) {
-                $uarr = reset(array_filter($this->userRepository, function($data) use ($user) {
+                $uarr = array_filter($this->userRepository, function($data) use ($user) {
                     return $data['username'] == $user;
-                }));
+                });
                 $email = $uarr['email'];
             }
-            if (!empty($email)) {
+            if (!empty($email) && is_email($email)) {
                 $this->attributes['to'][] = $email;
             }
         }
@@ -87,17 +89,19 @@ class Mailer
     }
 
     /**
-     *Set the cc address
-     * @param string $email
+     * Set the cc address
+     * @param string|array $email
      * @return $this
      */
     public function cc($email)
     {
         if (is_array($email)) {
             foreach ($email as $recipient) {
-                $this->attributes['cc'][] = $recipient;
+                if (is_email($recipient)) {
+                    $this->attributes['cc'][] = $recipient;
+                }
             }
-        } else {
+        } elseif (is_email($email)) {
             $this->attributes['cc'][] = $email;
         }
         return $this;
@@ -105,17 +109,21 @@ class Mailer
 
     /**
      * Set the bcc address
-     * @param string $email
+     * @param string|array $email
      * @return $this
      */
     public function bcc($email)
     {
         if (is_array($email)) {
             foreach ($email as $recipient) {
-                $this->attributes['bcc'][] = $recipient;
+                if (is_email($recipient)) {
+                    $this->attributes['bcc'][] = $recipient;
+                }
             }
         } else {
-            $this->attributes['bcc'][] = $email;
+            if (is_email($email)) {
+                $this->attributes['bcc'][] = $email;
+            }
         }
         return $this;
     }
@@ -127,7 +135,9 @@ class Mailer
      */
     public function replyTo($email)
     {
-        $this->attributes['reply-to'] = $email;
+        if (is_email($email)) {
+            $this->attributes['reply-to'] = $email;
+        }
         return $this;
     }
 
@@ -202,7 +212,7 @@ class Mailer
 
     /**
      * Add a attached file to the options.
-     * @param string $file Absolute path
+     * @param string|array $file Absolute path
      * @param string $name
      * @param string $encoding
      * @param string $type
@@ -241,23 +251,33 @@ class Mailer
         if (!empty($this->attributes)) {
             if (!empty($this->attributes['to'])) {
                 foreach (array_unique($this->attributes['to']) as $email) {
-                    if (!empty($email)) $this->mailer->address('to', $email);
+                    if (!empty($email)) {
+                        $this->mailer->address('to', $email);
+                    }
                 }
             } else {
                 return '[Email Helper] No addressed to send.';
             }
             if (!empty($this->attributes['cc'])) {
                 foreach ($this->attributes['cc'] as $email) {
-                    if (!empty($email)) $this->mailer->address('cc', $email);
+                    if (!empty($email)) {
+                        $this->mailer->address('cc', $email);
+                    }
                 }
             }
             if (!empty($this->attributes['bcc'])) {
                 foreach ($this->attributes['bcc'] as $email) {
-                    if (!empty($email)) $this->mailer->address('bcc', $email);
+                    if (!empty($email)) {
+                        $this->mailer->address('bcc', $email);
+                    }
                 }
             }
-            if (!empty($this->attributes['reply-to'])) $this->mailer->address('reply-to', $this->attributes['reply-to']);
-            if (isset($this->attributes['subject'])) $this->mailer->set(modMail::MAIL_SUBJECT, $this->attributes['subject']);
+            if (!empty($this->attributes['reply-to'])) {
+                $this->mailer->address('reply-to', $this->attributes['reply-to']);
+            }
+            if (isset($this->attributes['subject'])) {
+                $this->mailer->set(modMail::MAIL_SUBJECT, $this->attributes['subject']);
+            }
             if (isset($this->attributes['content'])) {
                 $this->mailer->set(modMail::MAIL_BODY, $this->attributes['content']);
             } elseif (isset($this->attributes['tpl']) && $chunk = $this->attributes['tpl']['name']) {
@@ -265,15 +285,23 @@ class Mailer
                 unset($this->attributes['tpl']);
                 $this->mailer->set(modMail::MAIL_BODY, $content);
             } else {
-                 return '[Email Helper] There is nothing to send.';
+                return '[Email Helper] There is nothing to send.';
             }
-            if (!empty($this->attributes['sender'])) $this->mailer->set(modMail::MAIL_SENDER, $this->attributes['sender']);
-            if (!empty($this->attributes['from'])) $this->mailer->set(modMail::MAIL_FROM, $this->attributes['from']);
-            if (!empty($this->attributes['fromName'])) $this->mailer->set(modMail::MAIL_FROM_NAME, $this->attributes['fromName']);
-            if (isset($this->attributes['setHTML'])) $this->mailer->setHTML($this->attributes['setHTML']);
+            if (!empty($this->attributes['sender'])) {
+                $this->mailer->set(modMail::MAIL_SENDER, $this->attributes['sender']);
+            }
+            if (!empty($this->attributes['from'])) {
+                $this->mailer->set(modMail::MAIL_FROM, $this->attributes['from']);
+            }
+            if (!empty($this->attributes['fromName'])) {
+                $this->mailer->set(modMail::MAIL_FROM_NAME, $this->attributes['fromName']);
+            }
+            if (isset($this->attributes['setHTML'])) {
+                $this->mailer->setHTML($this->attributes['setHTML']);
+            }
             if (!empty($this->attributes['attach'])) {
                 foreach ($this->attributes['attach'] as $data) {
-                    list($file, $name, $encoding, $type) = $data;
+                    list($file, $name, $encoding, $type) = array_values($data);
                     $this->mailer->attach($file, $name, $encoding, $type);
                 }
             }
@@ -337,8 +365,8 @@ class Mailer
 
     /**
      * Store the email to the cache.
-     * @param string $name Name of the queue
-     * @param bool $clear Replace the existing queue
+     * @param string|bool $name Name of the queue.
+     * @param bool $clear Replace the existing queue.
      * @return $this
      */
     public function toQueue($name = 'emails', $clear = false)

@@ -1,7 +1,7 @@
 ## default_if()
 Returns default value if a given value equals null or the specified value.
 
-```default_if($value, $default, $compared)```
+```default_if($value, $default, $compared):mixed```
 - $value (mixed) - a value or variable to check. 
 - $default (mixed) - default value.
 - $compared (mixed) - a value to compare instead of null.

@@ -167,7 +167,9 @@ class ResponseManager
     public function send($needPrepare = true)
     {
         if ($this->response instanceof SymfonyResponse && !$this->isSent) {
-            if ($needPrepare && !$this->isPrepared) $this->prepare(request());
+            if ($needPrepare && !$this->isPrepared) {
+                $this->prepare(request());
+            }
             $this->response->send();
         }
         $this->isSent = true;

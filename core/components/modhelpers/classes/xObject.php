@@ -69,8 +69,7 @@ class xObject
      */
     public function create(array $data)
     {
-        if (empty($data)) return false;
-        if (!class_exists($this->class) || !$object = $this->modx->newObject($this->class)) {
+        if (empty($data) || !class_exists($this->class) || !$object = $this->modx->newObject($this->class)) {
             return false;
         }
         /** @var xPDOObject $object */
@@ -78,7 +77,7 @@ class xObject
         if (!$object->save()) {
             $this->modx->log(1, "[modHelpers] Can't create an object of class {$this->class}!");
             return false;
-        };
+        }
         return $this->object = $object;
     }
 
@@ -91,6 +90,7 @@ class xObject
         if (!$object = $this->object()) {
             return false;
         }
+
         return $object->remove();
     }
 
@@ -148,7 +148,7 @@ class xObject
      */
     public function withProfile($alias = 'Profile')
     {
-        if ($this->class == 'modUser') {
+        if ($this->class === 'modUser') {
             $this->query->innerJoin('modUserProfile', $alias);
             $this->query->select($this->modx->getSelectColumns('modUser', 'modUser') . ',' . $this->modx->getSelectColumns('modUserProfile', $alias, '', array('id'), true));
         }
@@ -170,7 +170,9 @@ class xObject
      */
     public function toSql()
     {
-        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class));
+        if (empty($this->query->query['columns'])) {
+            $this->query->select($this->modx->getSelectColumns($this->class));
+        }
         $this->query->prepare();
         return $this->query->toSQL();
     }

@@ -52,6 +52,11 @@ class Timer
         return $this->checkpoint($message);
     }
 
+    public function log($message = 'Start')
+    {
+        return $this->checkpoint($message);
+    }
+
     /**
      * Gets formatted time log.
      * @param string $message
@@ -83,6 +88,15 @@ class Timer
     public function totalSec()
     {
         return $this->isEmpty() ? 0 : end($this->times)['time'] - $this->times[0]['time'];
+    }
+
+    /**
+     * Checks if the time log contains any checkpoints.
+     * @return bool
+     */
+    public function isStarted()
+    {
+        return !empty($this->times);
     }
 
     /**

@@ -110,7 +110,7 @@ class Session extends SymfonySession
      */
     public function set($key, $value = null, $flat = false)
     {
-        if (! is_array($key)) {
+        if (!is_array($key)) {
             $key = [$key => $value];
         } else {
             $flat = $value;
@@ -122,7 +122,7 @@ class Session extends SymfonySession
                 continue;
             }
             $keys = explode('.', $arrayKey);
-            if (count($keys) == 1) {
+            if (count($keys) === 1) {
                 $this->attributes[array_shift($keys)] = $arrayValue;
             } else {
                 $_key = array_shift($keys);
@@ -165,11 +165,15 @@ class Session extends SymfonySession
     public function remove($keys, $flat = false)
     {
         $original = &$this->attributes;
-        if (!is_array($keys)) $keys = array($keys);
+        if (!is_array($keys)) {
+            $keys = array($keys);
+        }
 
         foreach ($keys as $key) {
             if ($flat) {
-                if ($this->exists($key)) unset($this->attributes[$key]);
+                if ($this->exists($key)) {
+                    unset($this->attributes[$key]);
+                }
                 continue;
             }
             $array = &$original;

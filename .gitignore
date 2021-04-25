@@ -1,3 +1,4 @@
 .idea
 /core/components/modhelpers/vendor/
-/core/components/modhelpers/composer.lock
+.phpunit.result.cache
+composer.lock

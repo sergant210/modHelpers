@@ -18,7 +18,6 @@ class Query
     {
         $this->modx = $modx;
         $this->query = $query;
-
     }
 
     /**
@@ -56,13 +55,10 @@ class Query
     public function execute($bindings = NULL)
     {
         $tstart = microtime(true);
-        if ($stmt = $this->prepare(is_array($bindings) ? $bindings : func_get_args())) {
-            if ($stmt->execute($this->bindings)) {
-                $this->modx->queryTime += microtime(true) - $tstart;
-                $this->modx->executedQueries++;
-                $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                return $result;
-            }
+        if (($stmt = $this->prepare(is_array($bindings) ? $bindings : func_get_args())) && $stmt->execute($this->bindings)) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
         return null;
     }
@@ -75,12 +71,10 @@ class Query
     public function count($bindings = NULL)
     {
         $tstart = microtime(true);
-        if ($stmt = $this->prepare(is_array($bindings) ? $bindings : func_get_args())) {
-            if ($stmt->execute($this->bindings)) {
-                $this->modx->queryTime += microtime(true) - $tstart;
-                $this->modx->executedQueries++;
-                return $stmt->rowCount();
-            }
+        if (($stmt = $this->prepare(is_array($bindings) ? $bindings : func_get_args())) && $stmt->execute($this->bindings)) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
+            return $stmt->rowCount();
         }
         return false;
     }
@@ -93,13 +87,10 @@ class Query
     public function first($bindings = NULL)
     {
         $tstart = microtime(true);
-        if ($stmt = $this->prepare(is_array($bindings) ? $bindings : func_get_args())) {
-            if ($stmt->execute($this->bindings)) {
-                $this->modx->queryTime += microtime(true) - $tstart;
-                $this->modx->executedQueries++;
-                $result = $stmt->fetch(PDO::FETCH_ASSOC);
-                return $result;
-            }
+        if (($stmt = $this->prepare(is_array($bindings) ? $bindings : func_get_args())) && $stmt->execute($this->bindings)) {
+            $this->modx->queryTime += microtime(true) - $tstart;
+            $this->modx->executedQueries++;
+            return $stmt->fetch(PDO::FETCH_ASSOC);
         }
         return null;
     }

@@ -1,7 +1,7 @@
 ## dump() 
 Dump the passed variables. You can call it as many times as you want.
 
-```dump($var)```
+```dump($var1, $var2, ...)```
 - $var(mixed) - Variable to dump.
   
 ```php

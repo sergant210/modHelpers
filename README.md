@@ -12,6 +12,7 @@ Available functions:
 * [array_ltrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the beginning of an array values.
 * [array_rtrim()](./core/components/modhelpers/docs/en/array_trim.md) - strips whitespace (or specified characters) from the end of an array values.
 * url() - makes an url. Alias of the method ```$modx->makeUrl()```.
+* [build_tree()](./core/components/modhelpers/docs/en/build_tree.md) - builds a tree from the passed array.
 * [cache()](./core/components/modhelpers/docs/en/cache.md) - manages the MODX cache.
 * can() - returns true if user has the specified policy permission. Can be used instead of ```$modx->hasPermission()```.
 * children() - gets all of the child resource ids for a given resource. The short call of ```$modx->getChildIds()```.
@@ -34,7 +35,6 @@ Available functions:
 * [explode_ltrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and ltrim.
 * [explode_rtrim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and rtrim.
 * [explode_trim()](./core/components/modhelpers/docs/en/explode_trim.md) - combines two functions - explode and trim.
-* [faker()](./core/components/modhelpers/docs/en/faker.md) - creates a faked data.
 * [filter_data()](./core/components/modhelpers/docs/en/filter_data.md) - filters the array according to the specified rules.
 * [first()](./core/components/modhelpers/docs/en/first.md) - returns the first not null parameter.
 * forward() - to forward the request to another resource without changing the URL. The short call of ```$modx->forward()```.
@@ -74,6 +74,7 @@ Available functions:
 * processor() - runs the specified processor. Equivalent to the ```$modx->runProcessor()```.
 * quote() - quote the string.
 * [query()](./core/components/modhelpers/docs/en/query.md) - works with raw SQL queries.
+* [reading_time()](./core/components/modhelpers/docs/en/reading_time.md) - estimated time to read.
 * [redirect()](./core/components/modhelpers/docs/en/redirect.md) - redirect to the url or site page if the id is passed. Wraps the ```$modx->redirect()``` and ```$modx->makeUrl()```.
 * [request()](./core/components/modhelpers/docs/en/request.md) - for HTTP request management.
 * [resource()](./core/components/modhelpers/docs/en/resource.md) - works with a resource object.
@@ -81,6 +82,7 @@ Available functions:
 * resource_id() | res_id() - gets the id of the current resource. Returns the value of $modx->resource->id. 
 * resources() - works with a resource collection.
 * [response()](./core/components/modhelpers/docs/en/response.md) - for response management.
+* [sanitize_path()](./core/components/modhelpers/docs/en/sanitize_path.md) - removes "../" from a specified path.
 * [script()](./core/components/modhelpers/docs/en/script.md) - registers JavaScript to be injected inside the HEAD tag or before the closing BODY tag. Available the script attributes "async" and "defer".
 * [session()](./core/components/modhelpers/docs/en/session.md) - manages the session. You can use the dot notation.
 * [session_pull()](./core/components/modhelpers/docs/en/session_pull.md) - gets the value of a given key and then unsets it.
@@ -105,6 +107,7 @@ Available functions:
 * [user_exists()](./core/components/modhelpers/docs/en/user_exists.md) - checks the specified user exists.
 * user_id() - gets the id of the current user. Returns the value of ```$modx->user->id```.
 * users() - works with a user collection.
+* value() - .
 
 
 ### System settings for class extending

@@ -28,6 +28,11 @@ $tmp = array(
 		'value' => '{core_path}elements/snippets',
 		'area' => 'modhelpers_main',
 	),
+    'cache_model' => array(
+		'xtype' => 'combo-boolean',
+		'value' => true,
+		'area' => 'modhelpers_main',
+	),
 );
 
 foreach ($tmp as $k => $v) {

@@ -12,3 +12,5 @@ $_lang['setting_modhelpers_snippets_path'] = 'Путь к сниппетам';
 $_lang['setting_modhelpers_snippets_path_desc'] = 'Папка, в которой хранятся файлы сниппетов.';
 $_lang['setting_modhelpers_chunks_path'] = 'Путь к чанкам';
 $_lang['setting_modhelpers_chunks_path_desc'] = 'Папка, в которой хранятся файлы чанков.';
+$_lang['setting_modhelpers_cache_model'] = 'Кэшировать модель';
+$_lang['setting_modhelpers_cache_model_desc'] = 'Кэширует схему модели.';

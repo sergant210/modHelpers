@@ -169,7 +169,9 @@ class Container
         if ($concrete instanceof Closure) {
             return $concrete($this, $parameters);
         }
-        if (!class_exists($concrete)) return null;
+        if (!class_exists($concrete)) {
+            return null;
+        }
         return empty($parameters) ? new $concrete : new $concrete($parameters);
     }
 

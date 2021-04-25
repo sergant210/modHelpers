@@ -41,7 +41,9 @@ class Collection
         if (empty($class) || is_numeric($class)) {
             //$this->class = 'modResource';
             $this->arrayCollection = true;
-            if (is_numeric($class)) $this->rows = abs($class);
+            if (is_numeric($class)) {
+                $this->rows = abs($class);
+            }
         } else {
             $this->class = $class;
 
@@ -81,7 +83,9 @@ class Collection
 
     public function from($table, $alias = '')
     {
-        if (preg_match('/^select/i', $table)) $table = '(' . $table . ')';
+        if (0 === stripos($table, "select")) {
+            $table = '(' . $table . ')';
+        }
         $this->query->query['from']['tables'][] = array('table'=>$table, 'alias' => $alias);
         return $this;
     }
@@ -151,7 +155,9 @@ class Collection
 
     public function get($name = null)
     {
-        if (!$this->class) return '';
+        if (!$this->class) {
+            return '';
+        }
         if (!empty($name)) {
             $collection = $this->toArray();
             if (is_string($name)) {
@@ -169,8 +175,12 @@ class Collection
 
     public function set($data)
     {
-        if (!$this->class) return false;
-        if (!$this->modx->hasPermission('save')) return 0;
+        if (!$this->class) {
+            return false;
+        }
+        if (!$this->modx->hasPermission('save')) {
+            return 0;
+        }
         if (is_callable($data)) {
             $count = 0;
             $query = clone $this->query;
@@ -200,8 +210,12 @@ class Collection
 
     public function remove()
     {
-        if (!$this->class) return false;
-        if (!$this->modx->hasPermission('remove')) return 0;
+        if (!$this->class) {
+            return false;
+        }
+        if (!$this->modx->hasPermission('remove')) {
+            return 0;
+        }
         $this->query->command('DELETE');
         $this->addWhere();
         $this->query->limit(0);
@@ -216,7 +230,9 @@ class Collection
 
     public function first($num = 0)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->query->sortby('id', 'ASC');
         $this->query->limit($num);
         return $this->process();
@@ -224,7 +240,9 @@ class Collection
 
     public function last($num = 0)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->query->sortby('id', 'DESC');
         $this->query->limit($num);
 
@@ -233,28 +251,36 @@ class Collection
 
     public function union($query)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->unions[] = $query;
         return $this;
     }
 
     public function where($criteria, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
     }
 
     public function orWhere($criteria)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->where[] = array('conjunction' => xPDOQuery::SQL_OR, 'where' => $criteria);
         return $this;
     }
 
     public function whereExists($table, $criteria, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         if (is_array($table)) {
             $tableName = key($table);
             $alias = current($table);
@@ -267,7 +293,9 @@ class Collection
 
     public function whereNotExists($table, $criteria, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         if (is_array($table)) {
             $tableName = key($table);
             $alias = current($table);
@@ -280,7 +308,9 @@ class Collection
 
     public function whereLike($field, $value, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $criteria = array($field.':LIKE' => $value);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -288,7 +318,9 @@ class Collection
 
     public function whereNotLike($field, $value, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $criteria = array($field.':NOT LIKE' => $value);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -296,8 +328,12 @@ class Collection
 
     public function whereIn($field, $array, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
-        if (!is_array($array)) $array = array($array);
+        if (!$this->class) {
+            return $this;
+        }
+        if (!is_array($array)) {
+            $array = array($array);
+        }
         $criteria = array($field.':IN' => $array);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -305,7 +341,9 @@ class Collection
 
     public function whereNotIn($field, $array, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!is_array($array)) $array = array($array);
+        if (!is_array($array)) {
+            $array = array($array);
+        }
         $criteria = array($field.':NOT IN' => $array);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -313,7 +351,9 @@ class Collection
 
     public function whereIsNull($field, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $criteria = array($field.':IS' => NULL);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -321,7 +361,9 @@ class Collection
 
     public function whereIsNotNull($field, $conjunction = xPDOQuery::SQL_AND)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $criteria = array($field.':IS NOT' => NULL);
         $this->where[] = array('conjunction' => $conjunction, 'where' => $criteria);
         return $this;
@@ -335,12 +377,16 @@ class Collection
             }
             $this->tvSelects = array();
         }
-        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+        if (empty($this->query->query['columns'])) {
+            $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+        }
     }
 
     protected function addWhere($query = '')
     {
-        if (empty($query)) $query = $this->query;
+        if (empty($query)) {
+            $query = $this->query;
+        }
         if (!empty($this->where)) {
             foreach ($this->where as $where) {
                 $query->where($where['where'], $where['conjunction']);
@@ -388,7 +434,9 @@ class Collection
 
     public function withTV($TV, $prefix = 'TV.')
     {
-        if (!$this->class || $this->class != 'modResource') return $this;
+        if (!$this->class || $this->class !== 'modResource') {
+            return $this;
+        }
         $tvs = array_map('trim', explode(',', $TV));
         $tvs = array_unique($tvs);
         if (!empty($tvs)) {
@@ -425,7 +473,9 @@ class Collection
         $this->addSelect();
         $this->addJoins();
         $this->addWhere($this->query);
-        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+        if (empty($this->query->query['columns'])) {
+            $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+        }
         if (!$collection = $this->modx->getCollection($this->class, $this->query)) {
             return false;
         }
@@ -434,9 +484,11 @@ class Collection
 
     public function profile($alias = 'Profile')
     {
-        if ($this->class == 'modUser') {
+        if ($this->class === 'modUser') {
             $this->query->innerJoin('modUserProfile', $alias);
-            if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns('modUser', $this->alias) . ',' . $this->modx->getSelectColumns('modUserProfile', $alias, '', array('id'), true));
+            if (empty($this->query->query['columns'])) {
+                $this->query->select($this->modx->getSelectColumns('modUser', $this->alias) . ',' . $this->modx->getSelectColumns('modUserProfile', $alias, '', array('id'), true));
+            }
         }
         return $this;
     }
@@ -449,7 +501,9 @@ class Collection
 
     public function max($name)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->query->query['columns'] = array("max($name) as max");
         $value = $this->toArray();
         return $value[0]['max'];
@@ -457,7 +511,9 @@ class Collection
 
     public function min($name)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->query->query['columns'] = array("min($name) as min");
         $value = $this->toArray();
         return $value[0]['min'];
@@ -465,7 +521,9 @@ class Collection
 
     public function avg($name)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->query->query['columns'] = array("avg($name) as avg");
         $value = $this->toArray();
         return $value[0]['avg'];
@@ -473,7 +531,9 @@ class Collection
 
     public function sum($name)
     {
-        if (!$this->class) return $this;
+        if (!$this->class) {
+            return $this;
+        }
         $this->query->query['columns'] = array("sum($name) as sum");
         $value = $this->toArray();
         return $value[0]['sum'];
@@ -485,11 +545,15 @@ class Collection
      */
     public function toSql()
     {
-        if (!$this->class) return '';
+        if (!$this->class) {
+            return '';
+        }
         $this->addSelect();
         $this->addJoins();
         $this->addWhere($this->query);
-        if (empty($this->query->query['columns'])) $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+        if (empty($this->query->query['columns'])) {
+            $this->query->select($this->modx->getSelectColumns($this->class, $this->alias));
+        }
         $this->query->prepare();
         return $this->query->toSQL();
     }
@@ -501,7 +565,7 @@ class Collection
      */
     public function members($group)
     {
-        if ($this->class == 'modUser') {
+        if ($this->class === 'modUser') {
             $alias = !empty($this->alias) ? escape($this->alias) . '.' : '';
             switch (true) {
                 case is_numeric($group):
@@ -529,7 +593,7 @@ class Collection
      */
     public function joinGroup($groupId, $roleId = null,$rank = null)
     {
-        if ($this->class == 'modUser' || $this->class == 'modResource') {
+        if ($this->class === 'modUser' || $this->class === 'modResource') {
             $this->addWhere();
             $collection = $this->modx->getIterator($this->class, $this->query);
             /** @var modUser|modResource $object */
@@ -547,7 +611,7 @@ class Collection
      */
     public function leaveGroup($groupId)
     {
-        if ($this->class == 'modUser' || $this->class == 'modResource') {
+        if ($this->class === 'modUser' || $this->class === 'modResource') {
             $this->addWhere();
             $collection = $this->modx->getIterator($this->class, $this->query);
             /** @var modUser|modResource $object */

@@ -86,9 +86,9 @@ class JsonResponse extends BaseJsonResponse
     /**
      * {@inheritdoc}
      */
-    public function setEncodingOptions($options)
+    public function setEncodingOptions($encodingOptions)
     {
-        $this->encodingOptions = (int) $options;
+        $this->encodingOptions = (int) $encodingOptions;
 
         return $this->setData($this->getData());
     }

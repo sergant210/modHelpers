@@ -82,9 +82,13 @@ class Logger
             $target = $changeLevel;
             $changeLevel = false;
         }
-        if (is_object($message) && method_exists($message, 'toArray')) $message = $message->toArray();
-        if (is_array($message)) $message = print_r($message, 1);
-        if ($this->modx->getLogTarget() == 'HTML' || $target == 'HTML') {
+        if (is_object($message) && method_exists($message, 'toArray')) {
+            $message = $message->toArray();
+        }
+        if (is_array($message)) {
+            $message = print_r($message, 1);
+        }
+        if ($this->modx->getLogTarget() === 'HTML' || $target === 'HTML') {
             $message = '<style>.modx-debug-block{ background-color:#002357;color:#fcffc4;margin:0;padding:5px } .modx-debug-block h5,.modx-debug-block pre { margin:0 }</style><div>' . $message . '</div>';
         }
         if ($changeLevel) {

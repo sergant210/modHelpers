@@ -1,8 +1,19 @@
 Changelog for modHelpers.
 
+4.0.0-pl
+==============
+- Added function "build_tree".
+- Added function "reading_time".
+- Added function "sanitize_path".
+- Added function "value".
+- Removed function "faker".
+- Refactored the dump function. Now you can pass multiple agruments.
+- Added the ctx parameter for the login and logout functions.
+- Fixed the attach function of the Mailer class (#2).
+
 3.7.0-pl
 ==============
-- Added new function "get_exec_args".
+- New function "get_exec_args".
 
 3.7.0-beta
 ==============
