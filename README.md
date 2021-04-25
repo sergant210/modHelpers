@@ -107,7 +107,7 @@ Available functions:
 * [user_exists()](./core/components/modhelpers/docs/en/user_exists.md) - checks the specified user exists.
 * user_id() - gets the id of the current user. Returns the value of ```$modx->user->id```.
 * users() - works with a user collection.
-* value() - .
+* [value()](./core/components/modhelpers/docs/en/value.md) - returns the default value of a given value or a Closure.
 
 
 ### System settings for class extending
