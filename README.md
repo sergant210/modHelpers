@@ -1,3 +1,5 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## modHelpers
 Library of the helpfull functions for MODX. Most of these functions can be used by the template engines. You can easily extend this library simply by specifying your classes in the corresponding system settings.
 
