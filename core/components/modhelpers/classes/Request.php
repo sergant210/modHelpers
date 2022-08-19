@@ -217,7 +217,7 @@ class Request extends SymfonyRequest implements ArrayAccess
      */
     public function isJson()
     {
-        return str_contains($this->header('CONTENT_TYPE'), ['/json', '+json']);
+        return str_contains($this->header('CONTENT_TYPE'), '+json') || str_contains($this->header('CONTENT_TYPE'), '/json');
     }
 
     /**
